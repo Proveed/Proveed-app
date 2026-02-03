@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PROVEED | Terminal de Negocios</title>
+    
+    <!-- Librerías de Alto Rendimiento -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        :root {
+            --brand: #f97316;
+            --dark: #000000;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f1f5f9;
+            color: var(--dark);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            box-shadow: 0 0 80px rgba(0,0,0,0.08);
+        }
+
+        .brand-gradient {
+            background: linear-gradient(135deg, #111111 0%, #000000 100%);
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-dot {
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const Icon = ({ name, size = 20, className = "" }) => {
+            const LucideIcon = lucide.icons[name];
+            return LucideIcon ? <LucideIcon size={size} className={className} /> : null;
+        };
+
+        function App() {
+            const [loading, setLoading] = useState(true);
+            const [tab, setTab] = useState('inicio');
+
+            useEffect(() => {
+                const timer = setTimeout(() => setLoading(false), 1800);
+                return () => clearTimeout(timer);
+            }, []);
+
+            if (loading) {
+                return (
+                    <div className="h-screen flex flex-col items-center justify-center bg-white p-12">
+                        <div className="w-24 h-24 bg-orange-600 rounded-[2.5rem] flex items-center justify-center shadow-2xl animate-bounce mb-8">
+                            <span className="text-white font-black italic text-5xl">P</span>
+                        </div>
+                        <h1 className="text-3xl font-black italic tracking-tighter text-black uppercase">PROVEED</h1>
+                        <div className="mt-6 flex gap-2">
+                            <div className="w-2 h-2 bg-orange-200 rounded-full animate-pulse"></div>
+                            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                            <div className="w-2 h-2 bg-orange-600 rounded-full animate-pulse"></div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="app-container animate-fade">
+                    {/* Header */}
+                    <header className="px-6 py-6 sticky top-0 bg-white/95 backdrop-blur-md z-40 border-b border-slate-100 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <div className="w-11 h-11 bg-black rounded-2xl flex items-center justify-center text-white shadow-xl">
+                                <span className="font-black italic text-xl">P</span>
+                            </div>
+                            <div>
+                                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">Marketplace</h2>
+                                <p className="font-black italic text-black text-base tracking-tight uppercase">PROVEED</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">
+                            <div className="w-2 h-2 bg-emerald-500 rounded-full status-dot animate-pulse"></div>
+                            <span className="text-[10px] font-black text-emerald-700 uppercase">Red Activa</span>
+                        </div>
+                    </header>
+
+                    {/* Main */}
+                    <main className="flex-grow p-6 space-y-6 pb-32">
+                        {tab === 'inicio' && (
+                            <div className="space-y-6 animate-fade">
+                                {/* Balance Card */}
+                                <div className="brand-gradient p-8 rounded-[3rem] text-white relative overflow-hidden shadow-2xl">
+                                    <div className="relative z-10">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <p className="text-[10px] font-bold uppercase opacity-50 tracking-widest text-orange-200">Capital Central</p>
+                                            <Icon name="Crown" size={16} className="text-orange-500" />
+                                        </div>
+                                        <h2 className="text-6xl font-black italic tracking-tighter mb-10">$0.00</h2>
+                                        
+                                        <div className="flex gap-3">
+                                            <button className="flex-grow py-4 bg-orange-600 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-orange-900/40 active:scale-95 transition-all">
+                                                Nueva Venta
+                                            </button>
+                                            <button className="w-14 py-4 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 hover:bg-white/20 active:scale-95 transition-all">
+                                                <Icon name="Plus" size={20} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <Icon name="Zap" className="absolute -right-16 -bottom-16 opacity-10 text-orange-500" size={280} />
+                                </div>
+
+                                {/* Quick Stats */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm">
+                                        <Icon name="ShoppingBag" className="text-orange-500 mb-3" />
+                                        <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Órdenes Hoy</p>
+                                        <p className="text-2xl font-black italic text-black tracking-tighter">0</p>
+                                    </div>
+                                    <div className="p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm">
+                                        <Icon name="Link" className="text-slate-900 mb-3" />
+                                        <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Terminales</p>
+                                        <p className="text-2xl font-black italic text-black tracking-tighter">3</p>
+                                    </div>
+                                </div>
+
+                                {/* Menu Sections */}
+                                <div className="space-y-3">
+                                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2 italic">Infraestructura</h4>
+                                    <div className="bg-white rounded-[2rem] border border-slate-100 divide-y divide-slate-50 overflow-hidden shadow-sm">
+                                        <NavItem icon="Box" title="Inventario Global" />
+                                        <NavItem icon="Users" title="Red de Proveedores" />
+                                        <NavItem icon="ShieldCheck" title="Sistema Escrow" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Bottom Nav */}
+                    <nav className="fixed bottom-0 w-full max-w-[480px] bg-white/90 backdrop-blur-xl border-t p-6 pb-10 flex justify-around shadow-2xl z-50">
+                        <TabBtn active={tab === 'inicio'} icon="LayoutGrid" label="Panel" onClick={() => setTab('inicio')} />
+                        <TabBtn active={tab === 'red'} icon="Globe" label="Red" onClick={() => setTab('red')} />
+                        <TabBtn active={tab === 'caja'} icon="CreditCard" label="Caja" onClick={() => setTab('caja')} />
+                        <TabBtn active={tab === 'ajustes'} icon="Settings" label="Ajustes" onClick={() => setTab('ajustes')} />
+                    </nav>
+                </div>
+            );
+        }
+
+        const NavItem = ({ icon, title }) => (
+            <div className="flex items-center justify-between p-5 hover:bg-slate-50 transition-colors cursor-pointer group">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-black group-hover:text-white transition-all">
+                        <Icon name={icon} size={18} />
+                    </div>
+                    <span className="text-[11px] font-black uppercase text-slate-700 tracking-tighter">{title}</span>
+                </div>
+                <Icon name="ChevronRight" size={14} className="text-slate-200 group-hover:text-black transition-all" />
+            </div>
+        );
+
+        const TabBtn = ({ active, icon, label, onClick }) => (
+            <button onClick={onClick} className={`flex flex-col items-center gap-1.5 transition-all ${active ? 'text-orange-600 scale-110' : 'text-slate-300'}`}>
+                <Icon name={icon} size={24} strokeWidth={active ? 3 : 2} />
+                <span className="text-[8px] font-black uppercase tracking-tighter leading-none">{label}</span>
+            </button>
+        );
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+
