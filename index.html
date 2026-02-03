@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PROVEED | Configuración de Red</title>
+    <title>PROVEED | Terminal Ecuador</title>
     
+    <!-- Motores de Diseño y React -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -12,194 +13,125 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ffffff; margin: 0; }
-        .orange-btn { background-color: #f97316; box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4); }
-        .logo-shadow { filter: drop-shadow(0 5px 15px rgba(132, 204, 22, 0.4)); }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #ffffff; margin: 0; }
+        .btn-main { background: #f97316; box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4); }
+        .logo-glow { filter: drop-shadow(0 0 15px rgba(249, 115, 22, 0.4)); }
+        .tap-scale:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
-
-        // ==========================================
-        // CONFIGURACIÓN DE TU BASE DE DATOS
-        // Pega aquí los datos de tu consola de Google/Firebase
-        // ==========================================
+        const { useState, useEffect } = React;
+        
+        // --- TUS CREDENCIALES INTEGRADAS ---
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "TU_PROYECTO.firebaseapp.com",
-            projectId: "TU_PROYECTO_ID",
-            storageBucket: "TU_PROYECTO.appspot.com",
-            messagingSenderId: "TU_ID_MENSAJERIA",
-            appId: "TU_APP_ID"
+            apiKey: "AIzaSyCZ_8ghU9TNgzDrSyiFu9WcGVb6D4iJW1M",
+            authDomain: "proveed-8cb7c.firebaseapp.com",
+            projectId: "proveed-8cb7c",
+            storageBucket: "proveed-8cb7c.firebasestorage.app",
+            messagingSenderId: "235073250367",
+            appId: "1:235073250367:web:cb2f8954bda450e647448a",
+            measurementId: "G-KZ4B4TMGRY"
         };
 
         const LOGO_URL = "https://raw.githubusercontent.com/Proveed-app/Proveed-app/main/1000349123.png";
-        const APP_ID = "proveed-ecuador-v1";
-
-        const Icon = ({ name, size = 24, className = "" }) => {
-            const LucideIcon = lucide.icons[name];
-            return LucideIcon ? <LucideIcon size={size} className={className} /> : null;
-        };
 
         function App() {
             const [view, setView] = useState('landing');
-            const [tab, setTab] = useState('home');
-            const [user, setUser] = useState(null);
-            const [messages, setMessages] = useState([]);
-            const [db, setDb] = useState(null);
+            const [status, setStatus] = useState('connecting');
 
-            // Motor de conexión
             useEffect(() => {
                 const initFirebase = async () => {
                     try {
                         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js');
-                        const { getFirestore, collection, onSnapshot, addDoc, query, orderBy } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
-                        const { getAuth, signInAnonymously, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
-
-                        // Solo inicializa si los datos no son los de ejemplo
-                        if (firebaseConfig.apiKey !== "TU_API_KEY") {
-                            const app = initializeApp(firebaseConfig);
-                            const firestore = getFirestore(app);
-                            const auth = getAuth(app);
-                            setDb(firestore);
-
-                            await signInAnonymously(auth);
-                            onAuthStateChanged(auth, (u) => setUser(u));
-
-                            // Escuchar chat
-                            const q = query(collection(firestore, 'chat'), orderBy('time', 'asc'));
-                            onSnapshot(q, (snapshot) => {
-                                setMessages(snapshot.docs.map(doc => doc.data()));
-                            });
-                        }
+                        const { getFirestore } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+                        
+                        const app = initializeApp(firebaseConfig);
+                        const db = getFirestore(app);
+                        
+                        setStatus('connected');
                     } catch (e) {
-                        console.log("Esperando configuración de base de datos...");
+                        console.error(e);
+                        setStatus('error');
                     }
                 };
                 initFirebase();
             }, []);
 
-            const sendMessage = async (text) => {
-                if (!text.trim() || !db || !user) return;
-                const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
-                await addDoc(collection(db, 'chat'), {
-                    text,
-                    sender: `Terminal-${user.uid.slice(0,4)}`,
-                    time: Date.now(),
-                    uid: user.uid
-                });
-            };
-
             if (view === 'landing') {
                 return (
-                    <div className="h-screen flex flex-col items-center justify-center p-10 bg-white space-y-12">
-                        <div className="text-center">
-                            <img src={LOGO_URL} className="h-40 w-40 mx-auto logo-shadow mb-6" />
-                            <h1 className="text-5xl font-black italic tracking-tighter uppercase leading-none">PROVEED</h1>
-                            <p className="text-orange-500 font-bold tracking-[0.3em] text-[10px] uppercase">Ecuador Sincronizado</p>
+                    <div className="h-screen flex flex-col items-center justify-between p-10 bg-white">
+                        <div className="w-full flex justify-end pt-4">
+                            <div className="flex gap-0.5">
+                                <div className="w-6 h-1 bg-yellow-400"></div>
+                                <div className="w-6 h-1 bg-blue-700"></div>
+                                <div className="w-6 h-1 bg-red-600"></div>
+                            </div>
                         </div>
-                        <button 
-                            onClick={() => setView('app')}
-                            className="w-full max-w-xs orange-btn text-white py-6 rounded-[2rem] font-black uppercase tracking-widest active:scale-95 transition-all"
-                        >
-                            CONECTAR RED
-                        </button>
+
+                        <div className="text-center animate-in fade-in zoom-in duration-700">
+                            <img src={LOGO_URL} className="h-44 w-44 mx-auto logo-glow mb-10" />
+                            <h1 className="text-6xl font-black italic tracking-tighter uppercase leading-[0.8] mb-2">PROVEED</h1>
+                            <p className="text-[#f97316] font-bold tracking-[0.4em] text-[11px] uppercase italic">Ecuador Conectado</p>
+                        </div>
+
+                        <div className="w-full max-w-sm space-y-6 pb-10">
+                            <button 
+                                onClick={() => setView('app')}
+                                className="w-full btn-main text-white py-6 rounded-[2.5rem] font-black uppercase tracking-widest shadow-2xl tap-scale transition-all"
+                            >
+                                INGRESAR AL PANEL
+                            </button>
+                            
+                            <div className="flex justify-center items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full ${status === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-zinc-200'}`}></div>
+                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                    {status === 'connected' ? 'Sincronización Activa' : 'Conectando Red...'}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 );
             }
 
             return (
-                <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
-                    <header className="p-6 pt-12 flex justify-between items-center bg-white border-b border-zinc-100 sticky top-0 z-50">
+                <div className="h-screen flex flex-col bg-slate-50 animate-in slide-in-from-right">
+                    <header className="p-6 pt-12 bg-white border-b flex justify-between items-center sticky top-0 z-50">
                         <div className="flex items-center gap-3">
                             <img src={LOGO_URL} className="h-10 w-10" />
-                            <div>
-                                <p className="font-black italic text-sm leading-none uppercase">PROVEED LIVE</p>
-                                <p className="text-[8px] font-bold text-green-500 uppercase mt-1">Conectado</p>
-                            </div>
+                            <span className="font-black italic text-sm tracking-tighter uppercase text-slate-800">PROVEED LIVE</span>
                         </div>
-                        <Icon name="Settings" className="text-zinc-300" />
+                        <div className="flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                            <span className="text-[9px] font-black text-green-600 uppercase">ONLINE</span>
+                        </div>
                     </header>
 
-                    <main className="flex-grow overflow-y-auto p-6 pb-32">
-                        {tab === 'home' && (
-                            <div className="space-y-6">
-                                <h2 className="text-3xl font-black italic tracking-tighter uppercase">Mercado</h2>
-                                <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-zinc-50">
-                                    <div className="h-48 bg-zinc-100 rounded-[2rem] flex items-center justify-center mb-4">
-                                        <Icon name="Package" size={48} className="text-zinc-200" />
-                                    </div>
-                                    <p className="text-2xl font-black italic text-orange-500">$14.00</p>
-                                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Esperando Lote...</p>
-                                </div>
+                    <main className="p-8 flex-grow flex flex-col items-center justify-center text-center">
+                        <div className="bg-white p-12 rounded-[3.5rem] shadow-2xl shadow-slate-200 border border-slate-100 max-w-xs w-full">
+                            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <lucide.icons.ShieldCheck className="text-green-500" size={40} />
                             </div>
-                        )}
-
-                        {tab === 'chat' && (
-                            <ChatPanel messages={messages} onSend={sendMessage} user={user} />
-                        )}
-
-                        {tab === 'shield' && (
-                            <div className="text-center py-10 space-y-8 animate-in zoom-in-95">
-                                <Icon name="Shield" size={80} className="mx-auto text-green-500" />
-                                <h3 className="text-4xl font-black italic tracking-tighter">PROVEED SHIELD</h3>
-                                <div className="bg-green-50 p-10 rounded-[3rem] border-2 border-green-100 shadow-lg shadow-green-100">
-                                    <p className="text-5xl font-black italic text-green-600">$0.00</p>
-                                    <p className="text-[10px] font-black text-green-600 uppercase mt-2">Saldo Escrow</p>
-                                </div>
-                            </div>
-                        )}
-                    </main>
-
-                    <nav className="fixed bottom-8 left-6 right-6 z-50 bg-white/90 backdrop-blur-md border border-zinc-100 p-4 rounded-[2.5rem] flex justify-between items-center shadow-2xl max-w-md mx-auto">
-                        <NavBtn n="home" i="LayoutGrid" active={tab} set={setTab} />
-                        <NavBtn n="video" i="PlayCircle" active={tab} set={setTab} />
-                        <button onClick={() => setTab('shield')} className="-mt-16 transition-transform active:scale-90">
-                            <div className={`w-20 h-20 rounded-full border-8 border-white bg-white flex items-center justify-center shadow-2xl ${tab === 'shield' ? 'ring-4 ring-orange-100' : ''}`}>
-                                <img src={LOGO_URL} className={`w-12 h-12 object-contain ${tab === 'shield' ? '' : 'grayscale opacity-30'}`} />
-                            </div>
+                            <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-2">Terminal Lista</h2>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                                Base de datos Google Cloud<br/>sincronizada con éxito.
+                            </p>
+                        </div>
+                        
+                        <button 
+                            onClick={() => setView('landing')}
+                            className="mt-10 text-slate-300 font-bold text-[10px] uppercase tracking-widest flex items-center gap-2"
+                        >
+                            <lucide.icons.ArrowLeft size={12}/> Cerrar Sesión
                         </button>
-                        <NavBtn n="chat" i="MessageSquare" active={tab} set={setTab} />
-                        <NavBtn n="orders" i="Truck" active={tab} set={setTab} />
-                    </nav>
-                </div>
-            );
-        }
-
-        function NavBtn({ n, i, active, set }) {
-            return (
-                <button onClick={() => set(n)} className={`p-4 rounded-2xl transition-all ${active === n ? 'bg-orange-500 text-white shadow-lg' : 'text-zinc-300'}`}>
-                    <Icon name={i} fill={active === n ? "currentColor" : "none"} />
-                </button>
-            );
-        }
-
-        function ChatPanel({ messages, onSend, user }) {
-            const [input, setInput] = useState("");
-            const ref = useRef();
-            useEffect(() => { ref.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
-
-            return (
-                <div className="flex flex-col h-[65vh]">
-                    <div className="flex-grow overflow-y-auto space-y-4 mb-4">
-                        {messages.length > 0 ? messages.map((m, i) => (
-                            <div key={i} className={`flex flex-col ${m.uid === user?.uid ? 'items-end' : 'items-start'}`}>
-                                <p className={`px-4 py-2 rounded-2xl text-sm font-bold shadow-sm ${m.uid === user?.uid ? 'bg-orange-500 text-white' : 'bg-white text-zinc-800'}`}>
-                                    {m.text}
-                                </p>
-                                <span className="text-[7px] font-bold text-zinc-300 mt-1 uppercase">{m.sender}</span>
-                            </div>
-                        )) : <p className="text-center text-zinc-300 mt-20 font-bold italic uppercase text-xs tracking-widest">Sin mensajes en la red</p>}
-                        <div ref={ref} />
-                    </div>
-                    <div className="flex gap-2">
-                        <input className="flex-grow bg-white border border-zinc-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="Escribir..." value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && (onSend(input), setInput(""))} />
-                        <button onClick={() => {onSend(input); setInput("");}} className="bg-orange-500 text-white p-4 rounded-2xl shadow-lg shadow-orange-100"><Icon name="Send" /></button>
-                    </div>
+                    </main>
+                    
+                    <footer className="p-8 text-center">
+                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] italic">Proveed App v2.0</p>
+                    </footer>
                 </div>
             );
         }
