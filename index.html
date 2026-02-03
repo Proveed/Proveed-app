@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#ffffff">
-    <title>PROVEED | La App #1 de Proveedores en Ecuador</title>
+    <title>PROVEED | Configuración de Red</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -15,265 +12,193 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        
-        :root {
-            --orange-main: #f97316;
-            --lime-action: #84cc16;
-        }
-
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #ffffff; 
-            color: #1a1a1a;
-            -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
-        }
-
-        /* Estilos de Marca */
-        .btn-lime {
-            background-color: var(--lime-action);
-            box-shadow: 0 10px 25px -5px rgba(132, 204, 22, 0.4);
-        }
-
-        .btn-orange {
-            background-color: var(--orange-main);
-            box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);
-        }
-
-        .text-orange { color: var(--orange-main); }
-        .text-lime { color: var(--lime-action); }
-        .bg-orange { background-color: var(--orange-main); }
-        .bg-lime { background-color: var(--lime-action); }
-
-        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
-        
-        .ecuador-flag {
-            background: linear-gradient(90deg, #FFD700 0%, #0033A0 50%, #ED1C24 100%);
-            height: 4px;
-        }
-
-        .status-pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-        .logo-glow {
-            filter: drop-shadow(0 0 15px rgba(132, 204, 22, 0.3));
-        }
-
-        /* Transiciones de App */
-        .page-enter { animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ffffff; margin: 0; }
+        .orange-btn { background-color: #f97316; box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4); }
+        .logo-shadow { filter: drop-shadow(0 5px 15px rgba(132, 204, 22, 0.4)); }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
-        // Logo de seguridad proporcionado por el usuario
-        const LOGO_URL = "https://raw.githubusercontent.com/Proveed-app/Proveed-app/main/1000349123.png";
-
-        const Icon = ({ name, size = 22, className = "", fill = "none" }) => {
-            const LucideIcon = lucide.icons[name];
-            return LucideIcon ? <LucideIcon size={size} className={className} fill={fill} /> : null;
+        // ==========================================
+        // CONFIGURACIÓN DE TU BASE DE DATOS
+        // Pega aquí los datos de tu consola de Google/Firebase
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_PROYECTO.firebaseapp.com",
+            projectId: "TU_PROYECTO_ID",
+            storageBucket: "TU_PROYECTO.appspot.com",
+            messagingSenderId: "TU_ID_MENSAJERIA",
+            appId: "TU_APP_ID"
         };
 
-        const LogoShield = ({ size = "h-12" }) => (
-            <img src={LOGO_URL} alt="Proveed Shield" className={`${size} object-contain logo-glow`} />
-        );
+        const LOGO_URL = "https://raw.githubusercontent.com/Proveed-app/Proveed-app/main/1000349123.png";
+        const APP_ID = "proveed-ecuador-v1";
+
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const LucideIcon = lucide.icons[name];
+            return LucideIcon ? <LucideIcon size={size} className={className} /> : null;
+        };
 
         function App() {
-            const [view, setView] = useState('landing'); 
-
-            return (
-                <div className="min-h-screen flex flex-col">
-                    {view === 'landing' ? (
-                        <LandingView onStart={() => setView('app')} />
-                    ) : (
-                        <AppView onBack={() => setView('landing')} />
-                    )}
-                </div>
-            );
-        }
-
-        // --- VISTA: LANDING PAGE EMOCIONAL ---
-        function LandingView({ onStart }) {
-            return (
-                <div className="flex-grow flex flex-col bg-white page-enter">
-                    {/* Header */}
-                    <nav className="p-6 flex justify-between items-center glass-nav sticky top-0 z-50 border-b border-zinc-50">
-                        <div className="flex items-center gap-3">
-                            <LogoShield size="h-10" />
-                            <div className="flex flex-col">
-                                <span className="font-black tracking-tighter text-2xl italic leading-none uppercase">PROVEED</span>
-                                <div className="ecuador-flag w-full rounded-full"></div>
-                            </div>
-                        </div>
-                        <button onClick={onStart} className="bg-orange text-white px-6 py-2.5 rounded-xl font-black text-[10px] tracking-widest uppercase shadow-lg shadow-orange-100 transition-transform active:scale-90">
-                            INGRESAR
-                        </button>
-                    </nav>
-
-                    {/* Hero Section */}
-                    <div className="px-8 pt-12 pb-24 space-y-12 flex-grow max-w-4xl mx-auto w-full">
-                        <div className="space-y-8 text-center sm:text-left">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lime/10 text-lime border border-lime/20 font-black text-[10px] tracking-widest mx-auto sm:mx-0">
-                                <Icon name="Award" size={14} />
-                                LA APP #1 DEL ECUADOR 🇪🇨
-                            </div>
-                            
-                            <h2 className="text-6xl sm:text-8xl font-black italic tracking-tighter leading-[0.85] text-zinc-900">
-                                DEJA DE <span className="text-orange">BUSCAR,</span> <br/>
-                                EMPIEZA A <span className="text-lime">GANAR.</span>
-                            </h2>
-                            
-                            <p className="text-zinc-500 font-semibold text-xl leading-relaxed max-w-lg border-l-8 border-orange pl-6">
-                                Todos los proveedores en un solo lugar. <span className="text-zinc-900 font-black">Seguridad Escrow</span>, envíos rápidos y trato directo de fábrica.
-                            </p>
-                        </div>
-
-                        {/* CTA & Trust */}
-                        <div className="space-y-6">
-                            <button onClick={onStart} className="btn-orange w-full text-white py-8 rounded-[2.5rem] font-black uppercase tracking-[0.25em] text-lg transition-all hover:brightness-110 active:scale-95">
-                                EXPLORAR AHORA
-                            </button>
-                            
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 p-8 bg-zinc-50 rounded-[2rem] border border-zinc-100">
-                                <div className="flex items-center gap-4">
-                                    <LogoShield size="h-14" />
-                                    <div>
-                                        <p className="font-black text-sm uppercase italic">PROVEED-SHIELD</p>
-                                        <p className="text-xs font-bold text-zinc-400">Protección total de tu dinero</p>
-                                    </div>
-                                </div>
-                                <div className="flex -space-x-3">
-                                    {[1,2,3,4].map(i => (
-                                        <div key={i} className={`w-10 h-10 rounded-full border-4 border-white bg-zinc-${i+1}00`}></div>
-                                    ))}
-                                    <div className="w-10 h-10 rounded-full border-4 border-white bg-lime flex items-center justify-center text-white text-[8px] font-black">+10k</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // --- VISTA: APP FUNCIONAL ---
-        function AppView({ onBack }) {
+            const [view, setView] = useState('landing');
             const [tab, setTab] = useState('home');
+            const [user, setUser] = useState(null);
+            const [messages, setMessages] = useState([]);
+            const [db, setDb] = useState(null);
+
+            // Motor de conexión
+            useEffect(() => {
+                const initFirebase = async () => {
+                    try {
+                        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js');
+                        const { getFirestore, collection, onSnapshot, addDoc, query, orderBy } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+                        const { getAuth, signInAnonymously, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
+
+                        // Solo inicializa si los datos no son los de ejemplo
+                        if (firebaseConfig.apiKey !== "TU_API_KEY") {
+                            const app = initializeApp(firebaseConfig);
+                            const firestore = getFirestore(app);
+                            const auth = getAuth(app);
+                            setDb(firestore);
+
+                            await signInAnonymously(auth);
+                            onAuthStateChanged(auth, (u) => setUser(u));
+
+                            // Escuchar chat
+                            const q = query(collection(firestore, 'chat'), orderBy('time', 'asc'));
+                            onSnapshot(q, (snapshot) => {
+                                setMessages(snapshot.docs.map(doc => doc.data()));
+                            });
+                        }
+                    } catch (e) {
+                        console.log("Esperando configuración de base de datos...");
+                    }
+                };
+                initFirebase();
+            }, []);
+
+            const sendMessage = async (text) => {
+                if (!text.trim() || !db || !user) return;
+                const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+                await addDoc(collection(db, 'chat'), {
+                    text,
+                    sender: `Terminal-${user.uid.slice(0,4)}`,
+                    time: Date.now(),
+                    uid: user.uid
+                });
+            };
+
+            if (view === 'landing') {
+                return (
+                    <div className="h-screen flex flex-col items-center justify-center p-10 bg-white space-y-12">
+                        <div className="text-center">
+                            <img src={LOGO_URL} className="h-40 w-40 mx-auto logo-shadow mb-6" />
+                            <h1 className="text-5xl font-black italic tracking-tighter uppercase leading-none">PROVEED</h1>
+                            <p className="text-orange-500 font-bold tracking-[0.3em] text-[10px] uppercase">Ecuador Sincronizado</p>
+                        </div>
+                        <button 
+                            onClick={() => setView('app')}
+                            className="w-full max-w-xs orange-btn text-white py-6 rounded-[2rem] font-black uppercase tracking-widest active:scale-95 transition-all"
+                        >
+                            CONECTAR RED
+                        </button>
+                    </div>
+                );
+            }
 
             return (
-                <div className="flex-grow flex flex-col bg-white page-enter">
-                    {/* Header App */}
-                    <div className="px-6 pt-12 pb-4 flex justify-between items-center border-b border-zinc-50 bg-white/95 backdrop-blur-md sticky top-0 z-50">
+                <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
+                    <header className="p-6 pt-12 flex justify-between items-center bg-white border-b border-zinc-100 sticky top-0 z-50">
                         <div className="flex items-center gap-3">
-                            <LogoShield size="h-10" />
-                            <div className="flex flex-col">
-                                <span className="font-black italic text-sm tracking-tighter uppercase leading-none">PROVEED LIVE</span>
-                                <div className="flex items-center gap-1 mt-1">
-                                    <div className="w-1.5 h-1.5 bg-lime rounded-full status-pulse"></div>
-                                    <span className="text-[8px] font-black text-lime uppercase tracking-widest">Sincronizado</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex gap-2">
-                            <button className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400">
-                                <Icon name="Bell" size={18}/>
-                            </button>
-                            <button onClick={onBack} className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400">
-                                <Icon name="User" size={18}/>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* App Content Area */}
-                    <div className="flex-grow overflow-y-auto p-6 space-y-8 safe-area-bottom pb-32 max-w-4xl mx-auto w-full">
-                        <div className="flex justify-between items-end">
+                            <img src={LOGO_URL} className="h-10 w-10" />
                             <div>
-                                <p className="text-[10px] font-black text-orange uppercase tracking-[0.3em]">Directo de Fábrica</p>
-                                <h3 className="font-black text-3xl italic tracking-tighter">Últimos Lotes</h3>
-                            </div>
-                            <div className="bg-zinc-100 p-2 rounded-xl">
-                                <Icon name="Filter" size={18} className="text-zinc-500" />
+                                <p className="font-black italic text-sm leading-none uppercase">PROVEED LIVE</p>
+                                <p className="text-[8px] font-bold text-green-500 uppercase mt-1">Conectado</p>
                             </div>
                         </div>
+                        <Icon name="Settings" className="text-zinc-300" />
+                    </header>
 
-                        {/* Product Card Premium */}
-                        <div className="bg-white rounded-[3rem] overflow-hidden shadow-2xl shadow-zinc-200 border border-zinc-50">
-                            <div className="h-[480px] relative group overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=600" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-                                
-                                {/* Overlay de Seguridad */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent flex flex-col justify-end p-8">
-                                    <div className="flex items-center gap-4 mb-4">
-                                        <div className="w-14 h-14 rounded-2xl bg-white p-1.5 shadow-2xl rotate-3">
-                                            <LogoShield size="h-full w-full" />
-                                        </div>
-                                        <div>
-                                            <p className="text-white text-sm font-black italic tracking-widest uppercase leading-none">Zapatos_Quito_Mayorista</p>
-                                            <p className="text-lime text-[10px] font-black uppercase tracking-widest mt-1 italic">Verificación Escrow Activa</p>
-                                        </div>
+                    <main className="flex-grow overflow-y-auto p-6 pb-32">
+                        {tab === 'home' && (
+                            <div className="space-y-6">
+                                <h2 className="text-3xl font-black italic tracking-tighter uppercase">Mercado</h2>
+                                <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-zinc-50">
+                                    <div className="h-48 bg-zinc-100 rounded-[2rem] flex items-center justify-center mb-4">
+                                        <Icon name="Package" size={48} className="text-zinc-200" />
                                     </div>
-                                    <p className="text-white/80 text-sm font-medium italic leading-snug max-w-xs">
-                                        Fabricación nacional de exportación. Lote disponible: 300 unidades. Despacho inmediato.
-                                    </p>
-                                </div>
-
-                                <div className="absolute top-6 left-6 bg-red-600/90 backdrop-blur-md text-white px-4 py-2 rounded-full font-black text-[10px] uppercase flex items-center gap-2 border border-white/20">
-                                    <div className="w-2 h-2 bg-white rounded-full animate-ping"></div> EN VIVO
+                                    <p className="text-2xl font-black italic text-orange-500">$14.00</p>
+                                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Esperando Lote...</p>
                                 </div>
                             </div>
-                            
-                            <div className="p-8 flex justify-between items-center bg-white">
-                                <div>
-                                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest italic leading-none mb-1">Precio Miembro</p>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-black text-orange italic leading-none">$18.90</span>
-                                        <span className="text-xs font-bold text-zinc-400 italic">USD/u</span>
-                                    </div>
+                        )}
+
+                        {tab === 'chat' && (
+                            <ChatPanel messages={messages} onSend={sendMessage} user={user} />
+                        )}
+
+                        {tab === 'shield' && (
+                            <div className="text-center py-10 space-y-8 animate-in zoom-in-95">
+                                <Icon name="Shield" size={80} className="mx-auto text-green-500" />
+                                <h3 className="text-4xl font-black italic tracking-tighter">PROVEED SHIELD</h3>
+                                <div className="bg-green-50 p-10 rounded-[3rem] border-2 border-green-100 shadow-lg shadow-green-100">
+                                    <p className="text-5xl font-black italic text-green-600">$0.00</p>
+                                    <p className="text-[10px] font-black text-green-600 uppercase mt-2">Saldo Escrow</p>
                                 </div>
-                                <button className="btn-lime text-white w-20 h-20 rounded-[2rem] flex items-center justify-center transition-all active:scale-90 active:rotate-12 shadow-xl shadow-lime-100">
-                                    <Icon name="ShoppingBag" size={30} strokeWidth={3} />
-                                </button>
                             </div>
-                        </div>
+                        )}
+                    </main>
+
+                    <nav className="fixed bottom-8 left-6 right-6 z-50 bg-white/90 backdrop-blur-md border border-zinc-100 p-4 rounded-[2.5rem] flex justify-between items-center shadow-2xl max-w-md mx-auto">
+                        <NavBtn n="home" i="LayoutGrid" active={tab} set={setTab} />
+                        <NavBtn n="video" i="PlayCircle" active={tab} set={setTab} />
+                        <button onClick={() => setTab('shield')} className="-mt-16 transition-transform active:scale-90">
+                            <div className={`w-20 h-20 rounded-full border-8 border-white bg-white flex items-center justify-center shadow-2xl ${tab === 'shield' ? 'ring-4 ring-orange-100' : ''}`}>
+                                <img src={LOGO_URL} className={`w-12 h-12 object-contain ${tab === 'shield' ? '' : 'grayscale opacity-30'}`} />
+                            </div>
+                        </button>
+                        <NavBtn n="chat" i="MessageSquare" active={tab} set={setTab} />
+                        <NavBtn n="orders" i="Truck" active={tab} set={setTab} />
+                    </nav>
+                </div>
+            );
+        }
+
+        function NavBtn({ n, i, active, set }) {
+            return (
+                <button onClick={() => set(n)} className={`p-4 rounded-2xl transition-all ${active === n ? 'bg-orange-500 text-white shadow-lg' : 'text-zinc-300'}`}>
+                    <Icon name={i} fill={active === n ? "currentColor" : "none"} />
+                </button>
+            );
+        }
+
+        function ChatPanel({ messages, onSend, user }) {
+            const [input, setInput] = useState("");
+            const ref = useRef();
+            useEffect(() => { ref.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+            return (
+                <div className="flex flex-col h-[65vh]">
+                    <div className="flex-grow overflow-y-auto space-y-4 mb-4">
+                        {messages.length > 0 ? messages.map((m, i) => (
+                            <div key={i} className={`flex flex-col ${m.uid === user?.uid ? 'items-end' : 'items-start'}`}>
+                                <p className={`px-4 py-2 rounded-2xl text-sm font-bold shadow-sm ${m.uid === user?.uid ? 'bg-orange-500 text-white' : 'bg-white text-zinc-800'}`}>
+                                    {m.text}
+                                </p>
+                                <span className="text-[7px] font-bold text-zinc-300 mt-1 uppercase">{m.sender}</span>
+                            </div>
+                        )) : <p className="text-center text-zinc-300 mt-20 font-bold italic uppercase text-xs tracking-widest">Sin mensajes en la red</p>}
+                        <div ref={ref} />
                     </div>
-
-                    {/* Navigation Bar Flotante Estilo iOS */}
-                    <div className="fixed bottom-8 left-6 right-6 z-50 max-w-md mx-auto">
-                        <nav className="bg-white/95 backdrop-blur-xl border border-zinc-100 px-8 py-5 rounded-[2.5rem] flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
-                            <button onClick={() => setTab('home')} className={`transition-all p-2 ${tab === 'home' ? 'text-orange scale-125' : 'text-zinc-300'}`}>
-                                <Icon name="LayoutGrid" fill={tab === 'home' ? "currentColor" : "none"} />
-                            </button>
-                            <button onClick={() => setTab('video')} className={`transition-all p-2 ${tab === 'video' ? 'text-orange scale-125' : 'text-zinc-300'}`}>
-                                <Icon name="PlayCircle" />
-                            </button>
-                            
-                            {/* Botón Central de Seguridad */}
-                            <button onClick={() => setTab('shield')} className={`-mt-14 transition-all duration-500 transform ${tab === 'shield' ? 'scale-110' : ''}`}>
-                                <div className={`w-20 h-20 rounded-full border-8 border-white bg-white flex items-center justify-center shadow-2xl ${tab === 'shield' ? 'ring-4 ring-lime/20' : ''}`}>
-                                    <img src={LOGO_URL} className={`w-12 h-12 object-contain ${tab === 'shield' ? '' : 'grayscale opacity-40'}`} alt="Shield" />
-                                </div>
-                            </button>
-
-                            <button onClick={() => setTab('chat')} className={`transition-all p-2 ${tab === 'chat' ? 'text-orange scale-125' : 'text-zinc-300'}`}>
-                                <Icon name="MessageSquare" />
-                            </button>
-                            <button onClick={() => setTab('orders')} className={`transition-all p-2 ${tab === 'orders' ? 'text-orange scale-125' : 'text-zinc-300'}`}>
-                                <Icon name="Truck" />
-                            </button>
-                        </nav>
+                    <div className="flex gap-2">
+                        <input className="flex-grow bg-white border border-zinc-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="Escribir..." value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && (onSend(input), setInput(""))} />
+                        <button onClick={() => {onSend(input); setInput("");}} className="bg-orange-500 text-white p-4 rounded-2xl shadow-lg shadow-orange-100"><Icon name="Send" /></button>
                     </div>
                 </div>
             );
@@ -284,6 +209,4 @@
     </script>
 </body>
 </html>
-
-
 
