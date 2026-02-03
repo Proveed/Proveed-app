@@ -2,10 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PROVEED | Terminal de Negocios</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#ffffff">
+    <title>PROVEED | La App #1 de Proveedores en Ecuador</title>
     
-    <!-- Librerías de Alto Rendimiento -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -13,46 +15,62 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         
         :root {
-            --brand: #f97316;
-            --dark: #000000;
+            --orange-main: #f97316;
+            --lime-action: #84cc16;
         }
 
         body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f1f5f9;
-            color: var(--dark);
-            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #ffffff; 
+            color: #1a1a1a;
+            -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
         }
 
-        .app-container {
-            max-width: 480px;
-            margin: 0 auto;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: white;
-            box-shadow: 0 0 80px rgba(0,0,0,0.08);
+        /* Estilos de Marca */
+        .btn-lime {
+            background-color: var(--lime-action);
+            box-shadow: 0 10px 25px -5px rgba(132, 204, 22, 0.4);
         }
 
-        .brand-gradient {
-            background: linear-gradient(135deg, #111111 0%, #000000 100%);
+        .btn-orange {
+            background-color: var(--orange-main);
+            box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);
         }
 
-        .animate-fade {
-            animation: fadeIn 0.4s ease-out forwards;
+        .text-orange { color: var(--orange-main); }
+        .text-lime { color: var(--lime-action); }
+        .bg-orange { background-color: var(--orange-main); }
+        .bg-lime { background-color: var(--lime-action); }
+
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        
+        .ecuador-flag {
+            background: linear-gradient(90deg, #FFD700 0%, #0033A0 50%, #ED1C24 100%);
+            height: 4px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+        .status-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        .logo-glow {
+            filter: drop-shadow(0 0 15px rgba(132, 204, 22, 0.3));
         }
 
-        .status-dot {
-            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        /* Transiciones de App */
+        .page-enter { animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
     </style>
 </head>
@@ -62,140 +80,210 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const Icon = ({ name, size = 20, className = "" }) => {
+        // Logo de seguridad proporcionado por el usuario
+        const LOGO_URL = "https://raw.githubusercontent.com/Proveed-app/Proveed-app/main/1000349123.png";
+
+        const Icon = ({ name, size = 22, className = "", fill = "none" }) => {
             const LucideIcon = lucide.icons[name];
-            return LucideIcon ? <LucideIcon size={size} className={className} /> : null;
+            return LucideIcon ? <LucideIcon size={size} className={className} fill={fill} /> : null;
         };
 
+        const LogoShield = ({ size = "h-12" }) => (
+            <img src={LOGO_URL} alt="Proveed Shield" className={`${size} object-contain logo-glow`} />
+        );
+
         function App() {
-            const [loading, setLoading] = useState(true);
-            const [tab, setTab] = useState('inicio');
-
-            useEffect(() => {
-                const timer = setTimeout(() => setLoading(false), 1800);
-                return () => clearTimeout(timer);
-            }, []);
-
-            if (loading) {
-                return (
-                    <div className="h-screen flex flex-col items-center justify-center bg-white p-12">
-                        <div className="w-24 h-24 bg-orange-600 rounded-[2.5rem] flex items-center justify-center shadow-2xl animate-bounce mb-8">
-                            <span className="text-white font-black italic text-5xl">P</span>
-                        </div>
-                        <h1 className="text-3xl font-black italic tracking-tighter text-black uppercase">PROVEED</h1>
-                        <div className="mt-6 flex gap-2">
-                            <div className="w-2 h-2 bg-orange-200 rounded-full animate-pulse"></div>
-                            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                            <div className="w-2 h-2 bg-orange-600 rounded-full animate-pulse"></div>
-                        </div>
-                    </div>
-                );
-            }
+            const [view, setView] = useState('landing'); 
 
             return (
-                <div className="app-container animate-fade">
-                    {/* Header */}
-                    <header className="px-6 py-6 sticky top-0 bg-white/95 backdrop-blur-md z-40 border-b border-slate-100 flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 bg-black rounded-2xl flex items-center justify-center text-white shadow-xl">
-                                <span className="font-black italic text-xl">P</span>
-                            </div>
-                            <div>
-                                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">Marketplace</h2>
-                                <p className="font-black italic text-black text-base tracking-tight uppercase">PROVEED</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">
-                            <div className="w-2 h-2 bg-emerald-500 rounded-full status-dot animate-pulse"></div>
-                            <span className="text-[10px] font-black text-emerald-700 uppercase">Red Activa</span>
-                        </div>
-                    </header>
-
-                    {/* Main */}
-                    <main className="flex-grow p-6 space-y-6 pb-32">
-                        {tab === 'inicio' && (
-                            <div className="space-y-6 animate-fade">
-                                {/* Balance Card */}
-                                <div className="brand-gradient p-8 rounded-[3rem] text-white relative overflow-hidden shadow-2xl">
-                                    <div className="relative z-10">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <p className="text-[10px] font-bold uppercase opacity-50 tracking-widest text-orange-200">Capital Central</p>
-                                            <Icon name="Crown" size={16} className="text-orange-500" />
-                                        </div>
-                                        <h2 className="text-6xl font-black italic tracking-tighter mb-10">$0.00</h2>
-                                        
-                                        <div className="flex gap-3">
-                                            <button className="flex-grow py-4 bg-orange-600 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-orange-900/40 active:scale-95 transition-all">
-                                                Nueva Venta
-                                            </button>
-                                            <button className="w-14 py-4 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 hover:bg-white/20 active:scale-95 transition-all">
-                                                <Icon name="Plus" size={20} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <Icon name="Zap" className="absolute -right-16 -bottom-16 opacity-10 text-orange-500" size={280} />
-                                </div>
-
-                                {/* Quick Stats */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm">
-                                        <Icon name="ShoppingBag" className="text-orange-500 mb-3" />
-                                        <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Órdenes Hoy</p>
-                                        <p className="text-2xl font-black italic text-black tracking-tighter">0</p>
-                                    </div>
-                                    <div className="p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm">
-                                        <Icon name="Link" className="text-slate-900 mb-3" />
-                                        <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Terminales</p>
-                                        <p className="text-2xl font-black italic text-black tracking-tighter">3</p>
-                                    </div>
-                                </div>
-
-                                {/* Menu Sections */}
-                                <div className="space-y-3">
-                                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2 italic">Infraestructura</h4>
-                                    <div className="bg-white rounded-[2rem] border border-slate-100 divide-y divide-slate-50 overflow-hidden shadow-sm">
-                                        <NavItem icon="Box" title="Inventario Global" />
-                                        <NavItem icon="Users" title="Red de Proveedores" />
-                                        <NavItem icon="ShieldCheck" title="Sistema Escrow" />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </main>
-
-                    {/* Bottom Nav */}
-                    <nav className="fixed bottom-0 w-full max-w-[480px] bg-white/90 backdrop-blur-xl border-t p-6 pb-10 flex justify-around shadow-2xl z-50">
-                        <TabBtn active={tab === 'inicio'} icon="LayoutGrid" label="Panel" onClick={() => setTab('inicio')} />
-                        <TabBtn active={tab === 'red'} icon="Globe" label="Red" onClick={() => setTab('red')} />
-                        <TabBtn active={tab === 'caja'} icon="CreditCard" label="Caja" onClick={() => setTab('caja')} />
-                        <TabBtn active={tab === 'ajustes'} icon="Settings" label="Ajustes" onClick={() => setTab('ajustes')} />
-                    </nav>
+                <div className="min-h-screen flex flex-col">
+                    {view === 'landing' ? (
+                        <LandingView onStart={() => setView('app')} />
+                    ) : (
+                        <AppView onBack={() => setView('landing')} />
+                    )}
                 </div>
             );
         }
 
-        const NavItem = ({ icon, title }) => (
-            <div className="flex items-center justify-between p-5 hover:bg-slate-50 transition-colors cursor-pointer group">
-                <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-black group-hover:text-white transition-all">
-                        <Icon name={icon} size={18} />
-                    </div>
-                    <span className="text-[11px] font-black uppercase text-slate-700 tracking-tighter">{title}</span>
-                </div>
-                <Icon name="ChevronRight" size={14} className="text-slate-200 group-hover:text-black transition-all" />
-            </div>
-        );
+        // --- VISTA: LANDING PAGE EMOCIONAL ---
+        function LandingView({ onStart }) {
+            return (
+                <div className="flex-grow flex flex-col bg-white page-enter">
+                    {/* Header */}
+                    <nav className="p-6 flex justify-between items-center glass-nav sticky top-0 z-50 border-b border-zinc-50">
+                        <div className="flex items-center gap-3">
+                            <LogoShield size="h-10" />
+                            <div className="flex flex-col">
+                                <span className="font-black tracking-tighter text-2xl italic leading-none uppercase">PROVEED</span>
+                                <div className="ecuador-flag w-full rounded-full"></div>
+                            </div>
+                        </div>
+                        <button onClick={onStart} className="bg-orange text-white px-6 py-2.5 rounded-xl font-black text-[10px] tracking-widest uppercase shadow-lg shadow-orange-100 transition-transform active:scale-90">
+                            INGRESAR
+                        </button>
+                    </nav>
 
-        const TabBtn = ({ active, icon, label, onClick }) => (
-            <button onClick={onClick} className={`flex flex-col items-center gap-1.5 transition-all ${active ? 'text-orange-600 scale-110' : 'text-slate-300'}`}>
-                <Icon name={icon} size={24} strokeWidth={active ? 3 : 2} />
-                <span className="text-[8px] font-black uppercase tracking-tighter leading-none">{label}</span>
-            </button>
-        );
+                    {/* Hero Section */}
+                    <div className="px-8 pt-12 pb-24 space-y-12 flex-grow max-w-4xl mx-auto w-full">
+                        <div className="space-y-8 text-center sm:text-left">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lime/10 text-lime border border-lime/20 font-black text-[10px] tracking-widest mx-auto sm:mx-0">
+                                <Icon name="Award" size={14} />
+                                LA APP #1 DEL ECUADOR 🇪🇨
+                            </div>
+                            
+                            <h2 className="text-6xl sm:text-8xl font-black italic tracking-tighter leading-[0.85] text-zinc-900">
+                                DEJA DE <span className="text-orange">BUSCAR,</span> <br/>
+                                EMPIEZA A <span className="text-lime">GANAR.</span>
+                            </h2>
+                            
+                            <p className="text-zinc-500 font-semibold text-xl leading-relaxed max-w-lg border-l-8 border-orange pl-6">
+                                Todos los proveedores en un solo lugar. <span className="text-zinc-900 font-black">Seguridad Escrow</span>, envíos rápidos y trato directo de fábrica.
+                            </p>
+                        </div>
+
+                        {/* CTA & Trust */}
+                        <div className="space-y-6">
+                            <button onClick={onStart} className="btn-orange w-full text-white py-8 rounded-[2.5rem] font-black uppercase tracking-[0.25em] text-lg transition-all hover:brightness-110 active:scale-95">
+                                EXPLORAR AHORA
+                            </button>
+                            
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 p-8 bg-zinc-50 rounded-[2rem] border border-zinc-100">
+                                <div className="flex items-center gap-4">
+                                    <LogoShield size="h-14" />
+                                    <div>
+                                        <p className="font-black text-sm uppercase italic">PROVEED-SHIELD</p>
+                                        <p className="text-xs font-bold text-zinc-400">Protección total de tu dinero</p>
+                                    </div>
+                                </div>
+                                <div className="flex -space-x-3">
+                                    {[1,2,3,4].map(i => (
+                                        <div key={i} className={`w-10 h-10 rounded-full border-4 border-white bg-zinc-${i+1}00`}></div>
+                                    ))}
+                                    <div className="w-10 h-10 rounded-full border-4 border-white bg-lime flex items-center justify-center text-white text-[8px] font-black">+10k</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- VISTA: APP FUNCIONAL ---
+        function AppView({ onBack }) {
+            const [tab, setTab] = useState('home');
+
+            return (
+                <div className="flex-grow flex flex-col bg-white page-enter">
+                    {/* Header App */}
+                    <div className="px-6 pt-12 pb-4 flex justify-between items-center border-b border-zinc-50 bg-white/95 backdrop-blur-md sticky top-0 z-50">
+                        <div className="flex items-center gap-3">
+                            <LogoShield size="h-10" />
+                            <div className="flex flex-col">
+                                <span className="font-black italic text-sm tracking-tighter uppercase leading-none">PROVEED LIVE</span>
+                                <div className="flex items-center gap-1 mt-1">
+                                    <div className="w-1.5 h-1.5 bg-lime rounded-full status-pulse"></div>
+                                    <span className="text-[8px] font-black text-lime uppercase tracking-widest">Sincronizado</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400">
+                                <Icon name="Bell" size={18}/>
+                            </button>
+                            <button onClick={onBack} className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400">
+                                <Icon name="User" size={18}/>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* App Content Area */}
+                    <div className="flex-grow overflow-y-auto p-6 space-y-8 safe-area-bottom pb-32 max-w-4xl mx-auto w-full">
+                        <div className="flex justify-between items-end">
+                            <div>
+                                <p className="text-[10px] font-black text-orange uppercase tracking-[0.3em]">Directo de Fábrica</p>
+                                <h3 className="font-black text-3xl italic tracking-tighter">Últimos Lotes</h3>
+                            </div>
+                            <div className="bg-zinc-100 p-2 rounded-xl">
+                                <Icon name="Filter" size={18} className="text-zinc-500" />
+                            </div>
+                        </div>
+
+                        {/* Product Card Premium */}
+                        <div className="bg-white rounded-[3rem] overflow-hidden shadow-2xl shadow-zinc-200 border border-zinc-50">
+                            <div className="h-[480px] relative group overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=600" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                                
+                                {/* Overlay de Seguridad */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent flex flex-col justify-end p-8">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="w-14 h-14 rounded-2xl bg-white p-1.5 shadow-2xl rotate-3">
+                                            <LogoShield size="h-full w-full" />
+                                        </div>
+                                        <div>
+                                            <p className="text-white text-sm font-black italic tracking-widest uppercase leading-none">Zapatos_Quito_Mayorista</p>
+                                            <p className="text-lime text-[10px] font-black uppercase tracking-widest mt-1 italic">Verificación Escrow Activa</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-white/80 text-sm font-medium italic leading-snug max-w-xs">
+                                        Fabricación nacional de exportación. Lote disponible: 300 unidades. Despacho inmediato.
+                                    </p>
+                                </div>
+
+                                <div className="absolute top-6 left-6 bg-red-600/90 backdrop-blur-md text-white px-4 py-2 rounded-full font-black text-[10px] uppercase flex items-center gap-2 border border-white/20">
+                                    <div className="w-2 h-2 bg-white rounded-full animate-ping"></div> EN VIVO
+                                </div>
+                            </div>
+                            
+                            <div className="p-8 flex justify-between items-center bg-white">
+                                <div>
+                                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest italic leading-none mb-1">Precio Miembro</p>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-black text-orange italic leading-none">$18.90</span>
+                                        <span className="text-xs font-bold text-zinc-400 italic">USD/u</span>
+                                    </div>
+                                </div>
+                                <button className="btn-lime text-white w-20 h-20 rounded-[2rem] flex items-center justify-center transition-all active:scale-90 active:rotate-12 shadow-xl shadow-lime-100">
+                                    <Icon name="ShoppingBag" size={30} strokeWidth={3} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Navigation Bar Flotante Estilo iOS */}
+                    <div className="fixed bottom-8 left-6 right-6 z-50 max-w-md mx-auto">
+                        <nav className="bg-white/95 backdrop-blur-xl border border-zinc-100 px-8 py-5 rounded-[2.5rem] flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+                            <button onClick={() => setTab('home')} className={`transition-all p-2 ${tab === 'home' ? 'text-orange scale-125' : 'text-zinc-300'}`}>
+                                <Icon name="LayoutGrid" fill={tab === 'home' ? "currentColor" : "none"} />
+                            </button>
+                            <button onClick={() => setTab('video')} className={`transition-all p-2 ${tab === 'video' ? 'text-orange scale-125' : 'text-zinc-300'}`}>
+                                <Icon name="PlayCircle" />
+                            </button>
+                            
+                            {/* Botón Central de Seguridad */}
+                            <button onClick={() => setTab('shield')} className={`-mt-14 transition-all duration-500 transform ${tab === 'shield' ? 'scale-110' : ''}`}>
+                                <div className={`w-20 h-20 rounded-full border-8 border-white bg-white flex items-center justify-center shadow-2xl ${tab === 'shield' ? 'ring-4 ring-lime/20' : ''}`}>
+                                    <img src={LOGO_URL} className={`w-12 h-12 object-contain ${tab === 'shield' ? '' : 'grayscale opacity-40'}`} alt="Shield" />
+                                </div>
+                            </button>
+
+                            <button onClick={() => setTab('chat')} className={`transition-all p-2 ${tab === 'chat' ? 'text-orange scale-125' : 'text-zinc-300'}`}>
+                                <Icon name="MessageSquare" />
+                            </button>
+                            <button onClick={() => setTab('orders')} className={`transition-all p-2 ${tab === 'orders' ? 'text-orange scale-125' : 'text-zinc-300'}`}>
+                                <Icon name="Truck" />
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            );
+        }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
 </html>
+
+
 
