@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROVEED</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- INICIO -->
+  <div id="inicio" class="screen active">
+    <div class="logo">✔</div>
+    <h1>PROVEED</h1>
+    <button onclick="mostrar('auth')">Continuar</button>
+  </div>
+
+  <!-- AUTH -->
+  <div id="auth" class="screen">
+    <h2>Bienvenido</h2>
+    <button onclick="mostrar('registro')">Crear Cuenta</button>
+    <button class="secundario" onclick="mostrar('login')">Iniciar Sesión</button>
+    <button class="secundario" onclick="loginGoogle()">Continuar con Google</button>
+  </div>
+
+  <!-- REGISTRO -->
+  <div id="registro" class="screen">
+    <h2>Registro</h2>
+    <select id="tipo">
+      <option value="">Seleccionar tipo</option>
+      <option value="emprendedor">Emprendedor</option>
+      <option value="proveedor">Proveedor</option>
+    </select>
+    <input id="nombre" placeholder="Nombre">
+    <input id="email" placeholder="Correo">
+    <input id="password" type="password" placeholder="Contraseña">
+    <button onclick="registrar()">Crear Cuenta</button>
+    <button class="secundario" onclick="mostrar('auth')">Volver</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="login" class="screen">
+    <h2>Iniciar Sesión</h2>
+    <input id="loginEmail" placeholder="Correo">
+    <input id="loginPassword" type="password" placeholder="Contraseña">
+    <button onclick="login()">Ingresar</button>
+    <button class="secundario" onclick="mostrar('auth')">Volver</button>
+  </div>
+
+  <!-- SELECCIÓN TIPO GOOGLE -->
+  <div id="registroGoogle" class="screen">
+    <h2>Selecciona Tipo de Cuenta</h2>
+    <select id="tipoGoogle">
+      <option value="">Seleccionar tipo</option>
+      <option value="emprendedor">Emprendedor</option>
+      <option value="proveedor">Proveedor</option>
+    </select>
+    <button onclick="guardarTipoGoogle()">Continuar</button>
+  </div>
+
+  <!-- PERFIL EMPRENDEDOR -->
+  <div id="perfilEmprendedor" class="screen">
+    <h2>Completar Perfil Emprendedor</h2>
+    <input id="empApellido" placeholder="Apellido">
+    <input id="empCedula" placeholder="Cédula">
+    <input id="empDireccion1" placeholder="Dirección 1">
+    <input id="empDireccion2" placeholder="Dirección 2">
+    <input id="empTelefono" placeholder="Teléfono">
+    <button onclick="guardarPerfilEmprendedor()">Guardar Perfil</button>
+  </div>
+
+  <!-- PERFIL PROVEEDOR -->
+  <div id="perfilProveedor" class="screen">
+    <h2>Completar Perfil Proveedor</h2>
+    <input id="provEmpresa" placeholder="Empresa">
+    <input id="provRuc" placeholder="RUC">
+    <input id="provDireccion" placeholder="Dirección">
+    <input id="provTelefono1" placeholder="Teléfono 1">
+    <input id="provTelefono2" placeholder="Teléfono 2">
+    <button onclick="guardarPerfilProveedor()">Guardar Perfil</button>
+  </div>
+
+  <!-- DASHBOARD EMPRENDEDOR -->
+  <div id="dashboardEmprendedor" class="screen">
+    <h2 id="bienvenidaEmp"></h2>
+    <button onclick="logout()">Cerrar Sesión</button>
+  </div>
+
+  <!-- DASHBOARD PROVEEDOR -->
+  <div id="dashboardProveedor" class="screen">
+    <h2 id="bienvenidaProv"></h2>
+    <button onclick="logout()">Cerrar Sesión</button>
+  </div>
+
+</div>
+
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>
