@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PROVEED</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:wght@300;400;500;700&family=Orbitron:wght@400;900&family=Inter:wght@300;400;700;900&family=Montserrat:wght@400;800&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
+        html { height:100%; }
+        body { font-family:'DM Sans',sans-serif; background:#E8EAED; color:#1A1A1A; min-height:100%; overflow-x:hidden; -webkit-text-size-adjust:100%; }
+        h1,h2,h3,.brand { font-family:'Syne',sans-serif; }
+        :root {
+            --v:#32CD32; --n:#1A1A1A; --b:#FFFFFF;
+            --g:#F8F9FA; --g2:#F1F3F4;
+            --rj:#FF4D4D; --az:#007AFF;
+            --naranja:#FF8C00; --border:#EEEEEE;
+        }
+        .mundo { display:none; width:100%; min-height:100vh; }
+        .mundo.activo { display:block; }
+        #mundo-login { background:#E8EAED; }
+        #mundo-login.activo { display:flex !important; align-items:center; justify-content:center; min-height:100vh; padding:clamp(16px,4vw,40px); }
+        #mundo-emp { background:#E8EAED; }
+        #mundo-emp.activo { display:flex !important; flex-direction:column; align-items:center; }
+        #mundo-emp .screen { width:100%; max-width:480px; min-height:100vh; background:var(--g); box-shadow:0 0 60px rgba(0,0,0,.08); }
+        #mundo-prov { background:#E8EAED; }
+        .screen { display:none; flex-direction:column; animation:fadeUp .3s ease; }
+        .screen.active { display:flex; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+        .login-card { width:100%; max-width:440px; background:var(--b); padding:clamp(28px,5vw,48px) clamp(22px,4vw,40px); border-radius:28px; box-shadow:0 20px 60px rgba(0,0,0,.10); text-align:center; }
+        .login-card .brand { font-size:clamp(1.5rem,4vw,2rem); font-weight:900; color:var(--n); letter-spacing:2px; text-transform:uppercase; margin-top:10px; }
+        .input-group { text-align:left; margin-bottom:13px; }
+        .input-group label { font-size:.8rem; font-weight:700; color:#555; display:block; margin-bottom:5px; }
+        .input-group input { width:100%; padding:14px; border:2px solid var(--border); border-radius:13px; outline:none; transition:.3s; font-size:.93rem; font-family:'DM Sans',sans-serif; }
+        .input-group input:focus { border-color:var(--v); }
+        .btn { padding:16px; border-radius:14px; font-size:.95rem; font-weight:700; cursor:pointer; border:none; transition:all .22s ease; font-family:'Syne',sans-serif; width:100%; margin-bottom:10px; }
+        .btn:hover { filter:brightness(1.06); }
+        .btn:active { transform:scale(.97); }
+        .btn-verde { background:var(--v); color:white; box-shadow:0 8px 22px rgba(50,205,50,.22); }
+        .btn-naranja { background:var(--naranja); color:white; }
+        .btn-outline-v { background:transparent; color:var(--v); border:2.5px solid var(--v); }
+        .separator { margin:16px 0; color:#bbb; font-size:.76rem; display:flex; align-items:center; }
+        .separator::before,.separator::after { content:""; flex:1; border-bottom:1px solid #eee; margin:0 10px; }
+        .btn-google { width:100%; padding:13px; background:white; border:2px solid var(--border); border-radius:13px; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-weight:600; color:#555; font-family:'DM Sans',sans-serif; transition:.2s; }
+        .btn-google:hover { background:#f7f7f7; }
+        .back-link { margin-top:16px; font-size:.82rem; color:var(--v); cursor:pointer; font-weight:700; display:block; }
+        .rol-card { width:100%; padding:24px 20px; border-radius:20px; border:none; cursor:pointer; text-align:left; color:white; margin-bottom:16px; transition:.3s; display:flex; align-items:center; gap:18px; }
+        .rol-card.emp { background:var(--v); box-shadow:0 12px 28px rgba(50,205,50,.28); }
+        .rol-card.prov { background:var(--naranja); box-shadow:0 12px 28px rgba(255,140,0,.28); }
+        .rol-icon { width:52px; height:52px; background:rgba(255,255,255,.2); border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .rol-icon svg { width:26px; height:26px; stroke:white; stroke-width:2; fill:none; }
+        .rol-info { flex:1; }
+        .rol-title { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:900; display:block; }
+        .rol-desc { font-size:.8rem; opacity:.88; margin-top:3px; display:block; }
+        .reg-container { max-width:500px; margin:0 auto; background:var(--b); padding:28px; }
+        .reg-header { text-align:center; padding:40px 20px 20px; background:var(--b); }
+        .section-title-reg { font-size:.7rem; font-weight:800; color:#bbb; text-transform:uppercase; letter-spacing:1px; margin:18px 0 10px; }
+        .reg-input { width:100%; padding:14px; border:2px solid var(--border); border-radius:13px; outline:none; margin-bottom:11px; font-size:.9rem; font-family:'DM Sans',sans-serif; transition:.3s; }
+        .reg-input:focus { border-color:var(--v); }
+        .file-box { border:2px dashed #ddd; border-radius:13px; padding:22px; text-align:center; color:#aaa; cursor:pointer; font-size:.85rem; margin-bottom:11px; }
+        .btn-submit { width:100%; padding:17px; border-radius:14px; font-size:.95rem; font-weight:800; border:none; color:white; background:var(--v); cursor:pointer; font-family:'Syne',sans-serif; }
+        .btn-role { padding:22px; border-radius:20px; border:none; cursor:pointer; text-align:left; color:white; transition:.3s; width:100%; margin-bottom:14px; }
+        .btn-role .role-title { font-family:'Syne',sans-serif; font-weight:800; font-size:1.15rem; display:block; margin-bottom:4px; }
+        .btn-role .role-desc { font-size:.84rem; opacity:.9; }
+.dash-header { background:var(--b); padding:clamp(36px,6vw,52px) 20px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+        .user-greeting h2 { font-family:'Syne',sans-serif; font-size:clamp(.95rem,3vw,1.2rem); margin:0; }
+        .user-greeting span { font-size:.75rem; color:#888; font-weight:700; }
+        .header-icons { display:flex; align-items:center; gap:13px; }
+        .cart-btn { position:relative; cursor:pointer; }
+        .cart-badge { position:absolute; top:-5px; right:-5px; background:var(--rj); color:white; font-size:.6rem; font-weight:800; width:17px; height:17px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+        .search-area { padding:14px 18px; background:var(--b); border-bottom:1px solid var(--border); }
+        .search-wrap { background:var(--g2); display:flex; align-items:center; padding:10px 13px; border-radius:14px; border:1.5px solid transparent; transition:.3s; }
+        .search-wrap:focus-within { border-color:var(--v); }
+        .search-wrap input { flex:1; border:none; background:transparent; outline:none; font-size:.88rem; font-family:'DM Sans',sans-serif; margin:0 9px; }
+        .search-actions { display:flex; align-items:center; gap:9px; border-left:1px solid #ddd; padding-left:9px; }
+        .icon-btn { cursor:pointer; display:flex; align-items:center; color:#888; transition:.2s; }
+        .icon-btn:hover { color:var(--v); }
+        .grid-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:15px; }
+        .card-action { background:var(--b); border-radius:14px; padding:15px 10px; text-align:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.04); transition:.2s; }
+        .card-action:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.09); }
+        .card-action svg { width:24px; height:24px; stroke:var(--v); fill:none; stroke-width:2; margin-bottom:7px; }
+        .card-action span { font-size:.75rem; font-weight:700; color:var(--n); display:block; }
+        .section-hdr { padding:15px 20px 8px; font-family:'Syne',sans-serif; font-weight:800; display:flex; justify-content:space-between; align-items:center; font-size:.97rem; }
+        .reel-scroll { display:flex; gap:12px; padding:8px 20px 16px; overflow-x:auto; scrollbar-width:none; }
+        .reel-scroll::-webkit-scrollbar { display:none; }
+        .reel-item { min-width:128px; height:195px; border-radius:16px; background-size:cover; background-position:center; display:flex; align-items:flex-end; padding:11px; flex-shrink:0; }
+        .reel-item span { color:white; font-weight:800; font-family:'Syne',sans-serif; font-size:.82rem; }
+        .emp-tabs { position:sticky; bottom:0; width:100%; background:var(--b); display:flex; justify-content:space-around; padding:10px 0 18px; border-top:1px solid var(--border); box-shadow:0 -4px 15px rgba(0,0,0,.04); z-index:200; }
+        .tab-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:4px 12px; border-radius:10px; transition:.2s; }
+        .tab-item svg { width:22px; height:22px; stroke:#bbb; fill:none; stroke-width:2; transition:.2s; }
+        .tab-item span { font-size:.62rem; color:#bbb; font-weight:700; transition:.2s; }
+        .tab-item.active svg,.tab-item.active span { stroke:var(--v); color:var(--v); }
+        #emp-explorar { background:var(--g); overflow-y:auto; padding-bottom:80px; }
+        .exp-header { background:var(--b); padding:clamp(36px,6vw,52px) 20px 13px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.03); }
+        .exp-header h2 { font-family:'Syne',sans-serif; font-size:1.1rem; margin:0 0 13px; }
+        .cat-scroll { display:flex; gap:17px; padding:0 20px; overflow-x:auto; scrollbar-width:none; }
+        .cat-scroll::-webkit-scrollbar { display:none; }
+        .cat-item { display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; min-width:55px; }
+        .cat-icon { width:52px; height:52px; border-radius:16px; background:var(--g2); display:flex; align-items:center; justify-content:center; transition:.2s; }
+        .cat-item.cat-active .cat-icon { background:var(--v); }
+        .cat-item.cat-active .cat-icon svg { stroke:white; }
+        .cat-icon svg { width:22px; height:22px; stroke:#888; fill:none; stroke-width:2; }
+        .cat-label { font-size:.65rem; font-weight:700; color:#888; text-align:center; }
+        .chips-scroll { display:flex; gap:8px; padding:12px 20px; overflow-x:auto; scrollbar-width:none; }
+        .chips-scroll::-webkit-scrollbar { display:none; }
+        .chip { padding:7px 16px; border-radius:20px; background:var(--g2); font-size:.75rem; font-weight:700; cursor:pointer; white-space:nowrap; transition:.2s; }
+        .chip.chip-active { background:var(--n); color:white; }
+        .product-grid { display:grid; grid-template-columns:1fr 1fr; gap:13px; padding:13px 15px; }
+        .product-card { background:var(--b); border-radius:18px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,.05); cursor:pointer; transition:.2s; }
+        .product-card:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,.09); }
+        .product-img { width:100%; height:130px; object-fit:cover; background:#f2f2f2; }
+        .product-info { padding:11px; }
+        .product-info h4 { font-size:.82rem; font-weight:800; margin:0 0 3px; }
+        .product-info p { color:var(--v); font-weight:800; font-size:.88rem; margin:0 0 7px; }
+        .prov-tag { font-size:.65rem; color:#999; display:block; margin-bottom:8px; }
+        .btn-contactar { width:100%; background:var(--n); color:white; border:none; padding:9px; border-radius:10px; font-size:.72rem; font-weight:800; cursor:pointer; font-family:'Syne',sans-serif; transition:.2s; }
+        .btn-contactar:hover { background:var(--v); }
+        #emp-chat { background:var(--g); overflow:hidden; }
+        .chat-sec-screen { position:absolute; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:200; }
+        .chat-sec-card { background:white; width:82%; max-width:320px; padding:36px 20px; border-radius:28px; text-align:center; }
+        .shield-box { width:66px; height:66px; background:#f0fff0; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 17px; }
+        .chat-header-bar { background:var(--v); padding:46px 18px 12px; color:white; position:relative; }
+        .chat-header-top { display:flex; align-items:center; margin-bottom:8px; }
+        .rating-chip { background:rgba(0,0,0,.12); border-radius:20px; padding:6px 13px; display:inline-flex; align-items:center; font-size:.68rem; cursor:pointer; }
+        .stars-row { color:#FFD700; margin-right:7px; font-size:.86rem; }
+        .exp-popup { position:absolute; top:110px; left:50%; transform:translateX(-50%); width:86%; background:white; border-radius:18px; padding:13px; box-shadow:0 10px 28px rgba(0,0,0,.13); display:none; z-index:500; }
+        .exp-input { width:100%; border:1px solid #eee; border-radius:10px; padding:9px; font-size:.77rem; outline:none; font-family:'DM Sans',sans-serif; }
+        .message-area { flex:1; padding:17px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; background:#f0f2f5; }
+        .bubble { max-width:76%; padding:11px 15px; border-radius:18px; font-size:.88rem; }
+        .bubble.sent { background:var(--v); color:white; align-self:flex-end; border-bottom-right-radius:2px; }
+        .bubble.received { background:white; align-self:flex-start; border-bottom-left-radius:2px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+        .alert-toast { position:fixed; top:108px; left:50%; transform:translateX(-50%); background:var(--rj); color:white; padding:10px 17px; border-radius:28px; font-size:.71rem; font-weight:700; display:none; z-index:600; white-space:nowrap; }
+        .footer-input { background:white; padding:13px 15px; display:flex; gap:10px; border-top:1px solid var(--border); }
+        .footer-input input { flex:1; border:1.5px solid var(--border); border-radius:28px; padding:11px 16px; outline:none; font-family:'DM Sans',sans-serif; font-size:.88rem; }
+        .footer-input input:focus { border-color:var(--v); }
+        .btn-send-emp { background:var(--v); border:none; width:43px; height:43px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        #emp-carrito { background:var(--g); padding-bottom:200px; overflow-y:auto; }
+        .cart-header { background:var(--b); padding:clamp(36px,6vw,52px) 20px 13px; display:flex; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.03); }
+        .cart-header h2 { font-family:'Syne',sans-serif; margin:0; font-size:1.12rem; }
+        .cart-content { padding:15px 20px; }
+        .vendor-group { background:var(--b); border-radius:18px; padding:13px; margin-bottom:15px; box-shadow:0 3px 10px rgba(0,0,0,.03); }
+        .vendor-name { font-size:.8rem; font-weight:800; color:var(--v); text-transform:uppercase; letter-spacing:.5px; margin-bottom:13px; display:flex; align-items:center; gap:5px; }
+        .cart-item { display:flex; gap:13px; padding:10px 0; border-bottom:1px solid #f2f2f2; }
+        .cart-item:last-child { border-bottom:none; }
+        .item-img { width:74px; height:74px; background:#eee; border-radius:12px; object-fit:cover; flex-shrink:0; }
+        .item-details { flex:1; }
+        .item-title { font-size:.9rem; font-weight:700; color:var(--n); margin:0 0 3px; }
+        .item-price { color:var(--v); font-weight:800; margin:0 0 8px; font-size:.93rem; }
+        .item-footer { display:flex; justify-content:space-between; align-items:center; }
+        .qty-selector { display:flex; align-items:center; background:var(--g2); border-radius:8px; padding:3px; gap:9px; }
+        .qty-btn { width:27px; height:27px; background:var(--b); border:none; border-radius:6px; font-weight:800; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.06); font-size:1rem; transition:.2s; }
+        .qty-btn:active { background:var(--v); color:white; }
+        .qty-num { font-weight:700; min-width:18px; text-align:center; font-size:.88rem; }
+        .delete-btn { color:var(--rj); cursor:pointer; }
+        .checkout-footer { position:sticky; bottom:0; width:100%; background:var(--b); padding:17px 20px; border-radius:28px 28px 0 0; box-shadow:0 -8px 25px rgba(0,0,0,.08); z-index:100; }
+        .summary-row { display:flex; justify-content:space-between; margin-bottom:8px; font-size:.86rem; color:#888; }
+        .total-row { display:flex; justify-content:space-between; margin:11px 0; font-size:1.12rem; font-weight:800; color:var(--n); }
+        .btn-pay { background:var(--v); color:white; border:none; width:100%; padding:16px; border-radius:14px; font-weight:800; font-size:.93rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:'Syne',sans-serif; }
+        #emp-pago { background:var(--g); overflow-y:auto; }
+        .pay-header { background:var(--b); padding:clamp(36px,6vw,52px) 20px 13px; display:flex; align-items:center; border-bottom:1px solid var(--border); }
+        .pay-header h2 { font-family:'Syne',sans-serif; margin:0; font-size:1.08rem; }
+        .pay-content { padding:19px; }
+        .pay-card { background:var(--b); padding:19px; border-radius:16px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,.04); }
+        .pay-card h3 { font-family:'Syne',sans-serif; margin:0 0 13px; font-size:.97rem; }
+        .payment-element { background:var(--g); padding:17px; border-radius:12px; border:1px solid var(--border); min-height:55px; display:flex; align-items:center; justify-content:center; color:#999; font-size:.8rem; }
+        .btn-confirm { background:var(--n); color:white; border:none; width:100%; padding:18px; border-radius:16px; font-weight:800; font-size:.93rem; cursor:pointer; font-family:'Syne',sans-serif; }
+        .pay-total { display:flex; justify-content:space-between; font-weight:800; font-size:1.08rem; }
+        #emp-perfil { background:var(--g); overflow-y:auto; padding-bottom:90px; }
+        .top-bar { padding:clamp(36px,6vw,52px) 20px 13px; background:var(--b); display:flex; align-items:center; position:sticky; top:0; z-index:10; border-bottom:1px solid var(--border); }
+        .btn-exit { background:var(--g2); border:none; padding:9px 12px; border-radius:11px; cursor:pointer; display:flex; align-items:center; }
+        .header-profile { background:var(--b); padding:10px 20px 27px; text-align:center; border-radius:0 0 27px 27px; box-shadow:0 4px 13px rgba(0,0,0,.04); }
+        .avatar-img { width:86px; height:86px; border-radius:50%; border:3px solid var(--v); object-fit:cover; }
+        .menu-list { padding:17px; }
+        .section-title-menu { font-size:.7rem; font-weight:800; color:#bbb; text-transform:uppercase; margin:13px 5px 9px; }
+        .menu-card { background:var(--b); border-radius:18px; margin-bottom:17px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.03); }
+        .menu-item { display:flex; align-items:center; padding:16px 17px; border-bottom:1px solid #f9f9f9; cursor:pointer; transition:.2s; }
+        .menu-item:last-child { border-bottom:none; }
+        .menu-item:hover { background:#fafafa; }
+        .icon-box { width:37px; height:37px; background:#f0fff0; border-radius:11px; display:flex; align-items:center; justify-content:center; margin-right:13px; flex-shrink:0; }
+        .icon-box svg { width:18px; height:18px; stroke:var(--v); fill:none; stroke-width:2; }
+        .label-menu { flex:1; font-weight:600; color:var(--n); font-size:.91rem; }
+        .switch-tog { position:relative; display:inline-block; width:40px; height:20px; }
+        .switch-tog input { opacity:0; width:0; height:0; }
+        .slider-tog { position:absolute; cursor:pointer; inset:0; background:#ccc; transition:.4s; border-radius:20px; }
+        .slider-tog::before { position:absolute; content:""; height:14px; width:14px; left:3px; bottom:3px; background:white; transition:.4s; border-radius:50%; }
+        input:checked + .slider-tog { background:var(--v); }
+        input:checked + .slider-tog::before { transform:translateX(20px); }
+        .logout-btn { color:var(--rj); font-weight:800; text-align:center; padding:15px; cursor:pointer; margin-top:8px; font-family:'Syne',sans-serif; }
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.44); display:none; z-index:1000; }
+        .modal-content { position:fixed; bottom:-100%; left:50%; transform:translateX(-50%); width:100%; max-width:480px; max-height:80%; background:var(--b); border-radius:28px 28px 0 0; z-index:1001; transition:.4s cubic-bezier(.34,1.2,.64,1); padding:27px 19px; overflow-y:auto; }
+        .modal-content.active { bottom:0; }
+        .modal-content h3 { font-family:'Syne',sans-serif; margin:0 0 15px; }
+        .btn-modal-save { width:100%; padding:15px; background:var(--v); color:white; border:none; border-radius:14px; font-weight:700; cursor:pointer; margin-top:9px; font-family:'Syne',sans-serif; }
+        .input-modal { width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1.5px solid #eee; outline:none; font-family:'DM Sans',sans-serif; font-size:.9rem; }
+        .input-modal:focus { border-color:var(--v); }
+#mundo-prov { background:#F0F2F5; overflow-y:auto; font-family:'Inter','Segoe UI',sans-serif; }
+        .erp-header { background:var(--n); color:var(--b); padding:45px 20px 30px; border-radius:0 0 35px 35px; position:sticky; top:0; z-index:999; }
+        .erp-header h2 { margin:0; font-size:1.6rem; letter-spacing:-1px; font-family:'Syne',sans-serif; }
+        .erp-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:20px; margin-top:-40px; }
+        .erp-card { background:var(--b); border-radius:22px; padding:18px 14px; text-align:center; cursor:pointer; box-shadow:0 6px 20px rgba(0,0,0,0.06); transition:0.2s; }
+        .erp-card:hover { transform:translateY(-3px); }
+        .erp-card svg { width:28px; height:28px; stroke:var(--n); fill:none; stroke-width:2; margin-bottom:8px; }
+        .erp-card span { font-size:0.72rem; font-weight:800; color:var(--n); display:block; text-transform:uppercase; letter-spacing:0.3px; }
+        .erp-stat-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 20px 20px; }
+        .erp-stat { background:var(--b); border-radius:18px; padding:16px; box-shadow:0 4px 14px rgba(0,0,0,0.05); }
+        .erp-stat small { font-size:0.65rem; font-weight:800; color:#999; text-transform:uppercase; display:block; margin-bottom:4px; }
+        .erp-stat h3 { margin:0; font-size:1.4rem; font-weight:900; color:var(--n); }
+        .erp-recent { padding:0 20px 100px; }
+        .erp-recent h3 { font-family:'Syne',sans-serif; margin-bottom:12px; font-size:1rem; }
+        .order-row { background:var(--b); border-radius:16px; padding:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .order-info p { margin:0; font-weight:700; font-size:0.88rem; }
+        .order-info small { color:#888; font-size:0.72rem; }
+        .order-badge { padding:5px 12px; border-radius:20px; font-size:0.68rem; font-weight:800; }
+        .badge-pend { background:#FFF3CD; color:#856404; }
+        .badge-ok { background:#D4EDDA; color:#155724; }
+        .erp-back { position:sticky; top:0; z-index:100; background:var(--b); padding:44px 18px 12px; display:flex; align-items:center; gap:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .erp-back h3 { margin:0; font-family:'Syne',sans-serif; font-size:1.05rem; }
+        .erp-section { padding:18px; }
+        .erp-input { width:100%; padding:13px; border:1.5px solid var(--border); border-radius:13px; margin-bottom:12px; outline:none; font-family:'DM Sans',sans-serif; font-size:0.9rem; transition:0.2s; }
+        .erp-input:focus { border-color:var(--v); }
+        .erp-btn { width:100%; padding:15px; border-radius:14px; border:none; font-weight:800; cursor:pointer; font-family:'Syne',sans-serif; font-size:0.9rem; margin-bottom:10px; transition:0.2s; }
+        .erp-btn-dark { background:var(--n); color:white; }
+        .erp-btn-green { background:var(--v); color:white; }
+        .erp-btn-outline { background:transparent; border:2px solid var(--n); color:var(--n); }
+        .prod-item { background:var(--b); border-radius:16px; padding:14px; margin-bottom:10px; display:flex; gap:12px; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .prod-thumb { width:58px; height:58px; border-radius:12px; object-fit:cover; background:#eee; flex-shrink:0; }
+        .prod-data { flex:1; }
+        .prod-data h4 { margin:0 0 3px; font-size:0.88rem; }
+        .prod-data p { margin:0; color:var(--v); font-weight:800; font-size:0.85rem; }
+        .prod-actions { display:flex; gap:8px; }
+        .btn-edit { background:var(--g2); border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:0.75rem; font-weight:700; }
+        .btn-del { background:#FFE5E5; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:0.75rem; font-weight:700; color:var(--rj); }
+        .order-detail { background:var(--b); border-radius:18px; padding:16px; margin-bottom:12px; box-shadow:0 3px 10px rgba(0,0,0,0.05); }
+        .order-detail h4 { margin:0 0 8px; font-size:0.92rem; }
+        .order-meta { font-size:0.78rem; color:#888; margin-bottom:10px; }
+        .status-btns { display:flex; gap:8px; }
+        .btn-status { padding:8px 14px; border-radius:10px; border:none; font-weight:700; font-size:0.75rem; cursor:pointer; }
+        .btn-aceptar { background:#D4EDDA; color:#155724; }
+        .btn-rechazar { background:#FFE5E5; color:var(--rj); }
+        .btn-enviar { background:var(--v); color:white; }
+        .invoice-box { background:white; border-radius:18px; padding:24px; margin:18px; box-shadow:0 4px 18px rgba(0,0,0,0.07); }
+        .invoice-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+        .invoice-table { width:100%; border-collapse:collapse; font-size:0.82rem; margin:16px 0; }
+        .invoice-table th { background:#f5f5f5; padding:8px; text-align:left; font-size:0.72rem; text-transform:uppercase; }
+        .invoice-table td { padding:9px 8px; border-bottom:1px solid #f0f0f0; }
+        .invoice-total { text-align:right; font-weight:800; font-size:1rem; margin-top:12px; }
+        .config-panel { padding:18px; }
+        .config-section { background:var(--b); border-radius:18px; padding:18px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .config-section h4 { margin:0 0 14px; font-family:'Syne',sans-serif; font-size:0.95rem; }
+        .preview-panel { padding:18px; background:var(--g); }
+        .vnode { background:var(--b); border:2px solid #eee; border-radius:18px; padding:18px; margin-bottom:10px; cursor:pointer; transition:0.2s; }
+        .vnode.sel { border-color:var(--v); }
+        #erp-stats { padding:0; background:var(--g); }
+        .stats-wrap { max-width:980px; margin:0 auto; padding:20px; }
+        .kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:22px; }
+        @media(max-width:700px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+        .kpi-card { background:var(--b); padding:22px; border-radius:24px; box-shadow:0 6px 20px rgba(0,0,0,0.04); }
+        .kpi-card small { font-size:0.68rem; font-weight:800; color:#999; text-transform:uppercase; display:block; margin-bottom:6px; }
+        .kpi-card h2 { margin:0; font-size:1.7rem; font-weight:900; color:var(--n); }
+        .charts-wrap { display:grid; grid-template-columns:2fr 1fr; gap:18px; }
+        @media(max-width:800px){.charts-wrap{grid-template-columns:1fr;}}
+        .chart-card { background:var(--b); padding:24px; border-radius:26px; box-shadow:0 8px 25px rgba(0,0,0,0.04); }
+        .bar-ui { display:flex; align-items:flex-end; justify-content:space-between; height:190px; padding-top:28px; }
+        .bar-group { width:17%; display:flex; flex-direction:column; align-items:center; gap:8px; }
+        .bar-fill { width:100%; border-radius:10px 10px 3px 3px; background:var(--n); position:relative; transition:height 1s ease-in-out; }
+        .bar-fill.bactive { background:var(--v); }
+        .bar-val { position:absolute; top:-22px; width:100%; text-align:center; font-size:0.72rem; font-weight:700; }
+        .bar-lbl { font-size:0.68rem; font-weight:700; color:#86868b; }
+        .prod-rank { background:var(--b); padding:22px; border-radius:26px; box-shadow:0 8px 25px rgba(0,0,0,0.04); }
+        .rank-item { display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px dashed #eee; font-size:0.84rem; }
+        .rank-item:last-child { border:none; }
+        .rtag { padding:4px 10px; border-radius:8px; font-size:0.65rem; font-weight:800; }
+        .rtag.top { background:#E8F5E9; color:var(--v); }
+        .rtag.low { background:#FFEBEE; color:var(--rj); }
+        .sentiment-card { background:var(--n); color:white; padding:28px; border-radius:26px; text-align:center; }
+        .stars-ui { color:#FFD60A; font-size:1.5rem; margin:14px 0; }
+        #erp-sucursal.active { display:flex; min-height:100vh; flex-direction:column; background:var(--g); }
+        @media(min-width:900px){#erp-sucursal.active{flex-direction:row;}}
+        .suc-sidebar { background:var(--n); padding:25px; min-width:260px; }
+        .suc-branch { background:#222; border-radius:16px; padding:16px; margin-bottom:10px; cursor:pointer; color:white; border:2px solid transparent; transition:0.3s; font-size:0.85rem; }
+        .suc-branch.sactive { border-color:var(--v); }
+        .suc-main { flex:1; padding:20px; }
+        .suc-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:20px; }
+        .suc-stat { background:var(--b); padding:18px; border-radius:18px; text-align:center; }
+        .suc-stat small { font-size:0.65rem; font-weight:800; color:#999; text-transform:uppercase; display:block; }
+        .suc-stat h3 { margin:6px 0 0; font-size:1.5rem; font-weight:900; }
+        #erp-soporte { padding:0; }
+        .cs-wrap { padding:20px; }
+        .cs-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+        @media(max-width:800px){.cs-grid{grid-template-columns:1fr;}}
+        .cs-card { background:var(--b); padding:24px; border-radius:26px; box-shadow:0 8px 25px rgba(0,0,0,0.04); }
+        .agent-item { display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f9f9f9; border-radius:14px; margin-bottom:10px; }
+        .order-alert { background:#fff; border-left:6px solid var(--rj); padding:14px; border-radius:14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .btn-aten { background:var(--n); color:white; border:none; padding:11px; border-radius:11px; cursor:pointer; font-weight:bold; }
+        .badge-live { background:var(--v); color:white; padding:4px 10px; border-radius:20px; font-size:0.7rem; font-weight:800; }
+        .chat-overlay { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#E5DDD5; z-index:10000; flex-direction:column; }
+        .chat-overlay.open { display:flex; }
+        .chat-ov-header { background:var(--n); color:white; padding:18px; display:flex; justify-content:space-between; align-items:center; }
+        .media-full { height:32%; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; }
+        .ctrl-row { position:absolute; bottom:18px; display:flex; gap:18px; }
+        .btn-round { width:54px; height:54px; border-radius:50%; border:none; font-size:1.3rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+        .msg-space { flex:1; padding:18px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+        .erp-bubble { padding:12px 17px; border-radius:20px; max-width:80%; font-size:0.93rem; }
+        .erp-bubble.in { background:white; align-self:flex-start; }
+        .erp-bubble.out { background:var(--v); color:white; align-self:flex-end; }
+        .input-row-chat { background:white; padding:18px; display:flex; gap:10px; }
+        .input-row-chat input { flex:1; padding:14px; border-radius:28px; border:1px solid #ddd; outline:none; }
+        #erp-chat.active { display:flex; flex-direction:column; height:100vh; background:#050505; overflow:hidden; }
+        .chat-topbar { padding:14px 18px; background:#111; border-bottom:1px solid #222; display:flex; align-items:center; gap:12px; }
+        .chat-avatar { width:38px; height:38px; background:#222; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--v); flex-shrink:0; }
+        #chatBox { flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:14px; background:#050505; position:relative; }
+        .chat-msg { max-width:80%; padding:12px 16px; border-radius:20px; font-size:0.9rem; }
+        .chat-msg.sent { align-self:flex-end; background:var(--v); color:black; border-bottom-right-radius:4px; font-weight:600; }
+        .chat-msg.received { align-self:flex-start; background:#222; color:white; border-bottom-left-radius:4px; }
+        .prod-card-chat { background:#1a1a1a; border:1px solid #333; border-radius:14px; overflow:hidden; max-width:240px; align-self:flex-end; }
+        .prod-card-chat img { width:100%; height:140px; object-fit:cover; }
+        .prod-card-body { padding:12px; }
+        #stockPanel { position:absolute; bottom:0; left:0; right:0; background:#111; border-top:2px solid var(--v); display:none; z-index:200; height:370px; border-radius:24px 24px 0 0; }
+        .chat-input-bar { padding:14px; background:#111; border-top:1px solid #222; display:flex; gap:10px; align-items:center; }
+        .btn-stock { background:#000; color:var(--v); border:1px solid var(--v); padding:11px; border-radius:14px; font-weight:900; cursor:pointer; font-size:0.7rem; flex-shrink:0; }
+        .input-wrap { flex:1; background:#000; border:1px solid #333; border-radius:24px; display:flex; align-items:center; padding:5px 14px; }
+        #msgInput { flex:1; background:transparent; border:none; color:white; padding:9px; outline:none; font-size:0.9rem; }
+        .btn-send-erp { background:var(--v); color:black; border:none; width:38px; height:38px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .stock-search { width:100%; background:#000; border:1px solid #333; padding:11px; border-radius:11px; color:white; margin:12px 0; outline:none; }
+        .stock-item { display:flex; gap:10px; background:#000; padding:10px; border-radius:12px; margin-bottom:10px; cursor:pointer; border:1px solid #222; transition:0.2s; }
+        .stock-item:hover { border-color:var(--v); }
+        .notif-b2b { position:fixed; top:20px; right:20px; background:var(--v); color:black; padding:14px 20px; border-radius:16px; font-weight:800; font-size:0.85rem; box-shadow:0 8px 24px rgba(50,205,50,0.35); display:none; z-index:99999; animation:slideInRight 0.4s ease; max-width:280px; }
+        @keyframes slideInRight{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+        @media print { .config-panel,.erp-back { display:none!important; } .preview-panel { padding:0!important; background:white!important; } .invoice-box { box-shadow:none!important; } }
+    </style>
+</head>
+<body>
+<!-- ===================== NOTIFICACIÓN B2B GLOBAL ===================== -->
+<div class="notif-b2b" id="notifB2B" style="position:fixed;top:0;left:0;right:0;z-index:9999;">
+    🛒 <span id="notifTexto">Nuevo pedido recibido</span>
+</div>
+
+<!-- ===================== LOGIN ÚNICO ===================== -->
+<div id="mundo-login" class="mundo activo">
+    <div style="min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:#F8F9FA;">
+        <div class="login-card">
+            <svg width="86" height="86" viewBox="0 0 100 100" style="display:block;margin:0 auto;">
+                <path d="M50 5 L90 27.5 V72.5 L50 95 L10 72.5 V27.5 L50 5Z" fill="#32CD32"/>
+                <path class="check-path" d="M30 52 L45 65 L70 35" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <div class="brand" style="margin-top:10px;font-size:2rem;letter-spacing:2px;">PROVEED</div>
+            <p style="font-size:0.78rem;color:#888;margin:6px 0 24px;">La plataforma B2B del Ecuador</p>
+            <div class="input-group">
+                <label>Correo Electrónico</label>
+                <input type="email" id="loginEmail" placeholder="tucorreo@ejemplo.com" autocomplete="email">
+            </div>
+            <div class="input-group" style="position:relative;">
+                <label>Contraseña</label>
+                <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+                <span onclick="togglePassVis()" style="position:absolute;right:14px;bottom:14px;cursor:pointer;font-size:0.8rem;color:#888;">👁</span>
+            </div>
+            <div style="text-align:right;margin:-6px 0 16px;">
+                <span onclick="recuperarPassword()" style="font-size:0.75rem;color:var(--v);font-weight:700;cursor:pointer;">¿Olvidaste tu contraseña?</span>
+            </div>
+            <button class="btn btn-verde" id="btnLogin" onclick="loginUnico()">INGRESAR</button>
+            <div class="separator">o también</div>
+            <button class="btn-google" onclick="loginGoogle()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" width="17" onerror="this.style.display='none'">
+                Continuar con Google
+            </button>
+            <div style="text-align:center;margin-top:22px;font-size:0.82rem;color:#888;">¿Primera vez en PROVEED?</div>
+            <div style="display:flex;gap:10px;margin-top:10px;">
+                <button class="btn btn-outline-v" style="flex:1;font-size:0.82rem;padding:13px;" onclick="irARegistro('emp')">Soy Emprendedor</button>
+                <button class="btn" style="flex:1;font-size:0.82rem;padding:13px;background:transparent;border:2.5px solid var(--naranja);color:var(--naranja);border-radius:14px;" onclick="irARegistro('prov')">Soy Proveedor</button>
+            </div>
+            <p style="font-size:0.7rem;color:#ccc;text-align:center;margin-top:20px;">🔒 Cifrado bancario · Datos protegidos</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== MUNDO EMPRENDEDOR ===================== -->
+<div id="mundo-emp" class="mundo">
+
+    <!-- REGISTRO EMPRENDEDOR -->
+    <div id="emp-registro" class="screen" style="background:var(--g);overflow-y:auto;">
+        <div class="reg-header">
+            <svg width="62" height="62" viewBox="0 0 100 100">
+                <path d="M50 5 L90 27.5 V72.5 L50 95 L10 72.5 V27.5 L50 5Z" fill="#32CD32"/>
+                <path d="M30 52 L45 65 L70 35" stroke="white" stroke-width="9" stroke-linecap="round" fill="none"/>
+            </svg>
+            <h2 style="margin-top:9px;">Nueva Cuenta</h2>
+        </div>
+        <div class="reg-container">
+            <div class="section-title-reg">Seguridad</div>
+            <input type="email" class="reg-input" placeholder="Correo Electrónico">
+            <input type="password" class="reg-input" placeholder="Contraseña ••••••••">
+            <input type="password" maxlength="4" class="reg-input" placeholder="PIN de seguridad (4 dígitos)">
+            <div class="section-title-reg">Datos Personales</div>
+            <input type="text" class="reg-input" placeholder="Nombre">
+            <input type="text" class="reg-input" placeholder="Apellido">
+            <input type="tel" class="reg-input" placeholder="Número de Celular">
+            <input type="text" class="reg-input" placeholder="Dirección">
+            <input type="text" class="reg-input" placeholder="Número de Cédula">
+            <div class="file-box">📄 Foto de la Cédula</div>
+            <button class="btn-submit" onclick="empFinishReg()">FINALIZAR REGISTRO</button>
+            <span class="back-link" style="text-align:center;margin-top:14px;" onclick="irAlLogin()">← Volver al inicio</span>
+        </div>
+    </div>
+
+    <!-- DASHBOARD EMPRENDEDOR -->
+    <div id="emp-dashboard" class="screen">
+        <header class="dash-header">
+            <div class="user-greeting">
+                <h2>Hola, <span id="empNombre">Emprendedor</span> 👋</h2>
+                <span>EMPRENDEDOR</span>
+            </div>
+            <div class="header-icons">
+                <div class="cart-btn" onclick="empGoTo('emp-carrito')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--n)" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    <div class="cart-badge" id="cartBadge">0</div>
+                </div>
+                <div style="width:32px;cursor:pointer;">
+                    <svg viewBox="0 0 100 100">
+                        <path d="M50 5 L90 27.5 V72.5 L50 95 L10 72.5 V27.5 L50 5Z" fill="#32CD32"/>
+                        <path d="M30 52 L45 65 L70 35" stroke="white" stroke-width="10" stroke-linecap="round" fill="none"/>
+                    </svg>
+                </div>
+            </div>
+        </header>
+        <div class="search-area">
+            <div class="search-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="dashSearch" placeholder="¿Qué estás buscando hoy?">
+                <div class="search-actions">
+                    <div class="icon-btn" id="micBtn" onclick="activarVoz()">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    </div>
+                    <div class="icon-btn" onclick="empGoTo('emp-explorar')">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="overflow-y:auto;flex:1;padding-bottom:90px;">
+            <div class="grid-actions">
+                <div class="card-action" onclick="empGoTo('emp-explorar')">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <span>Explorar</span>
+                </div>
+                <div class="card-action" onclick="empGoTo('emp-chat')">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Mensajes</span>
+                </div>
+                <div class="card-action" onclick="empGoTo('emp-carrito')">
+                    <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    <span>Carrito</span>
+                </div>
+                <div class="card-action" onclick="empGoTo('emp-perfil')">
+                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>Mi Perfil</span>
+                </div>
+                <div class="card-action" onclick="empGoTo('emp-pago')">
+                    <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    <span>Pagos</span>
+                </div>
+                <div class="card-action">
+                    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    <span>Pedidos</span>
+                </div>
+            </div>
+            <div class="section-hdr"><span>Novedades</span><span style="font-size:0.78rem;color:var(--v);font-weight:700;">Ver todo</span></div>
+            <div class="reel-scroll">
+                <div class="reel-item" style="background-image:linear-gradient(to bottom,transparent,rgba(0,0,0,0.65)),url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300');background-size:cover;"><span>Textiles</span></div>
+                <div class="reel-item" style="background-image:linear-gradient(to bottom,transparent,rgba(0,0,0,0.65)),url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300');background-size:cover;"><span>Gadgets 2026</span></div>
+                <div class="reel-item" style="background-image:linear-gradient(to bottom,transparent,rgba(0,0,0,0.65)),url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=300');background-size:cover;"><span>Textiles</span></div>
+                <div class="reel-item" style="background-image:linear-gradient(to bottom,transparent,rgba(0,0,0,0.65)),url('https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300');background-size:cover;"><span>Belleza</span></div>
+            </div>
+        </div>
+        <nav class="emp-tabs" id="tabs-dashboard">
+            <div class="tab-item active" onclick="empGoTo('emp-dashboard');setTab(this)"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><p>Inicio</p></div>
+            <div class="tab-item" onclick="empGoTo('emp-explorar');setTab(this)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><p>Explorar</p></div>
+            <div class="tab-item" onclick="empGoTo('emp-chat');setTab(this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Mensajes</p></div>
+            <div class="tab-item" onclick="empGoTo('emp-carrito');setTab(this)"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><p>Carrito</p></div>
+            <div class="tab-item" onclick="empGoTo('emp-perfil');setTab(this)"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><p>Perfil</p></div>
+        </nav>
+    </div>
+<!-- EXPLORAR -->
+    <div id="emp-explorar" class="screen">
+        <div class="exp-header">
+            <h2>Explorar Proveedores</h2>
+            <div class="search-wrap">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" placeholder="Buscar proveedores y productos..." style="border:none;background:none;outline:none;width:100%;margin-left:9px;font-family:'DM Sans',sans-serif;font-size:0.9rem;">
+            </div>
+        </div>
+        <div style="overflow-y:auto;flex:1;padding-bottom:90px;">
+            <div class="cat-scroll" style="padding:12px 20px;">
+                <div class="cat-item cat-active" onclick="setCat(this)"><div class="cat-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><span class="cat-label">Todo</span></div>
+                <div class="cat-item" onclick="setCat(this)"><div class="cat-icon"><svg viewBox="0 0 24 24"><path d="M20.38 3.46 16 2.14 2 6.5l2.27 4.58C1.35 12.14 1 13.88 1 15c0 4.42 4.48 8 10 8s10-3.58 10-8c0-1.12-.35-2.86-1.27-3.92z"/></svg></div><span class="cat-label">Textiles</span></div>
+                <div class="cat-item" onclick="setCat(this)"><div class="cat-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div><span class="cat-label">Tecno</span></div>
+                <div class="cat-item" onclick="setCat(this)"><div class="cat-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11"/><line x1="9" y1="22" x2="9" y2="12"/><line x1="15" y1="22" x2="15" y2="12"/></svg></div><span class="cat-label">Hogar</span></div>
+                <div class="cat-item" onclick="setCat(this)"><div class="cat-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="cat-label">Belleza</span></div>
+                <div class="cat-item" onclick="setCat(this)"><div class="cat-icon"><svg viewBox="0 0 24 24"><path d="M14.5 21h-5A3.5 3.5 0 0 1 6 17.5V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10.5A3.5 3.5 0 0 1 14.5 21z"/></svg></div><span class="cat-label">Calzado</span></div>
+            </div>
+            <div class="chips-scroll">
+                <button class="chip chip-active" onclick="setChip(this)">Tendencias</button>
+                <button class="chip" onclick="setChip(this)">Mayoristas</button>
+                <button class="chip" onclick="setChip(this)">Liquidación</button>
+                <button class="chip" onclick="setChip(this)">Materia Prima</button>
+                <button class="chip" onclick="setChip(this)">Maquinaria</button>
+                <button class="chip" onclick="setChip(this)">Importados</button>
+                <button class="chip" onclick="setChip(this)">Eco-Friendly</button>
+            </div>
+            <div class="product-grid" id="catalogoEmp">
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300" class="product-img" onerror="this.style.background='#ddd'">
+                    <div class="product-info"><h4>Denim Stretch Premium</h4><p>Desde $4.50/yd</p><span class="prov-tag">🏭 Textiles San Juan</span>
+                    <button class="btn-contactar" onclick="contactarProveedor('Textiles San Juan','Denim Stretch Premium','$4.50/yd')">CONTACTAR PROVEEDOR</button></div>
+                </div>
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300" class="product-img" onerror="this.style.background='#ddd'">
+                    <div class="product-info"><h4>Smartwatch V8 Pro</h4><p>Desde $12.99</p><span class="prov-tag">🏭 TecnoImport Quito</span>
+                    <button class="btn-contactar" onclick="addToCart('Smartwatch V8 Pro','$12.99')">AGREGAR AL CARRITO</button></div>
+                </div>
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300" class="product-img" onerror="this.style.background='#ddd'">
+                    <div class="product-info"><h4>Set Brochas Prof.</h4><p>Desde $8.20</p><span class="prov-tag">🏭 Belleza Total</span>
+                    <button class="btn-contactar" onclick="addToCart('Set Brochas Prof.','$8.20')">AGREGAR AL CARRITO</button></div>
+                </div>
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300" class="product-img" onerror="this.style.background='#ddd'">
+                    <div class="product-info"><h4>Zapatillas Sport X</h4><p>Desde $15.00</p><span class="prov-tag">🏭 Calzado Imbabura</span>
+                    <button class="btn-contactar" onclick="addToCart('Zapatillas Sport X','$15.00')">AGREGAR AL CARRITO</button></div>
+                </div>
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=300" class="product-img" onerror="this.style.background='#ddd'">
+                    <div class="product-info"><h4>Algodón Pima 40/1</h4><p>Desde $2.80/kg</p><span class="prov-tag">🏭 Textiles San Juan</span>
+                    <button class="btn-contactar" onclick="contactarProveedor('Textiles San Juan','Algodón Pima 40/1','$2.80/kg')">CONTACTAR PROVEEDOR</button></div>
+                </div>
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300" class="product-img" onerror="this.style.background='#ddd'">
+                    <div class="product-info"><h4>Kit Belleza Deluxe</h4><p>Desde $22.00</p><span class="prov-tag">🏭 Belleza Total</span>
+                    <button class="btn-contactar" onclick="addToCart('Kit Belleza Deluxe','$22.00')">AGREGAR AL CARRITO</button></div>
+                </div>
+            </div>
+        </div>
+        <nav class="emp-tabs">
+            <div class="tab-item" onclick="empGoTo('emp-dashboard');setTab(this)"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><p>Inicio</p></div>
+            <div class="tab-item active" onclick="empGoTo('emp-explorar');setTab(this)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><p>Explorar</p></div>
+            <div class="tab-item" onclick="empGoTo('emp-chat');setTab(this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Mensajes</p></div>
+            <div class="tab-item" onclick="empGoTo('emp-carrito');setTab(this)"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><p>Carrito</p></div>
+            <div class="tab-item" onclick="empGoTo('emp-perfil');setTab(this)"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><p>Perfil</p></div>
+        </nav>
+    </div>
+
+    <!-- CHAT EMPRENDEDOR -->
+    <div id="emp-chat" class="screen" style="height:100vh;overflow:hidden;">
+        <div class="chat-sec-screen" id="chatSecScreen">
+            <div class="chat-sec-card">
+                <div class="shield-box"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#32CD32" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <h2 style="margin:0 0 9px;font-family:'Syne',sans-serif;">Chat Seguro</h2>
+                <p style="font-size:0.82rem;color:#666;margin-bottom:16px;">PROVEED bloquea automáticamente el envío de contactos externos por tu seguridad.</p>
+                <button onclick="document.getElementById('chatSecScreen').style.display='none'" style="background:var(--v);color:white;border:none;width:100%;padding:14px;border-radius:13px;font-weight:bold;cursor:pointer;font-family:'Syne',sans-serif;">ENTRAR AL CHAT</button>
+            </div>
+        </div>
+        <div class="chat-header-bar" style="position:relative;">
+            <div class="chat-header-top">
+                <div style="cursor:pointer;" onclick="empGoTo('emp-explorar')">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </div>
+                <strong style="margin-left:13px;font-family:'Syne',sans-serif;" id="chatProvNombre">Proveedor PROVEED</strong>
+            </div>
+            <div class="rating-chip" onclick="toggleExp()">
+                <span class="stars-row">★★★★★</span>
+                <span>Calificar experiencia</span>
+            </div>
+            <div class="exp-popup" id="expPopup">
+                <p style="margin:0 0 7px;font-size:0.72rem;font-weight:700;">¿Cómo fue tu experiencia?</p>
+                <textarea class="exp-input" rows="2" placeholder="Cuéntanos brevemente..."></textarea>
+                <button onclick="saveExp()" style="background:var(--n);color:white;border:none;width:100%;padding:8px;border-radius:9px;font-size:0.72rem;font-weight:bold;margin-top:8px;cursor:pointer;font-family:'Syne',sans-serif;">GUARDAR RESEÑA</button>
+            </div>
+        </div>
+        <div class="message-area" id="empChatMessages" style="flex:1;">
+            <div class="bubble received">¡Hola! Bienvenido al chat seguro de PROVEED. ¿En qué te puedo ayudar?</div>
+        </div>
+        <div class="alert-toast" id="chatToast">⚠️ MENSAJE BLOQUEADO POR SEGURIDAD</div>
+        <div class="footer-input">
+            <input type="text" id="empChatInput" placeholder="Escribe un mensaje seguro...">
+            <button class="btn-send-emp" onclick="sendEmpMsg()">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- CARRITO -->
+    <div id="emp-carrito" class="screen">
+        <div class="cart-header">
+            <div style="cursor:pointer;margin-right:13px;" onclick="empGoTo('emp-dashboard')">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </div>
+            <h2>Mi Carrito (<span id="cartCount">0</span>)</h2>
+        </div>
+        <div class="cart-content" id="cartContent">
+            <div id="carrito-vacio" style="text-align:center;padding:60px 20px;color:#bbb;">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" style="margin:0 auto 16px;display:block;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <p style="font-weight:700;font-size:0.95rem;">Tu carrito está vacío</p>
+                <p style="font-size:0.82rem;">Explora productos y añádelos aquí</p>
+                <button class="btn btn-verde" style="margin-top:20px;width:auto;padding:14px 28px;" onclick="empGoTo('emp-explorar')">IR A EXPLORAR</button>
+            </div>
+            <div id="carrito-items"></div>
+        </div>
+        <div class="checkout-footer" id="checkout-footer" style="display:none;">
+            <div class="summary-row"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+            <div class="summary-row"><span>Envío estimado</span><span style="color:var(--v)">Gratis 🎉</span></div>
+            <div class="total-row"><span>Total</span><span id="cartTotal">$0.00</span></div>
+            <button class="btn-pay" onclick="empGoTo('emp-pago');notificarProveedor()">
+                PAGAR AHORA
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- PAGO -->
+    <div id="emp-pago" class="screen">
+        <div class="pay-header">
+            <div onclick="empGoTo('emp-carrito')" style="cursor:pointer;margin-right:13px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </div>
+            <h2>Finalizar Compra</h2>
+        </div>
+        <div class="pay-content">
+            <div class="pay-card"><h3>Resumen del Pedido</h3><div id="pagoResumen" style="font-size:0.88rem;color:#666;"></div></div>
+            <div class="pay-card"><h3>Método de Pago</h3><div class="payment-element">🔒 Procesador de pagos seguro PROVEED</div></div>
+            <div class="pay-card"><div class="pay-total"><span>Total</span><span style="color:var(--v)" id="pagoTotal">$0.00</span></div></div>
+            <button class="btn-confirm" id="payBtn" onclick="procesarPago()">CONFIRMAR Y PAGAR</button>
+            <p style="font-size:0.7rem;color:#bbb;text-align:center;margin-top:13px;">🔒 Cifrado SSL — Tu dinero está protegido</p>
+        </div>
+    </div>
+
+    <!-- PERFIL EMPRENDEDOR -->
+    <div id="emp-perfil" class="screen">
+        <div class="top-bar">
+            <div onclick="empGoTo('emp-dashboard')" style="cursor:pointer;margin-right:13px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </div>
+            <h2 style="font-family:'Syne',sans-serif;font-size:1.05rem;margin:0;">Mi Perfil</h2>
+        </div>
+        <div class="header-profile">
+            <img src="https://ui-avatars.com/api/?name=E&background=32CD32&color=fff&size=86" class="avatar-img" id="empAvatar">
+            <div style="font-family:'Syne',sans-serif;font-weight:900;font-size:1.1rem;margin-top:10px;" id="empPerfilNombre">Emprendedor</div>
+            <div style="font-size:0.75rem;color:#888;margin-top:3px;" id="empPerfilEmail">correo@ejemplo.com</div>
+            <div style="background:#f0fff0;color:var(--v);font-size:0.7rem;font-weight:800;padding:4px 12px;border-radius:20px;display:inline-block;margin-top:8px;">EMPRENDEDOR VERIFICADO ✓</div>
+        </div>
+        <div class="menu-list">
+            <div class="section-title-menu">Mi Cuenta</div>
+            <div class="menu-card">
+                <div class="menu-item" onclick="abrirModal('modalEditarPerfil')">
+                    <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                    <span class="label-menu">Editar Perfil</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+                <div class="menu-item" onclick="empGoTo('emp-pago')">
+                    <div class="icon-box"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+                    <span class="label-menu">Métodos de Pago</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+                <div class="menu-item">
+                    <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+                    <span class="label-menu">Mis Pedidos</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+            </div>
+            <div class="section-title-menu">Preferencias</div>
+            <div class="menu-card">
+                <div class="menu-item">
+                    <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+                    <span class="label-menu">Notificaciones</span>
+                    <label class="switch-tog"><input type="checkbox" checked><span class="slider-tog"></span></label>
+                </div>
+                <div class="menu-item">
+                    <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                    <span class="label-menu">Chat Seguro</span>
+                    <label class="switch-tog"><input type="checkbox" checked><span class="slider-tog"></span></label>
+                </div>
+            </div>
+            <div class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</div>
+        </div>
+    </div>
+
+</div>
+<!-- FIN MUNDO EMPRENDEDOR -->
+<!-- ===================== MUNDO PROVEEDOR (ERP) ===================== -->
+<div id="mundo-prov" class="mundo">
+<div id="prov-erp" class="screen" style="background:var(--g);min-height:100vh;">
+
+    <!-- ERP HOME -->
+    <div id="erp-home" class="erp-view" style="display:block;">
+        <div class="erp-header">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                    <h2>PROVEED ERP</h2>
+                    <p style="margin:4px 0 0;font-size:0.75rem;color:#888;" id="provNombreERP">Proveedor</p>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <div id="notifDot" style="width:10px;height:10px;background:var(--rj);border-radius:50%;display:none;animation:pulse 1.5s infinite;"></div>
+                    <button onclick="cerrarSesion()" style="background:rgba(255,255,255,0.1);border:none;color:white;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:0.75rem;font-weight:700;">Salir</button>
+                </div>
+            </div>
+        </div>
+        <div class="erp-grid">
+            <div class="erp-card" onclick="erpGoTo('erp-catalogo')">
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <span>Catálogo</span>
+            </div>
+            <div class="erp-card" onclick="erpGoTo('erp-pedidos')">
+                <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span>Pedidos</span>
+            </div>
+            <div class="erp-card" onclick="erpGoTo('erp-chat')">
+                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Chat B2B</span>
+            </div>
+            <div class="erp-card" onclick="erpGoTo('erp-stats')">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>Estadísticas</span>
+            </div>
+            <div class="erp-card" onclick="erpGoTo('erp-factura')">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>Facturador</span>
+            </div>
+            <div class="erp-card" onclick="erpGoTo('erp-sucursal')">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Sucursales</span>
+            </div>
+            <div class="erp-card" onclick="erpGoTo('erp-inventario')">
+                <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <span>Inventario</span>
+            </div>
+            <div class="erp-card" onclick="erpGoTo('erp-soporte')">
+                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Soporte</span>
+            </div>
+            <div class="erp-card" onclick="erpGoTo('erp-conta')">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>Contabilidad</span>
+            </div>
+        </div>
+        <div class="erp-stat-row">
+            <div class="erp-stat"><small>Ventas Hoy</small><h3 style="color:var(--v);" id="erpVentas">$0</h3></div>
+            <div class="erp-stat"><small>Pedidos</small><h3 id="erpPedidos">0</h3></div>
+            <div class="erp-stat"><small>En Chat</small><h3 id="erpChats">0</h3></div>
+            <div class="erp-stat"><small>Productos</small><h3 id="erpProductos">0</h3></div>
+        </div>
+        <div class="erp-recent">
+            <h3>Pedidos Recientes</h3>
+            <div id="erpPedidosLista">
+                <div class="order-row"><div class="order-info"><p>#4401 - Denim x50</p><small>Emprendedor A · Hace 5 min</small></div><span class="order-badge badge-pend">PENDIENTE</span></div>
+                <div class="order-row"><div class="order-info"><p>#4400 - Filtros x10</p><small>Emprendedor B · Hace 12 min</small></div><span class="order-badge badge-ok">ENVIADO</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CATÁLOGO PROVEEDOR -->
+    <div id="erp-catalogo" class="erp-view">
+        <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:700;color:var(--n);font-size:0.88rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver</button><h3>Mi Catálogo</h3></div>
+        <div class="erp-section">
+            <div style="background:var(--b);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+                <h4 style="font-family:'Syne',sans-serif;margin:0 0 13px;">Agregar Producto</h4>
+                <input type="text" class="erp-input" id="prodNombre" placeholder="Nombre del producto">
+                <input type="text" class="erp-input" id="prodPrecio" placeholder="Precio (ej: $4.50)">
+                <input type="text" class="erp-input" id="prodStock" placeholder="Stock disponible">
+                <input type="text" class="erp-input" id="prodDesc" placeholder="Descripción breve">
+                <button class="erp-btn erp-btn-green" onclick="agregarProducto()">+ AGREGAR AL CATÁLOGO</button>
+            </div>
+            <div id="listaCatalogo"></div>
+        </div>
+    </div>
+
+    <!-- PEDIDOS PROVEEDOR -->
+    <div id="erp-pedidos" class="erp-view">
+        <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:700;color:var(--n);font-size:0.88rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver</button><h3>Gestión de Pedidos</h3></div>
+        <div class="erp-section" id="listaPedidos">
+            <p style="color:#bbb;text-align:center;padding:40px 0;">Cargando pedidos...</p>
+        </div>
+    </div>
+
+    <!-- ESTADÍSTICA -->
+    <div id="erp-stats" class="erp-view">
+        <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:700;color:var(--n);font-size:0.88rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver</button><h3>Estadísticas</h3></div>
+        <div class="stats-wrap">
+            <div class="kpi-grid">
+                <div class="kpi-card"><small>Ventas Hoy</small><h2 style="color:var(--v);">$24,500</h2></div>
+                <div class="kpi-card"><small>Pedidos Activos</small><h2>47</h2></div>
+                <div class="kpi-card"><small>Clientes</small><h2>158</h2></div>
+                <div class="kpi-card"><small>Devoluciones</small><h2 style="color:var(--rj);">2</h2></div>
+                <div class="kpi-card"><small>Satisfacción</small><h2 style="color:var(--v);">98%</h2></div>
+                <div class="kpi-card"><small>Stock Crítico</small><h2 style="color:orange;">3</h2></div>
+            </div>
+            <div class="charts-wrap">
+                <div class="chart-card"><h3 style="margin:0 0 18px;">Ventas por Ciudad</h3>
+                    <div class="bar-ui">
+                        <div class="bar-group"><div class="bar-fill bactive" style="height:140px;"><div class="bar-val">$8.4k</div></div><div class="bar-lbl">UIO</div></div>
+                        <div class="bar-group"><div class="bar-fill" style="height:100px;"><div class="bar-val">$6.1k</div></div><div class="bar-lbl">GYE</div></div>
+                        <div class="bar-group"><div class="bar-fill" style="height:60px;"><div class="bar-val">$3.8k</div></div><div class="bar-lbl">CUE</div></div>
+                        <div class="bar-group"><div class="bar-fill" style="height:40px;"><div class="bar-val">$2.1k</div></div><div class="bar-lbl">MAN</div></div>
+                        <div class="bar-group"><div class="bar-fill" style="height:30px;"><div class="bar-val">$1.9k</div></div><div class="bar-lbl">LOJ</div></div>
+                    </div>
+                </div>
+                <div class="prod-rank"><h3 style="margin:0 0 14px;">Top Productos</h3>
+                    <div class="rank-item"><span>Denim Stretch</span><span class="rtag top">⭐ Estrella</span></div>
+                    <div class="rank-item"><span>Kit Suspensión</span><span class="rtag top">↑ Alta Rotac.</span></div>
+                    <div class="rank-item"><span>Filtro Aire</span><span class="rtag low">↓ Baja Venta</span></div>
+                </div>
+            </div>
+            <div class="sentiment-card" style="margin-top:18px;"><h3>Satisfacción del Cliente</h3><div class="stars-ui">★★★★★</div><h2 style="margin:0;">98.5%</h2><p style="opacity:0.6;font-size:0.8rem;">Basado en 312 calificaciones</p></div>
+        </div>
+    </div>
+
+    <!-- CHAT B2B PROVEEDOR -->
+    <div id="erp-chat" class="erp-view" style="display:flex;flex-direction:column;height:100vh;background:#050505;overflow:hidden;">
+        <header class="chat-topbar">
+            <button onclick="erpGoHome()" style="background:none;border:none;color:var(--v);font-weight:bold;cursor:pointer;font-size:0.84rem;flex-shrink:0;">← Volver</button>
+            <div class="chat-avatar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#32CD32" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div><span style="font-weight:900;font-size:0.93rem;color:white;display:block;">EMPRENDEDOR</span><span style="font-size:0.63rem;color:var(--v);">● B2B Conectado</span></div>
+        </header>
+        <div id="chatBox" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;background:#050505;">
+            <div class="chat-msg received">Hola, estoy interesado en el stock. ¿Tienes el catálogo?</div>
+            <div id="stockPanel" style="position:absolute;bottom:0;left:0;right:0;background:#111;border-top:2px solid var(--v);display:none;z-index:200;height:370px;border-radius:24px 24px 0 0;">
+                <div style="padding:18px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;"><b style="color:var(--v);">📦 ENVIAR PRODUCTO</b><span onclick="toggleStock()" style="color:var(--rj);cursor:pointer;font-weight:900;font-size:0.8rem;">CERRAR ✕</span></div>
+                    <input type="text" class="stock-search" id="stockSearch" placeholder="Buscar por Nombre o SKU..." onkeyup="filterStock()">
+                    <div id="stockList" style="height:220px;overflow-y:auto;">
+                        <div class="stock-item" onclick="sendProduct('Mochila Pro-X','$55.00','')"><div style="width:40px;height:40px;background:#222;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🎒</div><div><b style="font-size:0.8rem;color:white;">Mochila Pro-X</b><br><span style="font-size:0.6rem;color:#666;">SKU-990 | $55.00</span></div></div>
+                        <div class="stock-item" onclick="sendProduct('Denim Stretch','$4.50/yd','')"><div style="width:40px;height:40px;background:#222;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">👖</div><div><b style="font-size:0.8rem;color:white;">Denim Stretch</b><br><span style="font-size:0.6rem;color:#666;">SKU-110 | $4.50/yd</span></div></div>
+                        <div class="stock-item" onclick="sendProduct('Filtro Aire Premium','$15.00','')"><div style="width:40px;height:40px;background:#222;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">⚙️</div><div><b style="font-size:0.8rem;color:white;">Filtro Aire Premium</b><br><span style="font-size:0.6rem;color:#666;">SKU-220 | $15.00</span></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-bar">
+            <button class="btn-stock" onclick="toggleStock()">📦 STOCK</button>
+            <div class="input-wrap"><input type="text" id="msgInput" placeholder="Escribir mensaje B2B..." onkeypress="if(event.key==='Enter')sendErpMsg()"></div>
+            <button class="btn-send-erp" onclick="sendErpMsg()"><svg viewBox="0 0 24 24" width="16" height="16" fill="black"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+        </div>
+    </div>
+
+    <!-- SUCURSALES -->
+    <div id="erp-sucursal" class="erp-view">
+        <div class="suc-sidebar">
+            <button onclick="erpGoHome()" style="background:none;border:none;color:var(--v);cursor:pointer;font-weight:700;padding:0 0 15px;">← Volver</button>
+            <h2 style="color:white;margin-bottom:14px;">Sucursales</h2>
+            <div id="sucList">
+                <div class="suc-branch sactive" onclick="loadSuc('Quito Norte','$12,400',18,3,this)"><b>QUITO NORTE</b><br><small>Gerente: Carlos R.</small></div>
+                <div class="suc-branch" onclick="loadSuc('Guayaquil Sur','$9,800',12,1,this)"><b>GUAYAQUIL SUR</b><br><small>Gerente: Ana M.</small></div>
+            </div>
+            <button onclick="addSuc()" style="background:var(--v);color:black;border:none;padding:12px;border-radius:12px;width:100%;font-weight:900;cursor:pointer;margin-top:14px;font-size:0.8rem;">+ NUEVA SUCURSAL</button>
+        </div>
+        <div class="suc-main">
+            <h2 id="sucName" style="margin:0 0 16px;">Sucursal: Quito Norte</h2>
+            <div class="suc-stats">
+                <div class="suc-stat"><small>Ventas Hoy</small><h3 style="color:var(--v);">$<span id="sVentas">12400</span></h3></div>
+                <div class="suc-stat"><small>Pedidos Activos</small><h3><span id="sPedidos">18</span></h3></div>
+                <div class="suc-stat"><small>Chat Espera</small><h3><span id="sChats">3</span></h3></div>
+                <div class="suc-stat"><small>Cajas Abiertas</small><h3>2</h3></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SERVICIO AL CLIENTE -->
+    <div id="erp-soporte" class="erp-view">
+        <div class="cs-wrap">
+            <button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;font-weight:700;color:var(--n);margin-bottom:16px;">← Volver</button>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+                <h1 style="margin:0;">Servicio al Cliente</h1>
+                <div class="badge-live">SOPORTE EN LÍNEA</div>
+            </div>
+            <div class="cs-grid">
+                <div class="cs-card">
+                    <h3>Equipo de Soporte</h3>
+                    <div class="agent-item"><span><b>SOP-01</b> Carlos Ruíz</span><span style="color:var(--v);font-weight:bold;">98%</span></div>
+                    <div class="agent-item"><span><b>SOP-02</b> Elena M.</span><span style="color:var(--v);font-weight:bold;">95%</span></div>
+                    <hr style="margin:14px 0;">
+                    <label style="font-size:0.65rem;font-weight:800;color:#555;text-transform:uppercase;">Agregar Agente</label>
+                    <input type="text" id="nuevoAgente" placeholder="Nombre del agente" style="width:90%;padding:10px;margin:10px 0;border:1.5px solid #eee;border-radius:10px;outline:none;">
+                    <button class="btn-aten" style="width:100%;" onclick="agregarAgente()">Generar Acceso</button>
+                </div>
+                <div class="cs-card">
+                    <h3>Alertas de Pedidos</h3>
+                    <div class="order-alert"><div><b>#4402 - Mal Estado</b><br><small>Lino Spandex - Reportado</small></div><button class="btn-aten" style="width:auto;padding:8px 14px;" onclick="openCS('Pedido #4402')">ATENDER</button></div>
+                    <div class="order-alert" style="border-left-color:orange;"><div><b>#4395 - No Despachado</b><br><small>Retraso en bodega</small></div><button class="btn-aten" style="width:auto;padding:8px 14px;" onclick="openCS('Pedido #4395')">ATENDER</button></div>
+                </div>
+            </div>
+        </div>
+        <div id="csChat" class="chat-overlay">
+            <div class="chat-ov-header"><span id="csSubject" style="font-weight:bold;">Atención</span><span onclick="closeCS()" style="cursor:pointer;font-size:1.4rem;">✕</span></div>
+            <div class="media-full"><div style="color:white;text-align:center;"><div style="font-size:2rem;">👤</div><p>Video Lista</p></div><div class="ctrl-row"><button class="btn-round" style="background:var(--az);color:white;">📹</button><button class="btn-round" style="background:var(--v);color:white;">📞</button><button class="btn-round" style="background:var(--rj);color:white;" onclick="closeCS()">✖</button></div></div>
+            <div class="msg-space" id="csMsgs"><div class="erp-bubble in">Hola, el pedido llegó dañado.</div><div class="erp-bubble out">Estoy revisando ahora mismo.</div></div>
+            <div class="input-row-chat"><input type="text" id="csInput" placeholder="Escribir solución..." onkeypress="if(event.key==='Enter')enviarCS()"><button class="btn-round" style="background:var(--n);color:white;width:48px;height:48px;" onclick="enviarCS()">➔</button></div>
+        </div>
+    </div>
+
+    <!-- FACTURADOR -->
+    <div id="erp-factura" class="erp-view">
+        <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:700;color:var(--n);font-size:0.88rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver</button><h3>Facturador</h3></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;min-height:80vh;" class="fact-wrapper">
+            <aside class="config-panel">
+                <div class="ig" style="margin-bottom:12px;"><label style="font-size:0.7rem;font-weight:800;color:#555;text-transform:uppercase;display:block;margin-bottom:6px;">Nombre Comercial</label><input type="text" id="tiendaName" placeholder="Mi Empresa S.A." oninput="updateFactura()" class="erp-input"></div>
+                <div class="ig" style="margin-bottom:12px;"><label style="font-size:0.7rem;font-weight:800;color:#555;text-transform:uppercase;display:block;margin-bottom:6px;">RUC</label><input type="text" id="rucNumber" placeholder="172455xxxx001" oninput="updateFactura()" class="erp-input"></div>
+                <div class="ig" style="margin-bottom:12px;"><label style="font-size:0.7rem;font-weight:800;color:#555;text-transform:uppercase;display:block;margin-bottom:6px;">Cliente</label><input type="text" id="clientName" placeholder="Nombre del cliente" oninput="updateFactura()" class="erp-input"></div>
+                <button class="erp-btn erp-btn-dark" onclick="window.print()">🖨️ IMPRIMIR</button>
+            </aside>
+            <div class="preview-panel">
+                <div class="invoice-box" id="invoice">
+                    <div class="invoice-header">
+                        <div style="font-family:'Syne',sans-serif;font-weight:900;font-size:1.4rem;color:var(--v);">PROVEED</div>
+                        <div style="text-align:right;"><div style="font-size:1.2rem;font-weight:900;">FACTURA</div><div style="font-weight:900;font-size:1.4rem;color:var(--v);">PROVEED</div>
+                        <div style="text-align:right;"><div style="font-size:1.2rem;font-weight:900;">FACTURA</div><div style="font-size:0.75rem;color:#888;">Nro. 001-001-000001</div><div style="font-size:0.75rem;color:#888;" id="dateNow"></div></div>
+                    </div>
+<table class="invoice-table"><thead><tr><th>Cant.</th><th>Descripción</th><th>P.Unit</th><th>Total</th></tr></thead><tbody id="invoiceItems"><tr><td>1</td><td>Producto Ejemplo</td><td>$0.00</td><td>$0.00</td></tr></tbody></table>
+                    <div style="text-align:right;font-size:0.85rem;margin-top:16px;"><p>Subtotal: <b id="subtotalVal">$0.00</b></p><p>IVA 15%: <b id="ivaVal">$0.00</b></p><p style="font-size:1.1rem;font-weight:900;">TOTAL: <span id="totalVal">$0.00</span></p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTABILIDAD -->
+    <div id="erp-conta" class="erp-view">
+        <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:700;color:var(--n);font-size:0.88rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver</button><h3>Contabilidad</h3></div>
+        <div style="padding:18px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;"><h2 style="margin:0;">Obligaciones Fiscales</h2><button onclick="generarXML()" style="background:var(--v);color:black;border:none;padding:12px 20px;border-radius:14px;font-weight:900;cursor:pointer;">Declarar SRI</button></div>
+            <div class="kpi-grid">
+                <div class="kpi-card"><small>IVA A PAGAR</small><h2 id="iva-val">$1,240.50</h2></div>
+                <div class="kpi-card"><small>IMPUESTO RENTA</small><h2 id="ir-val">$315.20</h2></div>
+                <div class="kpi-card"><small>TOTAL OBLIGACIONES</small><h2 id="total-tax">$1,555.70</h2></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INVENTARIO -->
+    <div id="erp-inventario" class="erp-view">
+        <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:700;color:var(--n);font-size:0.88rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver</button><h3>Inventario</h3></div>
+        <div class="erp-section">
+            <div id="listaInventario" style="margin-top:10px;">
+                <div class="prod-item"><div class="prod-data"><h4>Mochila Pro-X</h4><p>$55.00 · Stock: 42</p></div></div>
+                <div class="prod-item"><div class="prod-data"><h4>Denim Stretch</h4><p>$4.50/yd · Stock: 300</p></div></div>
+                <div class="prod-item"><div class="prod-data"><h4>Filtro Aire Premium</h4><p>$15.00 · Stock: 85</p></div></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+</div>
+<!-- FIN MUNDO PROVEEDOR -->
+<!-- MODALES PERFIL EMPRENDEDOR -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeAllModals()"></div>
+
+    <div class="modal-content" id="modal-info">
+        <h3>Información Personal</h3>
+        <input type="text" id="input-name" class="input-modal" placeholder="Nombre completo">
+        <input type="email" class="input-modal" placeholder="correo@proveed.com">
+        <button class="btn-modal-save" onclick="saveInfo()">ACTUALIZAR</button>
+    </div>
+
+    <div class="modal-content" id="modal-address">
+        <h3>Mis Direcciones</h3>
+        <div style="background:#f9f9f9;padding:11px;border-radius:11px;margin-bottom:13px;border-left:4px solid var(--v);font-size:0.86rem;">
+            <strong>Casa Principal</strong><br><small style="color:#888;">Av. Las Lomas 123, Quito</small>
+        </div>
+        <input type="text" class="input-modal" placeholder="Nueva dirección...">
+        <button class="btn-modal-save" style="background:var(--n);" onclick="closeAllModals()">+ AÑADIR</button>
+    </div>
+
+    <div class="modal-content" id="modal-auth">
+        <h3>Verificar Identidad</h3>
+        <p style="font-size:0.81rem;color:#888;margin-bottom:13px;">Ingresa tu contraseña para gestionar el PIN.</p>
+        <input type="password" id="check-pass" class="input-modal" placeholder="Contraseña">
+        <button class="btn-modal-save" onclick="verifyToPin()">CONTINUAR</button>
+    </div>
+
+    <div class="modal-content" id="modal-pin">
+        <h3>Cambiar PIN</h3>
+        <input type="password" maxlength="4" class="input-modal" style="text-align:center;font-size:1.8rem;letter-spacing:12px;" placeholder="0000">
+        <button class="btn-modal-save" onclick="closeAllModals()">GUARDAR PIN</button>
+    </div>
+
+</div><!-- FIN MUNDO EMPRENDEDOR -->
+
+<!-- ===================== MUNDO PROVEEDOR (ERP) ===================== -->
+<div id="mundo-prov" class="mundo">
+
+    <!-- REGISTRO PROVEEDOR -->
+    <div id="prov-registro" class="screen" style="background:var(--g);overflow-y:auto;">
+        <div class="reg-header">
+            <svg width="62" height="62" viewBox="0 0 100 100">
+                <path d="M50 5 L90 27.5 V72.5 L50 95 L10 72.5 V27.5 L50 5Z" fill="#FF7300"/>
+                <path d="M30 52 L45 65 L70 35" stroke="white" stroke-width="9" stroke-linecap="round" fill="none"/>
+            </svg>
+            <h2 style="margin-top:9px;">Registro Proveedor</h2>
+        </div>
+        <div class="reg-container">
+            <div class="section-title-reg">Seguridad</div>
+            <input type="email" id="provRegEmail" class="reg-input" placeholder="Correo Electrónico">
+            <input type="password" id="provRegPass" class="reg-input" placeholder="Contraseña ••••••••">
+            <div class="section-title-reg">Empresa</div>
+            <input type="text" id="provRegNombre" class="reg-input" placeholder="Nombre o Razón Social">
+            <input type="text" id="provRegRuc" class="reg-input" placeholder="RUC">
+            <input type="tel" id="provRegTel" class="reg-input" placeholder="Teléfono">
+            <input type="text" id="provRegDir" class="reg-input" placeholder="Dirección">
+            <div class="file-box">📄 Subir RUC / Permiso de funcionamiento</div>
+            <button class="btn-submit" style="background:var(--naranja);" onclick="provFinishReg()">CREAR CUENTA PROVEEDOR</button>
+            <span class="back-link" style="text-align:center;margin-top:14px;" onclick="irAlLogin()">← Volver al inicio</span>
+        </div>
+    </div>
+
+    <!-- ERP PRINCIPAL -->
+    <div id="prov-erp" class="screen" style="background:var(--g);min-height:100vh;overflow-y:auto;">
+
+        <!-- HOME ERP -->
+        <div id="erp-home" style="display:block;">
+            <div class="erp-header">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                        <h2>PROVEED ERP</h2>
+                        <p style="margin:4px 0 0;font-size:0.75rem;color:#888;" id="provNombreERP">Proveedor</p>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <div id="notifDot" style="width:10px;height:10px;background:var(--rj);border-radius:50%;display:none;animation:pulse 1.5s infinite;"></div>
+                        <button onclick="cerrarSesion()" style="background:rgba(255,255,255,0.1);border:none;color:white;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:0.75rem;font-weight:700;">Salir</button>
+                    </div>
+                </div>
+            </div>
+            <div class="erp-grid">
+                <div class="erp-card" onclick="erpGoTo('erp-catalogo')"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span>Catálogo</span></div>
+                <div class="erp-card" onclick="erpGoTo('erp-pedidos')"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Pedidos</span></div>
+                <div class="erp-card" onclick="erpGoTo('erp-chat')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat B2B</span></div>
+                <div class="erp-card" onclick="erpGoTo('erp-stats')"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Estadísticas</span></div>
+                <div class="erp-card" onclick="erpGoTo('erp-factura')"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Facturador</span></div>
+                <div class="erp-card" onclick="erpGoTo('erp-sucursal')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Sucursales</span></div>
+                <div class="erp-card" onclick="erpGoTo('erp-inventario')"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg><span>Inventario</span></div>
+                <div class="erp-card" onclick="erpGoTo('erp-soporte')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Soporte</span></div>
+                <div class="erp-card" onclick="erpGoTo('erp-conta')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Contabilidad</span></div>
+            </div>
+            <div class="erp-stat-row">
+                <div class="erp-stat"><small>Ventas Hoy</small><h3 style="color:var(--v);" id="erpVentas">$0</h3></div>
+                <div class="erp-stat"><small>Pedidos</small><h3 id="erpPedidos">0</h3></div>
+                <div class="erp-stat"><small>En Chat</small><h3 id="erpChats">0</h3></div>
+                <div class="erp-stat"><small>Productos</small><h3 id="erpProductos">0</h3></div>
+            </div>
+            <div class="erp-recent">
+                <h3>Pedidos Recientes</h3>
+                <div id="erpPedidosLista">
+                    <div class="order-row"><div class="order-info"><p>#4401 - Denim x50</p><small>Emprendedor A · Hace 5 min</small></div><span class="order-badge badge-pend">PENDIENTE</span></div>
+                    <div class="order-row"><div class="order-info"><p>#4400 - Filtros x10</p><small>Emprendedor B · Hace 12 min</small></div><span class="order-badge badge-ok">ENVIADO</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CATÁLOGO -->
+        <div id="erp-catalogo" class="erp-view">
+            <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:700;color:var(--n);font-size:0.88rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver</button><h3>Mi Catálogo</h3></div>
+            <div class="erp-section">
+                <div style="background:var(--b);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+                    <h4 style="font-family:'Syne',sans-serif;margin:0 0 13px;">Agregar Producto</h4>
+                    <input type="text" class="erp-input" id="prodNombre" placeholder="Nombre del producto">
+                    <input type="text" class="erp-input" id="prodPrecio" placeholder="Precio (ej: $4.50)">
+                    <input type="text" class="erp-input" id="prodStock" placeholder="Stock disponible">
+                    <input type="text" class="erp-input" id="prodDesc" placeholder="Descripción breve">
+                    <button class="erp-btn erp-btn-green" onclick="agregarProducto()">+ AGREGAR AL CATÁLOGO</button>
+                </div>
+                <div id="listaCatalogo"></div>
+            </div>
+        </div>
+
+        <!-- PEDIDOS -->
+        <div id="erp-pedidos" class="erp-view">
+            <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:700;color:var(--n);font-size:0.88rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver</button><h3>Gestión de Pedidos</h3></div>
+            <div class="erp-section" id="listaPedidos">
+                <p style="color:#bbb;text-align:center;padding:40px 0;">Cargando pedidos...</p>
+            </div>
+        </div>
+
+        <!-- CHAT B2B -->
+        <div id="erp-chat" class="erp-view" style="display:flex;flex-direction:column;height:100vh;background:#050505;overflow:hidden;">
+            <header class="chat-topbar">
+                <button onclick="erpGoHome()" style="background:none;border:none;color:var(--v);font-weight:bold;cursor:pointer;font-size:0.84rem;flex-shrink:0;">← Volver</button>
+                <div class="chat-avatar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#32CD32" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                <div><span style="font-weight:900;font-size:0.93rem;color:white;display:block;">EMPRENDEDOR</span><span style="font-size:0.63rem;color:var(--v);">● B2B Conectado</span></div>
+            </header>
+            <div id="chatBox" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;background:#050505;position:relative;">
+                <div class="chat-msg received">Hola, estoy interesado en el stock. ¿Tienes el catálogo?</div>
+                <div id="stockPanel">
+                    <div style="padding:18px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;"><b style="color:var(--v);">📦 ENVIAR PRODUCTO</b><span onclick="toggleStock()" style="color:var(--rj);cursor:pointer;font-weight:900;font-size:0.8rem;">CERRAR ✕</span></div>
+                        <input type="text" class="stock-search" id="stockSearch" placeholder="Buscar por Nombre o SKU..." onkeyup="filterStock()">
+                        <div id="stockList" style="height:220px;overflow-y:auto;">
+                            <div class="stock-item" onclick="sendProduct('Mochila Pro-X','$55.00','')"><div style="width:40px;height:40px;background:#222;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🎒</div><div><b style="font-size:0.8rem;color:white;">Mochila Pro-X</b><br><span style="font-size:0.6rem;color:#666;">SKU-990 | $55.00</span></div></div>
+                            <div class="stock-item" onclick="sendProduct('Denim Stretch','$4.50/yd','')"><div style="width:40px;height:40px;background:#222;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">👖</div><div><b style="font-size:0.8rem;color:white;">Denim Stretch</b><br><span style="font-size:0.6rem;color:#666;">SKU-110 | $4.50/yd</span></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-bar">
+                <button class="btn-stock" onclick="toggleStock()">📦 STOCK</button>
+                <div class="input-wrap"><input type="text" id="msgInput" placeholder="Escribir mensaje B2B..." onkeypress="if(event.key==='Enter')sendErpMsg()"></div>
+                <button class="btn-send-erp" onclick="sendErpMsg()"><svg viewBox="0 0 24 24" width="16" height="16" fill="black"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+            </div>
+        </div>
+
+        <!-- ESTADÍSTICAS -->
+        <div id="erp-stats" class="erp-view">
+            <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;font-weight:700;color:var(--n);">← Volver</button><h3>Estadísticas</h3></div>
+            <div class="stats-wrap">
+                <div class="kpi-grid">
+                    <div class="kpi-card"><small>Ventas Hoy</small><h2 style="color:var(--v);">$24,500</h2></div>
+                    <div class="kpi-card"><small>Pedidos Activos</small><h2>47</h2></div>
+                    <div class="kpi-card"><small>Clientes</small><h2>158</h2></div>
+                    <div class="kpi-card"><small>Devoluciones</small><h2 style="color:var(--rj);">2</h2></div>
+                    <div class="kpi-card"><small>Satisfacción</small><h2 style="color:var(--v);">98%</h2></div>
+                    <div class="kpi-card"><small>Stock Crítico</small><h2 style="color:orange;">3</h2></div>
+                </div>
+                <div class="charts-wrap">
+                    <div class="chart-card"><h3 style="margin:0 0 18px;">Ventas por Ciudad</h3>
+                        <div class="bar-ui">
+                            <div class="bar-group"><div class="bar-fill bactive" style="height:140px;"><div class="bar-val">$8.4k</div></div><div class="bar-lbl">UIO</div></div>
+                            <div class="bar-group"><div class="bar-fill" style="height:100px;"><div class="bar-val">$6.1k</div></div><div class="bar-lbl">GYE</div></div>
+                            <div class="bar-group"><div class="bar-fill" style="height:60px;"><div class="bar-val">$3.8k</div></div><div class="bar-lbl">CUE</div></div>
+                            <div class="bar-group"><div class="bar-fill" style="height:40px;"><div class="bar-val">$2.1k</div></div><div class="bar-lbl">MAN</div></div>
+                            <div class="bar-group"><div class="bar-fill" style="height:30px;"><div class="bar-val">$1.9k</div></div><div class="bar-lbl">LOJ</div></div>
+                        </div>
+                    </div>
+                    <div class="prod-rank"><h3 style="margin:0 0 14px;">Top Productos</h3>
+                        <div class="rank-item"><span>Denim Stretch</span><span class="rtag top">⭐ Estrella</span></div>
+                        <div class="rank-item"><span>Kit Suspensión</span><span class="rtag top">↑ Alta Rotac.</span></div>
+                        <div class="rank-item"><span>Filtro Aire</span><span class="rtag low">↓ Baja Venta</span></div>
+                    </div>
+                </div>
+                <div class="sentiment-card" style="margin-top:18px;"><h3>Satisfacción</h3><div class="stars-ui">★★★★★</div><h2 style="margin:0;">98.5%</h2></div>
+            </div>
+        </div>
+
+        <!-- FACTURADOR -->
+        <div id="erp-factura" class="erp-view">
+            <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;font-weight:700;color:var(--n);">← Volver</button><h3>Facturador</h3></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;min-height:80vh;">
+                <aside class="config-panel" style="padding:20px;">
+                    <input type="text" id="tiendaName" placeholder="Nombre Comercial" oninput="updateFactura()" class="erp-input">
+                    <input type="text" id="rucNumber" placeholder="RUC" oninput="updateFactura()" class="erp-input">
+                    <input type="text" id="clientName" placeholder="Nombre Cliente" oninput="updateFactura()" class="erp-input">
+                    <button class="erp-btn erp-btn-dark" onclick="window.print()">🖨️ IMPRIMIR</button>
+                </aside>
+                <div class="preview-panel">
+                    <div class="invoice-box" id="invoice">
+                        <div class="invoice-header">
+                            <div style="font-family:'Syne',sans-serif;font-weight:900;font-size:1.4rem;color:var(--v);">PROVEED</div>
+                            <div style="text-align:right;"><div style="font-size:1.2rem;font-weight:900;">FACTURA</div><div style="font-size:0.75rem;color:#888;" id="dateNow"></div></div>
+                        </div>
+                        <table class="invoice-table"><thead><tr><th>Cant.</th><th>Descripción</th><th>P.Unit</th><th>Total</th></tr></thead><tbody id="invoiceItems"><tr><td>1</td><td>Producto</td><td>$0.00</td><td>$0.00</td></tr></tbody></table>
+                        <div style="text-align:right;margin-top:12px;"><p>TOTAL: <b id="totalVal">$0.00</b></p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUCURSALES -->
+        <div id="erp-sucursal" class="erp-view" style="display:flex;min-height:100vh;">
+            <div class="suc-sidebar">
+                <button onclick="erpGoHome()" style="background:none;border:none;color:var(--v);cursor:pointer;font-weight:700;padding:0 0 15px;">← Volver</button>
+                <h2 style="color:white;margin-bottom:14px;">Sucursales</h2>
+                <div id="sucList">
+                    <div class="suc-branch sactive" onclick="loadSuc('Quito Norte','$12,400',18,3,this)"><b>QUITO NORTE</b><br><small>Gerente: Carlos R.</small></div>
+                    <div class="suc-branch" onclick="loadSuc('Guayaquil Sur','$9,800',12,1,this)"><b>GUAYAQUIL SUR</b><br><small>Gerente: Ana M.</small></div>
+                </div>
+                <button onclick="addSuc()" style="background:var(--v);color:black;border:none;padding:12px;border-radius:12px;width:100%;font-weight:900;cursor:pointer;margin-top:14px;font-size:0.8rem;">+ NUEVA SUCURSAL</button>
+            </div>
+            <div class="suc-main">
+                <h2 id="sucName" style="margin:0 0 16px;">Quito Norte</h2>
+                <div class="suc-stats">
+                    <div class="suc-stat"><small>Ventas Hoy</small><h3 style="color:var(--v);">$<span id="sVentas">12400</span></h3></div>
+                    <div class="suc-stat"><small>Pedidos</small><h3><span id="sPedidos">18</span></h3></div>
+                    <div class="suc-stat"><small>Chat</small><h3><span id="sChats">3</span></h3></div>
+                    <div class="suc-stat"><small>Cajas</small><h3>2</h3></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SOPORTE -->
+        <div id="erp-soporte" class="erp-view">
+            <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;font-weight:700;color:var(--n);">← Volver</button><h3>Servicio al Cliente</h3></div>
+            <div class="cs-wrap">
+                <div class="cs-grid">
+                    <div class="cs-card"><h3>Equipo</h3>
+                        <div class="agent-item"><span><b>SOP-01</b> Carlos Ruíz</span><span style="color:var(--v);font-weight:bold;">98%</span></div>
+                        <input type="text" id="nuevoAgente" placeholder="Nombre del agente" style="width:90%;padding:10px;margin:10px 0;border:1.5px solid #eee;border-radius:10px;outline:none;">
+<button class="btn-aten" style="width:100%;" onclick="agregarAgente()">Generar Acceso</button>
+                    </div>
+                    <div class="cs-card"><h3>Alertas</h3>
+                        <div class="order-alert"><div><b>#4402 - Mal Estado</b><br><small>Reportado</small></div><button class="btn-aten" style="width:auto;" onclick="openCS('Pedido #4402')">ATENDER</button></div>
+                    </div>
+                </div>
+            </div>
+            <div id="csChat" class="chat-overlay">
+                <div class="chat-ov-header"><span id="csSubject">Atención</span><span onclick="closeCS()" style="cursor:pointer;font-size:1.4rem;">✕</span></div>
+                <div class="msg-space" id="csMsgs"><div class="erp-bubble in">El pedido llegó dañado.</div></div>
+                <div class="input-row-chat"><input type="text" id="csInput" placeholder="Escribir solución..." onkeypress="if(event.key==='Enter')enviarCS()"><button class="btn-round" style="background:var(--n);color:white;width:48px;height:48px;" onclick="enviarCS()">➔</button></div>
+            </div>
+        </div>
+
+        <!-- CONTABILIDAD -->
+        <div id="erp-conta" class="erp-view">
+            <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;font-weight:700;color:var(--n);">← Volver</button><h3>Contabilidad</h3></div>
+            <div style="padding:18px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;"><h2 style="margin:0;">Obligaciones Fiscales</h2><button onclick="generarXML()" style="background:var(--v);color:black;border:none;padding:12px 20px;border-radius:14px;font-weight:900;cursor:pointer;">Declarar SRI</button></div>
+                <div class="kpi-grid">
+                    <div class="kpi-card"><small>IVA A PAGAR</small><h2 id="iva-val">$1,240.50</h2></div>
+                    <div class="kpi-card"><small>IMPUESTO RENTA</small><h2 id="ir-val">$315.20</h2></div>
+                    <div class="kpi-card"><small>TOTAL</small><h2 id="total-tax">$1,555.70</h2></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVENTARIO -->
+        <div id="erp-inventario" class="erp-view">
+            <div class="erp-back"><button onclick="erpGoHome()" style="background:none;border:none;cursor:pointer;font-weight:700;color:var(--n);">← Volver</button><h3>Inventario</h3></div>
+            <div class="erp-section">
+                <div id="listaInventario">
+                    <div class="prod-item"><div class="prod-data"><h4>Mochila Pro-X</h4><p>$55.00 · Stock: 42</p></div></div>
+                    <div class="prod-item"><div class="prod-data"><h4>Denim Stretch</h4><p>$4.50/yd · Stock: 300</p></div></div>
+                    <div class="prod-item"><div class="prod-data"><h4>Filtro Aire Premium</h4><p>$15.00 · Stock: 85</p></div></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- fin prov-erp -->
+</div><!-- fin mundo-prov -->
+
+<!-- SCRIPTS FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script>
+(function() {
+    var cfg = {
+        apiKey: "AIzaSyAZQRlfdtJjmodrfmct5N3qrLO6hniO2o8",
+        authDomain: "proveed-8cb7c.firebaseapp.com",
+        projectId: "proveed-8cb7c",
+        storageBucket: "proveed-8cb7c.appspot.com",
+        messagingSenderId: "235073250367",
+        appId: "1:235073250367:web:89ec59fea5f0b8a347448a"
+    };
+    try {
+        if (!firebase.apps.length) firebase.initializeApp(cfg);
+        auth    = firebase.auth();
+        db      = firebase.firestore();
+        storage = firebase.storage();
+        FB_LISTO = true;
+        initApp();
+    } catch(e) {
+        console.warn('Firebase init error:', e);
+        initApp();
+    }
+})();
+</script>
+<script>
+// ===================== FIREBASE GLOBALS STUB (reemplazados cuando Firebase carga) =====================
+var auth = {
+    onAuthStateChanged: function(cb) { cb(null); return function(){}; },
+    signInWithEmailAndPassword: function() { return Promise.reject({code:'not-ready', message:'Firebase aún cargando, espera un momento e intenta de nuevo.'}); },
+    createUserWithEmailAndPassword: function() { return Promise.reject({code:'not-ready', message:'Firebase aún cargando, espera un momento e intenta de nuevo.'}); },
+    signInWithPopup: function() { return Promise.reject({code:'not-ready', message:'Firebase aún cargando.'}); },
+    signOut: function() { return Promise.resolve(); },
+    currentUser: null
+};
+var db = {
+    collection: function() {
+        var _stub = {
+            doc: function() { return { get: function(){ return Promise.resolve({exists:false,data:function(){return{};}}); }, set:function(){return Promise.resolve();}, update:function(){return Promise.resolve();} }; },
+            add: function() { return Promise.resolve({id:'offline-'+Date.now()}); },
+            get: function() { return Promise.resolve({empty:true,forEach:function(){},docs:[]}); },
+            where: function() { return _stub; },
+            orderBy: function() { return _stub; },
+            limit: function() { return _stub; },
+            onSnapshot: function(cb) { cb({size:0,empty:true,forEach:function(){},docChanges:function(){return[];}}); return function(){}; }
+        };
+        return _stub;
+    }
+};
+var storage = { ref: function() { return { put: function(){ return {on:function(){}}; }, getDownloadURL: function(){ return Promise.resolve(''); } }; } };
+var FB_LISTO = false;
+
+var B2B = {
+    carrito: [],
+    pedidos: [],
+    rolActivo: null,
+    currentUser: null,
+    userDoc: null,
+    chatUnsubscribe: null,
+    pedidosUnsubscribe: null
+};
+
+// ===================== UI HELPERS =====================
+function showLoader(msg) {
+    var el = document.getElementById('fb-loader');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'fb-loader';
+        el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-family:Syne,sans-serif;gap:14px;';
+        el.innerHTML = '<svg width="48" height="48" viewBox="0 0 100 100" style="animation:spinL 1s linear infinite"><path d="M50 5 L90 27.5 V72.5 L50 95 L10 72.5 V27.5 L50 5Z" fill="#32CD32"/></svg><span id="fb-loader-msg" style="font-weight:700;font-size:0.95rem;">Cargando...</span>';
+        var style = document.createElement('style');
+        style.innerText = '@keyframes spinL{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
+        document.head.appendChild(style);
+        document.body.appendChild(el);
+    }
+    document.getElementById('fb-loader-msg').innerText = msg || 'Cargando...';
+    el.style.display = 'flex';
+}
+function hideLoader() { var el = document.getElementById('fb-loader'); if (el) el.style.display = 'none'; }
+function showFbError(msg) {
+    hideLoader();
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#FF4D4D;color:white;padding:12px 22px;border-radius:28px;font-weight:700;font-size:0.82rem;z-index:99999;white-space:nowrap;max-width:90vw;text-align:center;';
+    t.innerText = '⚠️ ' + msg;
+    document.body.appendChild(t);
+    setTimeout(function() { if(t.parentNode) t.parentNode.removeChild(t); }, 4000);
+}
+function showFbSuccess(msg) {
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#32CD32;color:black;padding:12px 22px;border-radius:28px;font-weight:700;font-size:0.82rem;z-index:99999;white-space:nowrap;';
+    t.innerText = '✓ ' + msg;
+    document.body.appendChild(t);
+    setTimeout(function() { if(t.parentNode) t.parentNode.removeChild(t); }, 3000);
+}
+
+// ===================== INIT APP =====================
+function initApp() {
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            showLoader('Cargando tu cuenta...');
+            db.collection('usuarios').doc(user.uid).get()
+                .then(function(doc) {
+                    hideLoader();
+                    if (doc.exists) {
+                        B2B.currentUser = user;
+                        B2B.userDoc     = doc.data();
+                        B2B.rolActivo   = doc.data().rol;
+                        redirigirPorRol(doc.data());
+                    } else { irAlLogin(); }
+                })
+                .catch(function() { hideLoader(); irAlLogin(); });
+        } else { irAlLogin(); }
+    });
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) initApp();
+    });
+}
+// ===================== MUNDOS =====================
+function activarMundo(id) {
+    document.querySelectorAll('.mundo').forEach(function(m) {
+        m.classList.remove('activo');
+        m.style.display = 'none';
+    });
+    var t = document.getElementById(id);
+    if (t) { t.style.display = ''; t.classList.add('activo'); }
+}
+function irAlLogin() {
+    activarMundo('mundo-login');
+    B2B.rolActivo = null; B2B.currentUser = null; B2B.carrito = [];
+    try { document.getElementById('loginEmail').value = ''; document.getElementById('loginPass').value = ''; } catch(e){}
+}
+function irARegistro(rol) {
+    if (rol === 'emp') { activarMundo('mundo-emp'); empGoTo('emp-registro'); }
+    else { activarMundo('mundo-prov'); provGoTo('prov-registro'); }
+}
+function irAlSelector() { irAlLogin(); }
+function entrarComo(rol) { irARegistro(rol); }
+
+function redirigirPorRol(data) {
+    var rol = data.rol;
+    if (rol === 'emp') {
+        activarMundo('mundo-emp');
+        cargarPerfilEmprendedor(data);
+        cargarProductosFirestore();
+        escucharPedidosEmprendedor();
+        empGoTo('emp-dashboard');
+    } else if (rol === 'prov') {
+        activarMundo('mundo-prov');
+        provGoTo('prov-erp');
+        erpGoHome();
+        escucharPedidosProveedor();
+        escucharChatProveedor();
+        try { document.getElementById('dateNow').innerText = new Date().toLocaleDateString('es-EC'); } catch(e){}
+        try { document.getElementById('statDate').innerText = new Date().toLocaleDateString('es-EC', {month:'long', year:'numeric'}); } catch(e){}
+    } else { irAlLogin(); }
+}
+
+// ===================== LOGIN ÚNICO =====================
+function loginUnico() {
+    var email = document.getElementById('loginEmail').value.trim();
+    var pass  = document.getElementById('loginPass').value;
+    if (!email || !pass) { showFbError('Ingresa tu correo y contraseña.'); return; }
+    if (!FB_LISTO) { showFbError('Conectando con el servidor... intenta en 3 segundos.'); return; }
+    var btn = document.getElementById('btnLogin');
+    btn.disabled = true; btn.innerText = 'VERIFICANDO...';
+    showLoader('Verificando acceso...');
+    auth.signInWithEmailAndPassword(email, pass)
+        .then(function(cred) { return db.collection('usuarios').doc(cred.user.uid).get(); })
+        .then(function(doc) {
+            hideLoader(); btn.disabled = false; btn.innerText = 'INGRESAR';
+            if (!doc.exists) { auth.signOut(); showFbError('Cuenta sin perfil. Contáctanos.'); return; }
+            B2B.currentUser = auth.currentUser;
+            B2B.userDoc = doc.data();
+            B2B.rolActivo = doc.data().rol;
+            showFbSuccess('¡Bienvenido, ' + (doc.data().nombre || '') + '!');
+            redirigirPorRol(doc.data());
+        })
+        .catch(function(err) {
+            hideLoader(); btn.disabled = false; btn.innerText = 'INGRESAR';
+            var msgs = {
+                'auth/user-not-found':     'No existe una cuenta con ese correo.',
+                'auth/wrong-password':     'Contraseña incorrecta.',
+                'auth/invalid-email':      'Correo inválido.',
+                'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+                'auth/too-many-requests':  'Demasiados intentos. Espera unos minutos.',
+                'not-ready':               'Conectando al servidor, intenta de nuevo.'
+            };
+            showFbError(msgs[err.code] || err.message);
+        });
+}
+function loginGoogle() {
+    if (!FB_LISTO) { showFbError('Conectando... espera un momento.'); return; }
+    var provider = new firebase.auth.GoogleAuthProvider();
+    showLoader('Conectando con Google...');
+    auth.signInWithPopup(provider)
+        .then(function(result) { return db.collection('usuarios').doc(result.user.uid).get(); })
+        .then(function(doc) {
+            hideLoader();
+            if (!doc.exists) { auth.signOut(); showFbError('Cuenta Google no registrada. Usa los botones de registro abajo.'); return; }
+            B2B.currentUser = auth.currentUser;
+            B2B.userDoc = doc.data();
+            B2B.rolActivo = doc.data().rol;
+            showFbSuccess('¡Bienvenido!');
+            redirigirPorRol(doc.data());
+        })
+        .catch(function(err) { hideLoader(); if (err.code !== 'auth/popup-closed-by-user') showFbError(err.message || 'Error con Google.'); });
+}
+function togglePassVis() { var inp = document.getElementById('loginPass'); inp.type = inp.type === 'password' ? 'text' : 'password'; }
+function recuperarPassword() {
+    var email = document.getElementById('loginEmail').value.trim();
+    if (!email) { showFbError('Escribe tu correo primero en el campo de arriba.'); return; }
+    if (!FB_LISTO) { showFbError('Conectando... espera un momento.'); return; }
+    auth.sendPasswordResetEmail(email)
+        .then(function() { showFbSuccess('Email de recuperación enviado a ' + email); })
+        .catch(function(err) { showFbError(err.message); });
+}
+function cerrarSesion() {
+    if (B2B.chatUnsubscribe) B2B.chatUnsubscribe();
+    if (B2B.pedidosUnsubscribe) B2B.pedidosUnsubscribe();
+    auth.signOut().then(function() { irAlLogin(); });
+}
+
+// ===================== NAVEGACIÓN =====================
+function empGoTo(id) {
+    document.querySelectorAll('#mundo-emp .screen').forEach(function(s) { s.classList.remove('active'); });
+    var t = document.getElementById(id); if (t) t.classList.add('active');
+    window.scrollTo(0, 0);
+}
+function setTab(el) {
+    document.querySelectorAll('.emp-tabs .tab-item').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+}
+function provGoTo(id) {
+    document.querySelectorAll('#mundo-prov .screen').forEach(function(s) { s.classList.remove('active'); });
+    var t = document.getElementById(id); if (t) t.classList.add('active');
+    window.scrollTo(0, 0);
+}
+function erpGoTo(id) {
+    document.querySelectorAll('#prov-erp .erp-view').forEach(function(v) { v.style.display = 'none'; });
+    document.getElementById('erp-home').style.display = 'none';
+    var t = document.getElementById(id); if (t) t.style.display = 'block';
+    window.scrollTo(0, 0);
+}
+function erpGoHome() {
+    document.querySelectorAll('#prov-erp .erp-view').forEach(function(v) { v.style.display = 'none'; });
+    document.getElementById('erp-home').style.display = 'block';
+    window.scrollTo(0, 0);
+}
+
+// ===================== REGISTRO EMPRENDEDOR =====================
+function empFinishReg() {
+    var inputs = document.querySelectorAll('#emp-registro .reg-input');
+    var email = inputs[0].value.trim(), pass = inputs[1].value, pin = inputs[2].value;
+    var nombre = inputs[3].value.trim(), apellido = inputs[4].value.trim();
+    var celular = inputs[5].value.trim(), cedula = inputs[7].value.trim();
+    if (!email || !pass || !nombre) { showFbError('Completa los campos obligatorios.'); return; }
+    if (pass.length < 6) { showFbError('La contraseña debe tener al menos 6 caracteres.'); return; }
+    if (!FB_LISTO) { showFbError('Conectando con el servidor... intenta en 3 segundos.'); return; }
+    showLoader('Creando tu cuenta...');
+    auth.createUserWithEmailAndPassword(email, pass)
+        .then(function(cred) {
+            return db.collection('usuarios').doc(cred.user.uid).set({
+                nombre: nombre, apellido: apellido, celular: celular,
+                cedula: cedula, email: email, pin: pin, rol: 'emp',
+                creado: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        })
+        .then(function() { hideLoader(); showFbSuccess('¡Cuenta creada! Ya puedes iniciar sesión.'); irAlLogin(); })
+        .catch(function(err) {
+            hideLoader();
+            var msgs = { 'auth/email-already-in-use': 'Este correo ya está registrado.', 'auth/weak-password': 'La contraseña es muy débil.' };
+            showFbError(msgs[err.code] || err.message);
+        });
+}
+function cargarPerfilEmprendedor(data) {
+    var nombre = data.nombre || data.email || 'Emprendedor';
+    try { document.getElementById('empNombre').innerText = nombre; } catch(e){}
+    try { document.getElementById('profileName').innerText = nombre; } catch(e){}
+    try { document.getElementById('empPerfilNombre').innerText = nombre; } catch(e){}
+    try { document.getElementById('empPerfilEmail').innerText = data.email || ''; } catch(e){}
+    try { if (document.getElementById('input-name')) document.getElementById('input-name').value = nombre; } catch(e){}
+}
+
+// ===================== REGISTRO PROVEEDOR =====================
+function provFinishReg() {
+    var inputs = document.querySelectorAll('#prov-registro .reg-input');
+    var email = inputs[0].value.trim(), pass = inputs[1].value;
+    var empresa = inputs[2].value.trim(), ruc = inputs[3].value.trim();
+    var tel = inputs[4].value.trim(), dir = inputs[5].value.trim();
+    if (!email || !pass || !empresa) { showFbError('Completa los campos obligatorios.'); return; }
+    if (pass.length < 6) { showFbError('La contraseña debe tener al menos 6 caracteres.'); return; }
+    if (!FB_LISTO) { showFbError('Conectando con el servidor... intenta en 3 segundos.'); return; }
+    showLoader('Registrando empresa en PROVEED...');
+    auth.createUserWithEmailAndPassword(email, pass)
+        .then(function(cred) {
+            return db.collection('usuarios').doc(cred.user.uid).set({
+                nombre: empresa, empresa: empresa, ruc: ruc,
+                tel: tel, direccion: dir, email: email, rol: 'prov',
+                creado: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        })
+        .then(function() { hideLoader(); showFbSuccess('¡Empresa registrada exitosamente!'); irAlLogin(); })
+        .catch(function(err) {
+            hideLoader();
+            var msgs = { 'auth/email-already-in-use': 'Este correo ya está registrado.' };
+            showFbError(msgs[err.code] || err.message);
+        });
+}
+
+// ===================== PRODUCTOS FIRESTORE =====================
+function cargarProductosFirestore() {
+    db.collection('productos').orderBy('creado', 'desc').limit(20).get()
+        .then(function(snap) {
+            if (snap.empty) return;
+            var grid = document.getElementById('catalogoEmp');
+            grid.innerHTML = '';
+            snap.forEach(function(doc) {
+                var p = doc.data();
+                var precio = p.precio ? '$' + parseFloat(p.precio).toFixed(2) : 'Consultar';
+                var img = p.fotos && p.fotos[0] ? p.fotos[0] : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300';
+                var html = '<div class="product-card"><img src="' + img + '" class="product-img" onerror="this.style.background=\'#eee\'">';
+                html += '<div class="product-info"><h4>' + (p.nombre || 'Producto') + '</h4>';
+                html += '<p>Desde ' + precio + '</p>';
+                html += '<span class="prov-tag">🏭 ' + (p.empresa || 'Proveedor PROVEED') + '</span>';
+                if (p.metodo === 'directo') {
+                    html += '<button class="btn-contactar" onclick="addToCart(\'' + (p.nombre||'').replace(/'/g,"\\'") + '\',\'' + precio + '\')">AGREGAR AL CARRITO</button>';
+                } else {
+                    html += '<button class="btn-contactar" onclick="contactarProveedor(\'' + (p.empresa||'').replace(/'/g,"\\'") + '\',\'' + (p.nombre||'').replace(/'/g,"\\'") + '\',\'' + precio + '\',\'' + doc.id + '\')">CONTACTAR PROVEEDOR</button>';
+                }
+                html += '</div></div>';
+                grid.innerHTML += html;
+            });
+        })
+        .catch(function(err) { console.log('Productos demo activos:', err.message); });
+}
+// ===================== EXPLORAR =====================
+function setCat(el) {
+    document.querySelectorAll('.cat-item').forEach(function(c) { c.classList.remove('cat-active'); });
+    el.classList.add('cat-active');
+}
+function setChip(el) {
+    document.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('chip-active'); });
+    el.classList.add('chip-active');
+}
+
+// ===================== CONTACTAR PROVEEDOR =====================
+function contactarProveedor(prov, producto, precio, prodId) {
+    document.getElementById('chatProvNombre').innerText = prov;
+    escucharChatEmprendedor();
+    if (B2B.currentUser) {
+        setTimeout(function() {
+            guardarMensajeFirestore('Hola! Estoy interesado en: ' + producto + ' (' + precio + '). ¿Tienen disponibilidad?', 'emp');
+        }, 400);
+    }
+    empGoTo('emp-chat');
+    document.getElementById('chatSecScreen').style.display = 'none';
+}
+
+// ===================== CARRITO B2B =====================
+function addToCart(nombre, precio) {
+    var precioNum = parseFloat(precio.replace('$','').replace('/yd','').replace('/kg',''));
+    B2B.carrito.push({ nombre: nombre, precio: precioNum, qty: 1 });
+    renderCarrito();
+    var badge = document.getElementById('cartBadge');
+    badge.innerText = B2B.carrito.length;
+    badge.style.transform = 'scale(1.4)';
+    setTimeout(function() { badge.style.transform = 'scale(1)'; }, 300);
+    var toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--v);color:white;padding:10px 20px;border-radius:28px;font-weight:700;font-size:0.82rem;z-index:9999;white-space:nowrap;';
+    toast.innerText = '✓ ' + nombre + ' agregado';
+    document.body.appendChild(toast);
+    setTimeout(function() { document.body.removeChild(toast); }, 2000);
+}
+
+function renderCarrito() {
+    var container = document.getElementById('carrito-items');
+    var vacio     = document.getElementById('carrito-vacio');
+    var footer    = document.getElementById('checkout-footer');
+    var count     = document.getElementById('cartCount');
+    if (B2B.carrito.length === 0) {
+        vacio.style.display = 'block'; container.innerHTML = '';
+        footer.style.display = 'none'; count.innerText = '0'; return;
+    }
+    vacio.style.display = 'none'; footer.style.display = 'block';
+    count.innerText = B2B.carrito.length;
+    var total = 0, html = '';
+    B2B.carrito.forEach(function(item, i) {
+        total += item.precio * item.qty;
+        html += '<div class="vendor-group"><div class="cart-item">';
+        html += '<div class="item-img" style="background:linear-gradient(135deg,#32CD32,#1a8c1a);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🛒</div>';
+        html += '<div class="item-details"><p class="item-title">' + item.nombre + '</p>';
+        html += '<p class="item-price">$' + item.precio.toFixed(2) + '</p>';
+        html += '<div class="item-footer"><div class="qty-selector">';
+        html += '<button class="qty-btn" onclick="cambiarQty(' + i + ',-1)">−</button>';
+        html += '<span class="qty-num">' + item.qty + '</span>';
+        html += '<button class="qty-btn" onclick="cambiarQty(' + i + ',1)">+</button>';
+        html += '</div><div class="delete-btn" onclick="eliminarItem(' + i + ')">🗑</div>';
+        html += '</div></div></div></div>';
+    });
+    container.innerHTML = html;
+    document.getElementById('cartSubtotal').innerText = '$' + total.toFixed(2);
+    document.getElementById('cartTotal').innerText    = '$' + total.toFixed(2);
+    try { document.getElementById('pagoTotal').innerText = '$' + total.toFixed(2); } catch(e){}
+    var resumen = B2B.carrito.map(function(i) { return i.qty + 'x ' + i.nombre + ' — $' + (i.precio*i.qty).toFixed(2); }).join('<br>');
+    try { document.getElementById('pagoResumen').innerHTML = resumen; } catch(e){}
+}
+function cambiarQty(i, delta) { B2B.carrito[i].qty = Math.max(1, B2B.carrito[i].qty + delta); renderCarrito(); }
+function eliminarItem(i) { B2B.carrito.splice(i, 1); renderCarrito(); document.getElementById('cartBadge').innerText = B2B.carrito.length; }
+
+// ===================== NOTIFICAR PROVEEDOR / PEDIDO =====================
+function notificarProveedor() {
+    if (!B2B.currentUser) return;
+    var pedido = {
+        emprendedorId:     B2B.currentUser.uid,
+        emprendedorNombre: B2B.userDoc ? (B2B.userDoc.nombre + ' ' + (B2B.userDoc.apellido||'')) : 'Emprendedor',
+        emprendedorEmail:  B2B.currentUser.email,
+        items:  B2B.carrito.slice(),
+        total:  B2B.carrito.reduce(function(s,i){ return s + i.precio*i.qty; }, 0).toFixed(2),
+        estado: 'pendiente',
+        creado: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    db.collection('pedidos').add(pedido)
+        .then(function(ref) { B2B.pedidos.push(pedido); console.log('Pedido guardado:', ref.id); })
+        .catch(function(err) { console.error('Error guardando pedido:', err); });
+}
+
+// ===================== PAGO =====================
+function procesarPago() {
+    var btn = document.getElementById('payBtn');
+    btn.disabled = true; btn.innerText = 'PROCESANDO...';
+    notificarProveedor();
+    setTimeout(function() {
+        if (B2B.currentUser) {
+            db.collection('compras').add({
+                uid:   B2B.currentUser.uid,
+                items: B2B.carrito,
+                total: B2B.carrito.reduce(function(s,i){ return s + i.precio*i.qty; }, 0),
+                fecha: firebase.firestore.FieldValue.serverTimestamp(),
+                estado: 'pagado'
+            }).catch(function(e){ console.log(e); });
+        }
+        showFbSuccess('¡Pago exitoso! El proveedor procesará tu pedido.');
+        B2B.carrito = [];
+        renderCarrito();
+        document.getElementById('cartBadge').innerText = '0';
+        btn.disabled = false; btn.innerText = 'CONFIRMAR Y PAGAR';
+        empGoTo('emp-dashboard');
+    }, 2000);
+}
+
+// ===================== LISTENERS FIRESTORE EN TIEMPO REAL =====================
+function escucharPedidosProveedor() {
+    if (B2B.pedidosUnsubscribe) B2B.pedidosUnsubscribe();
+    B2B.pedidosUnsubscribe = db.collection('pedidos')
+        .where('estado', '==', 'pendiente')
+        .orderBy('creado', 'desc')
+        .onSnapshot(function(snap) {
+            var lista = document.getElementById('erpPedidosLista');
+            var seccion = document.getElementById('listaPedidos');
+            if (lista) {
+                var n = document.getElementById('erpPedidos');
+                if (n) n.innerText = snap.size;
+            }
+            if (snap.empty) {
+                if (seccion) seccion.innerHTML = '<p style="color:#bbb;text-align:center;padding:40px 0;">No hay pedidos pendientes.</p>';
+                return;
+            }
+            var html = '';
+            snap.forEach(function(doc) {
+                var p = doc.data();
+                var nombres = (p.items||[]).map(function(i){ return i.qty+'x '+i.nombre; }).join(', ');
+                var fecha = p.creado ? new Date(p.creado.seconds*1000).toLocaleString('es-EC') : 'Ahora';
+                html += '<div class="order-detail">';
+                html += '<h4>🛒 ' + (p.emprendedorNombre||'Emprendedor') + '</h4>';
+                html += '<div class="order-meta">' + fecha + ' · Total: $' + (p.total||'0') + '</div>';
+                html += '<p style="font-size:0.82rem;color:#555;margin-bottom:10px;">' + nombres + '</p>';
+                html += '<div class="status-btns">';
+                html += '<button class="btn-status btn-aceptar" onclick="cambiarEstadoPedido(\'' + doc.id + '\',\'aceptado\',this)">✓ Aceptar</button>';
+                html += '<button class="btn-status btn-enviar" onclick="cambiarEstadoPedido(\'' + doc.id + '\',\'enviado\',this)">🚚 Enviar</button>';
+                html += '<button class="btn-status btn-rechazar" onclick="cambiarEstadoPedido(\'' + doc.id + '\',\'rechazado\',this)">✕ Rechazar</button>';
+                html += '</div></div>';
+            });
+            if (seccion) seccion.innerHTML = html;
+            if (snap.size > 0) mostrarNotifB2B('Tienes ' + snap.size + ' pedido(s) pendiente(s).');
+        });
+}
+
+function escucharPedidosEmprendedor() {
+    if (!B2B.currentUser) return;
+    db.collection('pedidos')
+        .where('emprendedorId', '==', B2B.currentUser.uid)
+        .orderBy('creado', 'desc').limit(5)
+        .onSnapshot(function(snap) {
+            snap.docChanges().forEach(function(change) {
+                if (change.type === 'modified') {
+                    var p = change.doc.data();
+                    if (p.estado === 'enviado') mostrarNotifB2B('¡Tu pedido fue despachado! 🚚');
+                    if (p.estado === 'aceptado') mostrarNotifB2B('Tu pedido fue aceptado ✓');
+                }
+            });
+        });
+}
+
+function cambiarEstadoPedido(docId, nuevoEstado, btn) {
+    db.collection('pedidos').doc(docId).update({ estado: nuevoEstado })
+        .then(function() { btn.disabled = true; showFbSuccess('Pedido marcado como: ' + nuevoEstado); })
+        .catch(function(e) { showFbError(e.message); });
+}
+// ===================== CHAT B2B FIRESTORE =====================
+var chatRoom = 'global';
+
+function escucharChatProveedor() {
+    if (B2B.chatUnsubscribe) B2B.chatUnsubscribe();
+    B2B.chatUnsubscribe = db.collection('chat_b2b').doc(chatRoom)
+        .collection('mensajes').orderBy('creado').limit(50)
+        .onSnapshot(function(snap) {
+            var box = document.getElementById('chatBox');
+            if (!box) return;
+            // Mantener el stockPanel si existe
+            var stock = document.getElementById('stockPanel');
+            box.innerHTML = '';
+            if (stock) box.appendChild(stock);
+            snap.forEach(function(doc) {
+                var m = doc.data();
+                var div = document.createElement('div');
+                div.className = 'chat-msg ' + (m.rol === 'prov' ? 'sent' : 'received');
+                div.innerText = (m.nombre ? m.nombre + ': ' : '') + m.texto;
+                box.appendChild(div);
+            });
+            box.scrollTop = 9999;
+            if (snap.size > 0) {
+                var n = document.getElementById('erpChats');
+                if (n) n.innerText = snap.size;
+            }
+        });
+}
+
+function escucharChatEmprendedor() {
+    if (B2B.chatUnsubscribe) B2B.chatUnsubscribe();
+    B2B.chatUnsubscribe = db.collection('chat_b2b').doc(chatRoom)
+        .collection('mensajes').orderBy('creado').limit(50)
+        .onSnapshot(function(snap) {
+            var area = document.getElementById('empChatMessages');
+            if (!area) return;
+            area.innerHTML = '';
+            snap.forEach(function(doc) {
+                var m = doc.data();
+                var b = document.createElement('div');
+                b.className = 'bubble ' + (m.rol === 'emp' ? 'sent' : 'received');
+                b.innerText = m.texto;
+                area.appendChild(b);
+            });
+            area.scrollTop = 9999;
+        });
+}
+
+function guardarMensajeFirestore(texto, rol) {
+    return db.collection('chat_b2b').doc(chatRoom).collection('mensajes').add({
+        texto:  texto,
+        rol:    rol,
+        uid:    B2B.currentUser ? B2B.currentUser.uid : 'anonimo',
+        nombre: B2B.userDoc ? B2B.userDoc.nombre : rol,
+        creado: firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
+
+// ===================== CHAT EMPRENDEDOR UI =====================
+var chatFails = 0;
+document.addEventListener('DOMContentLoaded', function() {
+    var inp = document.getElementById('empChatInput');
+    if (inp) inp.addEventListener('keypress', function(e) { if (e.key === 'Enter') sendEmpMsg(); });
+});
+function agregarBubbleEmp(texto, tipo) {
+    var area = document.getElementById('empChatMessages');
+    var b = document.createElement('div');
+    b.className = 'bubble ' + tipo;
+    b.innerText = texto;
+    area.appendChild(b);
+    area.scrollTop = 9999;
+}
+function sendEmpMsg() {
+    var inp = document.getElementById('empChatInput');
+    var val = inp.value.trim();
+    if (!val) return;
+    var banned = ['whatsapp','telegram','facebook','numero','celular','telefono','wp','09'];
+    var bloqueado = banned.some(function(b) { return val.toLowerCase().includes(b); }) || /\d{7,}/.test(val);
+    if (bloqueado) {
+        chatFails++; inp.value = '';
+        var t = document.getElementById('chatToast');
+        t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 2800);
+        return;
+    }
+    inp.value = '';
+    if (B2B.currentUser) {
+        guardarMensajeFirestore(val, 'emp');
+    } else {
+        agregarBubbleEmp(val, 'sent');
+        setTimeout(function() { agregarBubbleEmp('Inicia sesión para chatear con proveedores reales.', 'received'); }, 1000);
+    }
+    try { document.getElementById('expPopup').style.display = 'none'; } catch(e){}
+}
+function abrirChatEmprendedor(provNombre) {
+    document.getElementById('chatProvNombre').innerText = provNombre || 'Proveedor PROVEED';
+    document.getElementById('chatSecScreen').style.display = 'none';
+    escucharChatEmprendedor();
+}
+function toggleExp() {
+    var p = document.getElementById('expPopup');
+    p.style.display = p.style.display === 'block' ? 'none' : 'block';
+}
+function saveExp() { showFbSuccess('¡Gracias por tu reseña!'); document.getElementById('expPopup').style.display = 'none'; }
+
+// ===================== CHAT ERP PROVEEDOR UI =====================
+function sendErpMsg() {
+    var inp = document.getElementById('msgInput');
+    var val = inp.value.trim();
+    if (!val) return;
+    inp.value = '';
+    if (B2B.currentUser) {
+        guardarMensajeFirestore(val, 'prov');
+    } else {
+        var box = document.getElementById('chatBox');
+        var div = document.createElement('div');
+        div.className = 'chat-msg sent'; div.innerText = val;
+        box.appendChild(div); box.scrollTop = 9999;
+    }
+}
+function toggleStock() {
+    var p = document.getElementById('stockPanel');
+    p.style.display = p.style.display === 'none' || !p.style.display ? 'block' : 'none';
+}
+function filterStock() {
+    var q = document.getElementById('stockSearch').value.toLowerCase();
+    document.querySelectorAll('.stock-item').forEach(function(it) {
+        it.style.display = it.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
+    });
+}
+function sendProduct(nombre, precio, img) {
+    toggleStock();
+    var box = document.getElementById('chatBox');
+    var div = document.createElement('div');
+    div.className = 'prod-card-chat';
+    div.innerHTML = '<div class="prod-card-body"><b style="font-size:0.85rem;color:white;">' + nombre + '</b><p style="color:var(--v);font-weight:800;margin:4px 0 0;">' + precio + '</p><button style="background:var(--v);color:black;border:none;width:100%;padding:8px;border-radius:8px;margin-top:8px;font-weight:800;cursor:pointer;" onclick="addToCart(\'' + nombre.replace(/'/g,"\\'") + '\',\'' + precio + '\')">AÑADIR AL CARRITO</button></div>';
+    box.appendChild(div);
+    box.scrollTop = 9999;
+    if (B2B.currentUser) guardarMensajeFirestore('[Producto compartido: ' + nombre + ' — ' + precio + ']', 'prov');
+}
+
+// ===================== NOTIFICACIÓN B2B =====================
+function mostrarNotifB2B(msg) {
+    var notif = document.getElementById('notifB2B');
+    var texto = document.getElementById('notifTexto');
+    if (!notif || !texto) return;
+    texto.innerText = msg;
+    notif.style.display = 'block';
+    setTimeout(function() { notif.style.display = 'none'; }, 5000);
+}
+function notifB2BPedido() { mostrarNotifB2B('Nuevo pedido B2B recibido 🛒'); }
+
+// ===================== PERFIL MODAL =====================
+function openModal(id) {
+    document.getElementById('modalOverlay').style.display = 'block';
+    document.getElementById(id).classList.add('active');
+}
+function closeAllModals() {
+    document.getElementById('modalOverlay').style.display = 'none';
+    document.querySelectorAll('.modal-content').forEach(function(m) { m.classList.remove('active'); });
+}
+function abrirModal(id) { openModal(id); }
+function verifyToPin() {
+    var pass = document.getElementById('check-pass').value;
+    if (!B2B.currentUser) { showFbError('Debes iniciar sesión.'); return; }
+    var credential = firebase.auth.EmailAuthProvider.credential(B2B.currentUser.email, pass);
+    showLoader('Verificando...');
+    B2B.currentUser.reauthenticateWithCredential(credential)
+        .then(function() {
+            hideLoader();
+            document.getElementById('modal-auth').classList.remove('active');
+            document.getElementById('modal-pin').classList.add('active');
+        })
+        .catch(function() { hideLoader(); showFbError('Contraseña incorrecta.'); });
+}
+function saveInfo() {
+    var name = document.getElementById('input-name').value.trim();
+    if (!name) return;
+    try { document.getElementById('profileName').innerText = name; } catch(e){}
+    try { document.getElementById('empNombre').innerText = name; } catch(e){}
+    closeAllModals();
+    if (B2B.currentUser) {
+        db.collection('usuarios').doc(B2B.currentUser.uid).update({ nombre: name })
+            .then(function() { showFbSuccess('Perfil actualizado.'); })
+            .catch(function(e) { showFbError(e.message); });
+    }
+}
+
+// ===================== ERP: CATÁLOGO PROVEEDOR =====================
+function agregarProducto() {
+    var nombre = document.getElementById('prodNombre').value.trim();
+    var precio = document.getElementById('prodPrecio').value.trim();
+    var stock  = document.getElementById('prodStock').value.trim();
+    var desc   = document.getElementById('prodDesc').value.trim();
+    if (!nombre || !precio) { showFbError('Nombre y precio son obligatorios.'); return; }
+    if (!B2B.currentUser) { showFbError('Debes iniciar sesión.'); return; }
+    showLoader('Guardando producto...');
+    db.collection('productos').add({
+        nombre:  nombre,
+        precio:  parseFloat(precio.replace('$','')),
+        stock:   parseInt(stock) || 0,
+        desc:    desc,
+        empresa: B2B.userDoc ? B2B.userDoc.empresa || B2B.userDoc.nombre : 'Proveedor',
+        provId:  B2B.currentUser.uid,
+        metodo:  'directo',
+        creado:  firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function(ref) {
+        hideLoader();
+        showFbSuccess('Producto agregado al catálogo.');
+        document.getElementById('prodNombre').value = '';
+        document.getElementById('prodPrecio').value = '';
+        document.getElementById('prodStock').value  = '';
+        document.getElementById('prodDesc').value   = '';
+        cargarCatalogoProveedor();
+    }).catch(function(e) { hideLoader(); showFbError(e.message); });
+}
+
+function cargarCatalogoProveedor() {
+    if (!B2B.currentUser) return;
+    db.collection('productos').where('provId','==',B2B.currentUser.uid).get()
+        .then(function(snap) {
+            var lista = document.getElementById('listaCatalogo');
+            if (!lista) return;
+            if (snap.empty) { lista.innerHTML = '<p style="color:#bbb;text-align:center;padding:20px;">Aún no tienes productos. ¡Agrega el primero!</p>'; return; }
+            var html = '';
+            snap.forEach(function(doc) {
+                var p = doc.data();
+                html += '<div class="prod-item"><div class="prod-data">';
+                html += '<h4>' + p.nombre + '</h4>';
+                html += '<p>$' + parseFloat(p.precio).toFixed(2) + ' · Stock: ' + (p.stock||0) + '</p>';
+                html += '</div><div class="prod-actions">';
+                html += '<button class="btn-del" onclick="eliminarProducto(\'' + doc.id + '\',this)">Eliminar</button>';
+                html += '</div></div>';
+            });
+            lista.innerHTML = html;
+            var n = document.getElementById('erpProductos');
+            if (n) n.innerText = snap.size;
+        });
+}
+
+function eliminarProducto(docId, btn) {
+    if (!confirm('¿Eliminar este producto?')) return;
+    db.collection('productos').doc(docId).delete()
+        .then(function() { showFbSuccess('Producto eliminado.'); cargarCatalogoProveedor(); })
+        .catch(function(e) { showFbError(e.message); });
+}
+
+// ===================== ERP: SUCURSALES =====================
+function loadSuc(nombre, ventas, pedidos, chats, el) {
+    document.querySelectorAll('.suc-branch').forEach(function(b) { b.classList.remove('sactive'); });
+    el.classList.add('sactive');
+    try { document.getElementById('sucName').innerText = 'Sucursal: ' + nombre; } catch(e){}
+    try { document.getElementById('sVentas').innerText = ventas.replace('$',''); } catch(e){}
+    try { document.getElementById('sPedidos').innerText = pedidos; } catch(e){}
+    try { document.getElementById('sChats').innerText = chats; } catch(e){}
+}
+function addSuc() {
+    var nombre = prompt('Nombre de la nueva sucursal:');
+    if (!nombre) return;
+    var lista = document.getElementById('sucList');
+    var div = document.createElement('div');
+    div.className = 'suc-branch';
+    div.innerHTML = '<b>' + nombre.toUpperCase() + '</b><br><small>Sin gerente asignado</small>';
+    div.onclick = function() { loadSuc(nombre, '0', 0, 0, div); };
+    lista.appendChild(div);
+    showFbSuccess('Sucursal ' + nombre + ' creada.');
+}
+
+// ===================== ERP: SOPORTE =====================
+function openCS(subject) {
+    document.getElementById('csSubject').innerText = subject;
+    document.getElementById('csChat').classList.add('open');
+}
+function closeCS() { document.getElementById('csChat').classList.remove('open'); }
+function enviarCS() {
+    var inp = document.getElementById('csInput');
+    var val = inp.value.trim(); if (!val) return;
+    var msgs = document.getElementById('csMsgs');
+    var b = document.createElement('div');
+    b.className = 'erp-bubble out'; b.innerText = val;
+    msgs.appendChild(b); msgs.scrollTop = 9999; inp.value = '';
+}
+function agregarAgente() {
+    var nombre = document.getElementById('nuevoAgente').value.trim();
+    if (!nombre) return;
+    showFbSuccess('Acceso generado para: ' + nombre);
+    document.getElementById('nuevoAgente').value = '';
+}
+
+// ===================== ERP: FACTURADOR =====================
+var invoiceItemsList = [];
+function updateFactura() {
+    try { document.getElementById('prevTienda').innerText  = document.getElementById('tiendaName').value || 'NOMBRE'; } catch(e){}
+    try { document.getElementById('prevRuc').innerText     = 'RUC: ' + (document.getElementById('rucNumber').value || '—'); } catch(e){}
+    try { document.getElementById('prevClient').innerText  = document.getElementById('clientName').value || 'Consumidor Final'; } catch(e){}
+}
+function addItem() {
+    try {
+        var desc  = document.getElementById('itemDesc').value.trim();
+        var qty   = parseFloat(document.getElementById('itemQty').value) || 1;
+        var price = parseFloat(document.getElementById('itemPrice').value) || 0;
+        if (!desc) return;
+        invoiceItemsList.push({ desc: desc, qty: qty, price: price });
+        renderInvoice();
+    } catch(e){}
+}
+function renderInvoice() {
+    try {
+        var tbody = document.getElementById('invoiceItems');
+        var subtotal = 0;
+        tbody.innerHTML = '';
+        invoiceItemsList.forEach(function(item) {
+            var total = item.qty * item.price;
+            subtotal += total;
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>' + item.qty + '</td><td>' + item.desc + '</td><td style="text-align:right">$' + item.price.toFixed(2) + '</td><td style="text-align:right">$' + total.toFixed(2) + '</td>';
+            tbody.appendChild(tr);
+        });
+        var iva = subtotal * 0.15;
+        try { document.getElementById('subtotalVal').innerText = '$' + subtotal.toFixed(2); } catch(e){}
+        try { document.getElementById('ivaVal').innerText      = '$' + iva.toFixed(2); } catch(e){}
+        try { document.getElementById('totalVal').innerText    = '$' + (subtotal + iva).toFixed(2); } catch(e){}
+    } catch(e){}
+}
+function generarXML() { showFbSuccess('Declaración SRI generada. Descarga el XML desde tu portal.'); }
+
+// ===================== ERP: CONTABILIDAD =====================
+function setPeriod(label, meses, evt) {
+    document.querySelectorAll('.btn-period').forEach(function(b) { b.classList.remove('active'); });
+    if (evt && evt.target) evt.target.classList.add('active');
+    var factor = meses;
+    try { document.getElementById('iva-val').innerText   = '$' + (1240.50 * factor).toLocaleString('es-EC', {minimumFractionDigits:2}); } catch(e){}
+    try { document.getElementById('ir-val').innerText    = '$' + (315.20  * factor).toLocaleString('es-EC', {minimumFractionDigits:2}); } catch(e){}
+    try { document.getElementById('total-tax').innerText = '$' + (1555.70 * factor).toLocaleString('es-EC', {minimumFractionDigits:2}); } catch(e){}
+    try { document.getElementById('period-label').innerText = 'PERÍODO: ' + label.toUpperCase(); } catch(e){}
+}
+// ===================== ERP: NUEVO PRODUCTO (ficha técnica) =====================
+function cambiarNicho() {
+    var v = document.getElementById('nicho').value;
+    var f = document.getElementById('ficha-tecnica');
+    var map = {
+        agro:[['Cultivo','Tipo de cultivo'],['Temporada','Cosecha estimada'],['Certificación','Orgánico / Convencional']],
+        moda:[['Talla','S/M/L/XL'],['Material','Tela o fibra'],['Colección','Temporada']],
+        maquina:[['Potencia','HP / KW'],['Voltaje','110V / 220V'],['Garantía','Meses de garantía']],
+        tec:[['Modelo','Modelo exacto'],['RAM','GB de RAM'],['Almacenamiento','SSD / HDD']],
+        med:[['Registro ARCSA','Nro. registro'],['Uso','Clínico / Doméstico'],['Caducidad','Fecha de caducidad']],
+        ferre:[['Material','Acero / PVC'],['Norma','INEN / ISO'],['Peso','KG por unidad']],
+        auto:[['Marca','Compatible con'],['Año','Año del modelo'],['OEM','Código OEM']],
+        min:[['Mineral','Tipo de mineral'],['Pureza','% de pureza'],['Certificado','Origen certificado']],
+        alimen:[['Registro Sanitario','Nro.'],['Caducidad','Meses de vida'],['Presentación','Kg / Litros']],
+        barber:[['Tipo','Profesional / Amateur'],['Voltaje','Universal / Local'],['Garantía','Meses']],
+        seg:[['Certificación','CE / UL'],['Autonomía','Horas de batería'],['Grado','IP rating']],
+        quim:[['Hoja de Seguridad','MSDS disponible'],['Concentración','% de pureza'],['Empaque','Litros / Kg']]
+    };
+    if (!v) { f.innerHTML = '<p style="text-align:center;font-size:0.7rem;color:#aaa;margin:10px 0;">Selecciona una industria</p>'; return; }
+    var items = map[v] || [];
+    f.innerHTML = items.map(function(l) { return '<label style="font-size:0.7rem;font-weight:800;color:#555;text-transform:uppercase;display:block;margin-bottom:4px;">'+l[0]+'</label><input type="text" class="erp-input" placeholder="'+l[1]+'">'; }).join('');
+}
+function setMetodo(tipo) {
+    document.getElementById('optChat').classList.toggle('active', tipo==='chat');
+    document.getElementById('optDirecto').classList.toggle('active', tipo==='directo');
+    document.getElementById('metodoFinal').value = tipo;
+    document.getElementById('infoMetodo').innerText = tipo === 'chat' ? '* El emprendedor será redirigido al chat B2B.' : '* El emprendedor puede comprar directamente.';
+}
+function publicar() {
+    var nm     = document.getElementById('prod-nombre').value.trim();
+    var precio = document.getElementById('prod-precio').value;
+    var minima = document.getElementById('prod-minima').value;
+    var nicho  = document.getElementById('nicho').value;
+    var metodo = document.getElementById('metodoFinal').value;
+    if (!nm) { showFbError('Ingresa el nombre del producto.'); return; }
+    if (!B2B.currentUser) { showFbError('Debes iniciar sesión como proveedor.'); return; }
+    showLoader('Publicando producto...');
+    db.collection('productos').add({
+        nombre: nm, precio: parseFloat(precio)||0,
+        minimaCompra: parseInt(minima)||1, nicho: nicho, metodo: metodo,
+        empresa: B2B.userDoc ? (B2B.userDoc.empresa||B2B.userDoc.nombre) : 'Proveedor PROVEED',
+        proveedorId: B2B.currentUser.uid, fotos: [], activo: true,
+        creado: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+        hideLoader(); showFbSuccess('¡Producto publicado! Ya visible para emprendedores.'); erpGoHome();
+    }).catch(function(err) { hideLoader(); showFbError(err.message); });
+}
+
+// ===================== ERP: INVENTARIO =====================
+function toggleBranch(id) {
+    var sw = document.getElementById('bsw'+id);
+    var card = document.getElementById('bc'+id);
+    var st = document.getElementById('bstat'+id);
+    var on = sw.classList.toggle('on');
+    if (card) card.classList.toggle('br-active', on);
+    if (st) { st.innerText = on ? 'VINCULADA AL STOCK' : 'DESCONECTADA'; st.style.color = on ? 'var(--v)' : '#666'; }
+    var log = document.getElementById('invLog');
+    if (log) log.innerText = on ? 'Sede '+id+' conectada. Ventas descuentan del Inventario Central.' : 'Sucursal '+id+' desconectada.';
+}
+function actualizarStock() {
+    var log = document.getElementById('invLog');
+    if (log) log.innerText = 'Rescaneando base de datos global...';
+    setTimeout(function() { if (log) log.innerText = '✓ Stock actualizado — ' + new Date().toLocaleTimeString('es-EC'); }, 1400);
+}
+
+// ===================== ERP: VAULT =====================
+var mKeys = {f1:'1234', f2:'abc#', f3:'alpha1'};
+var vStep = 1;
+function initVault() {
+    try {
+        document.getElementById('vaultScreen').classList.remove('gone');
+        document.getElementById('vaultPanel').classList.remove('open');
+        vStep = 1;
+        document.getElementById('vaultInput').value = '';
+        document.getElementById('vaultErr').style.display = 'none';
+        document.getElementById('vaultLabel').innerText = 'FILTRO 1: PIN NUMÉRICO';
+    } catch(e){}
+}
+function vaultVerify() {
+    var v = document.getElementById('vaultInput').value;
+    var err = document.getElementById('vaultErr');
+    err.style.display = 'none';
+    var ok = (vStep===1 && v===mKeys.f1)||(vStep===2 && v===mKeys.f2)||(vStep===3 && v===mKeys.f3);
+    if (ok && vStep < 3) {
+        try { document.getElementById('vc'+vStep).classList.add('on'); } catch(e){}
+        vStep++;
+        var labels = ['','FILTRO 2: LETRAS Y SIGNOS','FILTRO 3: ALFANUMÉRICO MAESTRO'];
+        document.getElementById('vaultLabel').innerText = labels[vStep];
+        document.getElementById('vaultInput').value = '';
+    } else if (ok && vStep === 3) {
+        try { document.getElementById('vc3').classList.add('on'); } catch(e){}
+        setTimeout(function() {
+            document.getElementById('vaultScreen').classList.add('gone');
+            document.getElementById('vaultPanel').classList.add('open');
+        }, 600);
+    } else {
+        err.style.display = 'block';
+        document.getElementById('vaultInput').value = '';
+        setTimeout(function() { err.style.display='none'; }, 2000);
+    }
+}
+function updateMasterPin() {
+    var np = document.getElementById('newMasterPin').value;
+    if (!np || np.length < 4) { showFbError('PIN debe tener al menos 4 caracteres.'); return; }
+    mKeys.f1 = np;
+    showFbSuccess('PIN maestro actualizado.');
+    document.getElementById('newMasterPin').value = '';
+}
+function panicLock() {
+    if (confirm('¿ACTIVAR BLOQUEO DE EMERGENCIA? Cerrará todas las sesiones.')) {
+        showFbError('🚨 BLOQUEO ACTIVADO');
+        setTimeout(function() { cerrarSesion(); }, 2000);
+    }
+}
+
+// ===================== DESPACHOS =====================
+function despachar(id, btn) {
+    btn.innerText = '✓ DESPACHADO'; btn.style.background = '#333';
+    btn.style.color = '#32CD32'; btn.disabled = true;
+}
+function marcarDespachado(docId, btn) {
+    db.collection('pedidos').doc(docId).update({ estado: 'enviado' })
+        .then(function() { btn.innerText = '✓ Enviado'; btn.disabled = true; showFbSuccess('Pedido despachado.'); })
+        .catch(function(e) { showFbError(e.message); });
+}
+
+// ===================== VOZ =====================
+function activarVoz() {
+    var mic = document.getElementById('micBtn');
+    var inp = document.getElementById('dashSearch');
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { showFbError('Tu navegador no soporta búsqueda por voz.'); return; }
+    var rec = new SR(); rec.lang = 'es-ES';
+    rec.onstart  = function() { if(mic) mic.classList.add('recording'); if(inp) inp.placeholder = 'Escuchando...'; };
+    rec.onresult = function(e) { if(inp) inp.value = e.results[0][0].transcript; if(mic) mic.classList.remove('recording'); };
+    rec.onerror  = function() { if(mic) mic.classList.remove('recording'); };
+    rec.start();
+}
+
+// ===================== INIT FECHA =====================
+document.addEventListener('DOMContentLoaded', function() {
+    try { document.getElementById('dateNow').innerText = new Date().toLocaleDateString('es-EC'); } catch(e){}
+    try { document.getElementById('statDate').innerText = new Date().toLocaleDateString('es-EC', {month:'long', year:'numeric'}); } catch(e){}
+    var mi = document.getElementById('msgInput');
+    if (mi) mi.addEventListener('keypress', function(e) { if (e.key === 'Enter') sendErpMsg(); });
+});
+</script>
+
+<!-- ===================== FIREBASE: CARGA DINÁMICA CON REINTENTOS ===================== -->
+<script>
+(function() {
+    var FB_CONFIG = {
+        apiKey:            "AIzaSyAZQRlfdtJjmodrfmct5N3qrLO6hniO2o8",
+        authDomain:        "proveed-8cb7c.firebaseapp.com",
+        projectId:         "proveed-8cb7c",
+        storageBucket:     "proveed-8cb7c.firebasestorage.app",
+        messagingSenderId: "235073250367",
+        appId:             "1:235073250367:web:89ec59fea5f0b8a347448a"
+    };
+
+    var CDNS = [
+        'https://www.gstatic.com/firebasejs/10.12.0/',
+        'https://cdn.jsdelivr.net/npm/firebase@10.12.0/',
+        'https://unpkg.com/firebase@10.12.0/'
+    ];
+    var LIBS = [
+        'firebase-app-compat.js',
+        'firebase-auth-compat.js',
+        'firebase-firestore-compat.js',
+        'firebase-storage-compat.js'
+    ];
+
+    function mostrarLoaderFB(msg) {
+        var el = document.getElementById('fb-carga');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'fb-carga';
+            el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:linear-gradient(90deg,#1A1A1A 0%,#32CD32 50%,#1A1A1A 100%);background-size:200% 100%;animation:fbSlide 1.5s linear infinite;color:white;padding:8px 20px;font-size:0.72rem;font-weight:800;font-family:Syne,sans-serif;z-index:99999;text-align:center;letter-spacing:1px;';
+            var st = document.createElement('style');
+            st.innerText = '@keyframes fbSlide{0%{background-position:200% 0}100%{background-position:0% 0}}';
+            document.head.appendChild(st);
+            document.body.appendChild(el);
+        }
+        el.innerText = '⬡ ' + (msg || 'CONECTANDO...');
+        el.style.display = 'block';
+    }
+    function ocultarLoaderFB() { var el = document.getElementById('fb-carga'); if (el) el.style.display = 'none'; }
+
+    function iniciarFirebase() {
+        try {
+            if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+            window.auth    = firebase.auth();
+            window.db      = firebase.firestore();
+            window.storage = firebase.storage();
+            window.FB_LISTO = true;
+            window.db.enablePersistence().catch(function(){});
+            ocultarLoaderFB();
+            console.log('✅ Firebase OK');
+            if (typeof initApp === 'function') initApp();
+        } catch(e) {
+            console.error('Error init Firebase:', e);
+            fallbackSinFirebase();
+        }
+    }
+
+    function cargarLibsSecuencial(cdn, libIndex, onDone, onFail) {
+        if (libIndex >= LIBS.length) { onDone(); return; }
+        var s = document.createElement('script');
+        s.src = cdn + LIBS[libIndex];
+        s.onload  = function() { cargarLibsSecuencial(cdn, libIndex + 1, onDone, onFail); };
+        s.onerror = function() { onFail(); };
+        document.head.appendChild(s);
+    }
+
+    function intentarCDN(cdnIndex) {
+        if (cdnIndex >= CDNS.length) { fallbackSinFirebase(); return; }
+        mostrarLoaderFB('Conectando...');
+        cargarLibsSecuencial(CDNS[cdnIndex], 0,
+            function() { iniciarFirebase(); },
+            function() { console.warn('CDN falló, probando siguiente...'); intentarCDN(cdnIndex + 1); }
+        );
+    }
+
+function fallbackSinFirebase() {
+        ocultarLoaderFB();
+        console.warn('⚠️ Firebase no disponible — modo sin conexión');
+        window.auth = {
+            onAuthStateChanged: function(cb) { cb(null); },
+            signInWithEmailAndPassword: function() { return Promise.reject({code:'offline', message:'Sin conexión a internet'}); },
+            createUserWithEmailAndPassword: function() { return Promise.reject({code:'offline', message:'Sin conexión a internet'}); },
+            signOut: function() { return Promise.resolve(); }
+        };
+        window.db = {
+            collection: function() {
+                var s = { doc:function(){return{get:function(){return Promise.resolve({exists:false,data:function(){return{};}});},set:function(){return Promise.resolve();},update:function(){return Promise.resolve();}};}, add:function(){return Promise.resolve({id:'local'});}, get:function(){return Promise.resolve({empty:true,forEach:function(){}});}, where:function(){return s;}, orderBy:function(){return s;}, limit:function(){return s;}, onSnapshot:function(cb){cb({size:0,empty:true,forEach:function(){},docChanges:function(){return[];}});return function(){};}};
+                return s;
+            }
+        };
+        window.storage = { ref: function() { return {}; } };
+        if (typeof initApp === 'function') initApp();
+    }
+
+    if (typeof firebase !== 'undefined') {
+        iniciarFirebase();
+    } else {
+        intentarCDN(0);
+    }
+})();
+</script>
+</body>
+</html>
