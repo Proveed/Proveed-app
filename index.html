@@ -3,106 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOCH: METEOR ASCENSION</title>
+    <title>TOCH: COSMIC ASCENSION</title>
     <style>
         :root {
-            --bg: #000;
-            --primary: #32ff7e; /* Verde Neón - Energía/Meta */
-            --danger: #ff3e3e;  /* Rojo Neón - Muerte/Meteoros */
-            --ball: #fff;       /* Esfera Blanca */
+            /* Colores Estelares Premium */
+            --bg-deep: #020205; /* Negro azulado profundo */
+            --bg-void: #0a0a1a; /* Violeta muy oscuro */
+            --primary: #32ff7e; /* Verde Neón Estelar */
+            --danger: #ff3e3e;  /* Rojo Alerta Cósmica */
+            --meteor: #ff9f1a;  /* Naranja Incandescente */
+            --ball: #ffffff;    /* Estrella Blanca */
         }
 
         * { box-sizing: border-box; touch-action: none; user-select: none; }
 
         body {
-            margin: 0; background: var(--bg); color: white;
+            margin: 0; background: var(--bg-deep); color: white;
             font-family: 'Courier New', monospace; height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
             overflow: hidden;
         }
 
-        /* HUD Superior */
+        /* HUD Superior Cristalino */
         #hud {
             margin-top: 20px; text-align: center; width: 90%; z-index: 100;
             display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.03); padding: 10px 15px;
+            border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
         }
-        #level-txt { font-size: 14px; color: var(--primary); letter-spacing: 2px; }
-        #altitude-txt { font-size: 20px; font-weight: bold; color: #fff; }
+        #level-txt { font-size: 12px; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; }
+        #altitude-txt { font-size: 18px; font-weight: bold; color: #fff; font-family: sans-serif; }
 
-        /* Escenario de Juego */
+        /* Escenario Cósmico de Juego */
         #stage {
             position: relative; width: 100vw; height: calc(100vh - 80px);
             margin-top: 10px; overflow: hidden;
-            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            /* Fondo de Espacio Profundo */
+            background: radial-gradient(circle at center, var(--bg-void) 0%, var(--bg-deep) 100%);
         }
 
-        /* LÍNEA DE MUERTE (Abajo) */
+        /* CAPAS DE ESTRELLAS Y CONSTELACIONES (Efecto Parallax) */
+        #stars-far, #stars-mid, #stars-near {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            background-repeat: repeat; will-change: transform;
+        }
+
+        /* LÍNEA DE MUERTE (Barrera de Energía Inferior) */
         #death-line {
-            position: absolute; bottom: 0; width: 100%; height: 5px;
-            background: var(--danger); box-shadow: 0 0 20px var(--danger);
-            z-index: 50;
+            position: absolute; bottom: 0; width: 100%; height: 4px;
+            background: var(--danger); box-shadow: 0 0 15px var(--danger);
+            z-index: 50; opacity: 0.8;
         }
 
-        /* LÍNEA DE META (Arriba - Objetivo) */
+        /* LÍNEA DE META (Puerta Estelar Superior) */
         #finish-line {
-            position: absolute; top: 50px; width: 100%; height: 5px;
-            background: var(--primary); box-shadow: 0 0 20px var(--primary);
-            z-index: 50;
+            position: absolute; top: 60px; width: 100%; height: 4px;
+            background: var(--primary); box-shadow: 0 0 15px var(--primary);
+            z-index: 50; opacity: 0.8;
         }
 
-        /* La Esfera del Jugador */
+        /* La Esfera de Energía del Jugador */
         #player-ball {
-            position: absolute; width: 40px; height: 40px;
+            position: absolute; width: 36px; height: 36px;
             background: var(--ball); border-radius: 50%;
-            box-shadow: 0 0 30px var(--ball), inset 0 0 10px white;
+            box-shadow: 0 0 30px var(--ball), inset 0 0 10px rgba(0,0,0,0.5);
             /* Inicia cerca de la línea de muerte */
-            bottom: 80px; left: 50%; transform: translate(-50%, 0);
-            z-index: 60; will-change: bottom, left;
+            bottom: 100px; left: 50%; transform: translate(-50%, 0);
+            z-index: 60; will-change: bottom;
         }
 
-        /* Meteoritos */
+        /* Meteoritos Cósmicos */
         .meteor {
-            position: absolute; width: 30px; height: 30px;
-            background: #555; border-radius: 5px; /* Aspecto rocoso */
-            box-shadow: 0 0 10px var(--danger);
+            position: absolute; width: 26px; height: 26px;
+            background: var(--meteor); border-radius: 3px; /* Fragmento */
+            box-shadow: 0 0 15px var(--meteor), 0 0 30px var(--danger);
             z-index: 40; will-change: top, left;
-            border: 2px solid var(--danger);
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Superposición de Inicio/Fin */
+        /* Superposición de Inicio/Fin Cósmica */
         #overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.97);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 1000; text-align: center; padding: 30px;
         }
         .btn-start {
             padding: 20px 50px; background: transparent; color: var(--primary);
-            border: 3px solid var(--primary); font-weight: 900; font-size: 18px;
-            border-radius: 10px; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(50, 255, 126, 0.3);
+            border: 2px solid var(--primary); font-weight: 900; font-size: 16px;
+            border-radius: 5px; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(50, 255, 126, 0.2);
+            transition: all 0.2s;
         }
+        .btn-start:active { background: var(--primary); color: black; box-shadow: 0 0 30px var(--primary); }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <h1 style="color:var(--primary); font-size: 28px; letter-spacing: 3px;">TOCH: METEOR ASCENSION</h1>
-        <p style="color:#888; margin-bottom: 40px; font-size: 12px; max-width: 300px; line-height: 1.6;">
-            TOCA PARA SUBIR.<br><br>
-            NO TOQUES LA LÍNEA ROJA INFERIOR.<br><br>
-            NO TOQUES LOS METEORITOS QUE CAEN.<br><br>
-            TUS PULSACIONES DESTRUYEN METEORITOS CERCANOS.<br><br>
-            LLEGA A LA LÍNEA VERDE SUPERIOR.
+        <h1 style="color:var(--primary); font-size: 26px; letter-spacing: 4px; font-weight: 900; margin-bottom: 10px;">TOCH: COSMIC ASCENSION</h1>
+        <div style="width:50px; height:2px; background:var(--primary); margin-bottom: 30px;"></div>
+        <p style="color:#aaa; margin-bottom: 50px; font-size: 12px; max-width: 320px; line-height: 1.8; text-align: left;">
+            <span style="color:white; font-weight:bold;">[MISION]</span> ASCENDER POR EL COSMOS.<br><br>
+            <span style="color:white; font-weight:bold;">[CONTROL]</span> TOCA PARA IMPULSAR LA ENERGIA.<br><br>
+            <span style="color:var(--danger); font-weight:bold;">[PELIGRO]</span> NO TOQUES LA BARRERA INFERIOR.<br><br>
+            <span style="color:var(--meteor); font-weight:bold;">[DEFENSA]</span> DESTRUYE METEORITOS CON TUS PULSOS CERCANOS.<br><br>
+            <span style="color:var(--primary); font-weight:bold;">[OBJETIVO]</span> ALCANZA LA PUERTA ESTELAR SUPERIOR.
         </p>
-        <button class="btn-start" id="startBtn">INICIAR ASCENSO</button>
+        <button class="btn-start" id="startBtn">INICIAR ASCENSO ESTELAR</button>
     </div>
 
     <div id="hud">
-        <div id="level-txt">VIP-NIVEL 1</div>
-        <div id="altitude-txt">ALT: 0m</div>
+        <div id="level-txt">VIP-SISTEMA SOLAR 01</div>
+        <div id="altitude-txt">PARSEC: 0.0</div>
     </div>
 
     <div id="stage">
+        <div id="stars-far"></div>
+        <div id="stars-mid"></div>
+        <div id="stars-near"></div>
+        
         <div id="finish-line"></div>
         <div id="player-ball"></div>
         <div id="death-line"></div>
@@ -114,31 +134,38 @@
         const altitudeTxt = document.getElementById('altitude-txt');
         const startBtn = document.getElementById('startBtn');
         const overlay = document.getElementById('overlay');
+        // Capas Parallax
+        const starsFar = document.getElementById('stars-far');
+        const starsMid = document.getElementById('stars-mid');
+        const starsNear = document.getElementById('stars-near');
 
         // Dimensiones del escenario
         const stageH = stage.offsetHeight;
         const stageW = stage.offsetWidth;
-        const playerSize = 40;
-        const finishLineY = 55; // Píxeles desde arriba
-        const deathLineY = 5;    // Píxeles desde abajo
+        const playerSize = 36;
+        const finishLineY = 62; // Píxeles desde arriba
+        const deathLineY = 4;    // Píxeles desde abajo
 
         // Física y Estado
-        let playerY = 80; // Píxeles desde el fondo
-        let playerX = 50; // Porcentaje horizontal
+        let playerY = 100; // Píxeles desde el fondo
         let playerVelY = 0;
         let active = false;
         let lastTimestamp = 0;
-        let targetAltitude = 1000; // Meta en "metros" virtuales
+        let targetAltitude = 50.0; // Meta en "Parsecs" virtuales
         let currentAltitude = 0;
         let meteorList = [];
+        let starY = { far: 0, mid: 0, near: 0 }; // Posición Y de las estrellas para Parallax
 
         // CONFIGURACIÓN DE MECÁNICAS (LA CLAVE)
-        const gravity = 0.8;          // Fuerza de caída constante
-        const tapImpulse = 18;        // Fuerza hacia arriba por tap
-        const friction = 0.96;         // Resistencia del aire
-        const meteorSpawnRate = 0.03; // Probabilidad de spawn por frame
-        const meteorSpeed = 4;        // Velocidad de caída de meteoros
-        const pulseDestroyRadius = 100; // Radio de destrucción del pulso (px)
+        const gravity = 0.75;         // Fuerza de caída constante
+        const tapImpulse = 17;        // Fuerza hacia arriba por tap
+        const friction = 0.96;         // Resistencia del "vacío"
+        const meteorSpawnRate = 0.035; // Probabilidad de spawn por frame (un poco más difícil)
+        const meteorSpeed = 4.5;        // Velocidad de caída de meteoros
+        const pulseDestroyRadius = 110; // Radio de destrucción del pulso (px)
+
+        // Inicializar el escenario estelar procedimentalmente
+        generateStars();
 
         // Iniciar el ciclo del juego
         startBtn.onclick = () => {
@@ -156,8 +183,33 @@
             // Limpiar meteoros antiguos
             meteorList.forEach(m => m.el.remove());
             meteorList = [];
-            altitudeTxt.innerText = "ALT: 0m";
+            altitudeTxt.innerText = "PARSEC: 0.0";
             altitudeTxt.style.color = "#fff";
+            starY = { far: 0, mid: 0, near: 0 }; // Reset Parallax
+        }
+
+        // --- GENERACIÓN PROCEDIMENTAL DE ESTRELLAS CÓSMICAS ---
+        function generateStars() {
+            // Capa Lejana (Pequeñas y oscuras)
+            starsFar.style.backgroundImage = createStarTexture(1, '#333', 100);
+            // Capa Media (Medianamente brillantes)
+            starsMid.style.backgroundImage = createStarTexture(1.5, '#666', 50);
+            // Capa Cercana (Grandes y brillantes)
+            starsNear.style.backgroundImage = createStarTexture(2, '#999', 20);
+        }
+
+        function createStarTexture(size, color, count) {
+            let canvas = document.createElement('canvas');
+            canvas.width = stageW;
+            canvas.height = stageH;
+            let ctx = canvas.getContext('2d');
+            ctx.fillStyle = color;
+            for (let i = 0; i < count; i++) {
+                ctx.beginPath();
+                ctx.arc(Math.random() * stageW, Math.random() * stageH, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            return `url(${canvas.toDataURL()})`;
         }
 
         // --- LÓGICA DE PULSACIÓN (TAPPING & DESTRUCCIÓN) ---
@@ -168,7 +220,7 @@
             // 1. IMPULSO DE ASCENSO
             playerVelY += tapImpulse;
 
-            // 2. ONDA DE CHOQUE (Destruir Meteoros)
+            // 2. ONDA DE CHOQUE CÓSMICA (Destruir Meteoros)
             // Obtener coordenadas del toque
             let touchX, touchY;
             if (e.touches) {
@@ -198,7 +250,7 @@
                     // DESTRUIR METEORO
                     m.el.remove();
                     meteorList.splice(i, 1);
-                    // Pequeño feedback visual (opcional)
+                    // Feedback visual cósmico
                     createExplosion(mCenterX, mCenterY);
                 }
             }
@@ -209,17 +261,17 @@
             if (!('ontouchstart' in window)) handleTap(e);
         });
 
-        // --- SISTEMA DE METEORITOS ---
+        // --- SISTEMA DE METEORITOS CÓSMICOS ---
         function spawnMeteor() {
             if (Math.random() < meteorSpawnRate) {
                 let el = document.createElement('div');
                 el.className = 'meteor';
                 // Posición horizontal aleatoria
-                let x = Math.random() * (stageW - 30);
+                let x = Math.random() * (stageW - 26);
                 el.style.left = x + "px";
-                el.style.top = "-40px"; // Inicia fuera de pantalla
+                el.style.top = "-30px"; // Inicia fuera de pantalla
                 stage.appendChild(el);
-                meteorList.push({ el: el, y: -40 });
+                meteorList.push({ el: el, y: -30 });
             }
         }
 
@@ -236,16 +288,20 @@
                     continue;
                 }
 
-                // COLISIÓN CON EL JUGADOR
+                // COLISIÓN CON EL JUGADOR (Caja de colisión reducida para precisión)
                 let pRect = player.getBoundingClientRect();
                 let mRect = m.el.getBoundingClientRect();
 
-                if (pRect.left < mRect.right &&
-                    pRect.right > mRect.left &&
-                    pRect.top < mRect.bottom &&
-                    pRect.bottom > mRect.top) {
+                let pCenterX = pRect.left + playerSize/2;
+                let pCenterY = pRect.top + playerSize/2;
+                let mCenterX = mRect.left + 13;
+                let mCenterY = mRect.top + 13;
+
+                let dist = Math.sqrt(Math.pow(pCenterX - mCenterX, 2) + Math.pow(pCenterY - mCenterY, 2));
+
+                if (dist < (playerSize/2 + 10)) {
                     // COLISIÓN DETECTADA
-                    gameOver("COLISIÓN CON METEORITO. ASCENSO FALLIDO.");
+                    gameOver("COLISIÓN COSMICA DETECTADA. NÚCLEO INESTABLE.");
                     return;
                 }
             }
@@ -265,31 +321,43 @@
             // Renderizado de posición
             player.style.bottom = playerY + "px";
 
-            // 2. ACTUALIZAR SISTEMAS
+            // 2. EFECTO PARALLAX DE ASCENSO
+            // Solo movemos las estrellas si el jugador está subiendo
+            if (playerVelY > 0) {
+                starY.far += playerVelY * 0.01;
+                starY.mid += playerVelY * 0.05;
+                starY.near += playerVelY * 0.2;
+                
+                starsFar.style.transform = `translateY(${starY.far % stageH}px)`;
+                starsMid.style.transform = `translateY(${starY.mid % stageH}px)`;
+                starsNear.style.transform = `translateY(${starY.near % stageH}px)`;
+            }
+
+            // 3. ACTUALIZAR SISTEMAS CÓSMICOS
             spawnMeteor();
             updateMeteors();
 
-            // Actualizar Altitud (Virtual)
-            // Calculamos el progreso hacia la meta visual (50px de arriba es la meta)
+            // Actualizar Altitud (Virtual en Parsecs)
+            // Calculamos el progreso hacia la meta visual ( finishLineY es la meta)
             let currentVisualY = stageH - playerY - playerSize/2;
-            let progress = 1 - ( (currentVisualY - finishLineY) / (stageH - finishLineY - 80) );
+            let progress = 1 - ( (currentVisualY - finishLineY) / (stageH - finishLineY - 100) );
             currentAltitude = Math.max(0, progress * targetAltitude);
-            altitudeTxt.innerText = `ALT: ${Math.round(currentAltitude)}m`;
+            altitudeTxt.innerText = `PARSEC: ${currentAltitude.toFixed(1)}`;
 
-            // 3. CONDICIONES DE DERROTA/VICTORIA
-            // Muerte por Línea Inferior
+            // 4. CONDICIONES DE DERROTA/VICTORIA CÓSMICA
+            // Muerte por Barrera de Energía Inferior
             if (playerY <= deathLineY) {
                 playerY = deathLineY;
-                gameOver("COLAPSO AL VACÍO. NO MANTUVISTE EL PULSO.");
+                gameOver("COLAPSO EN EL VACÍO. NO MANTUVISTE EL PULSO.");
                 return;
             }
 
-            // Victoria por Línea Superior
+            // Victoria por Puerta Estelar Superior
             if (currentVisualY <= finishLineY) {
                 active = false;
-                altitudeTxt.innerText = "¡ÓRBITA ALCANZADA!";
+                altitudeTxt.innerText = "¡ÓRBITA ESTELAR ALCANZADA!";
                 altitudeTxt.style.color = "var(--primary)";
-                gameOver("¡ASCENSO EXITOSO! NIVEL COMPLETADO.", true);
+                gameOver("¡ASCENSO EXITOSO! SISTEMA COMPLETADO.", true);
                 return;
             }
 
@@ -298,7 +366,7 @@
 
         function gameOver(msg, win = false) {
             active = false;
-            // Pequeña pausa para efecto
+            // Pequeña pausa para efecto cósmico
             setTimeout(() => {
                 alert(msg);
                 overlay.style.display = "flex";
@@ -307,22 +375,23 @@
         }
 
         function createExplosion(x, y) {
-            // Efecto visual simple de destrucción
+            // Efecto visual cósmico de destrucción (como una pequeña nova)
             let ex = document.createElement('div');
             ex.style.position = 'absolute';
-            ex.style.width = '10px'; ex.style.height = '10px';
+            ex.style.width = '5px'; ex.style.height = '5px';
             ex.style.background = 'white'; ex.style.borderRadius = '50%';
             ex.style.left = x + 'px'; ex.style.top = y + 'px';
             ex.style.transform = 'translate(-50%, -50%)';
-            ex.style.transition = 'transform 0.2s, opacity 0.2s';
+            ex.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
             ex.style.zIndex = '35';
+            ex.style.boxShadow = "0 0 15px white";
             stage.appendChild(ex);
             
             requestAnimationFrame(() => {
-                ex.style.transform = 'translate(-50%, -50%) scale(8)';
+                ex.style.transform = 'translate(-50%, -50%) scale(12)';
                 ex.style.opacity = '0';
             });
-            setTimeout(() => ex.remove(), 200);
+            setTimeout(() => ex.remove(), 250);
         }
     </script>
 </body>
