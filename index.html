@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOCH: COSMIC ASCENSION</title>
+    <title>TOCH: COSMIC ASCENSION - FIRST PULSE</title>
     <style>
         :root {
             /* Colores Estelares Premium */
@@ -68,15 +68,15 @@
             position: absolute; width: 36px; height: 36px;
             background: var(--ball); border-radius: 50%;
             box-shadow: 0 0 30px var(--ball), inset 0 0 10px rgba(0,0,0,0.5);
-            /* Inicia cerca de la línea de muerte */
-            bottom: 100px; left: 50%; transform: translate(-50%, 0);
+            /* INICIA ARRIBA (justo debajo de la meta) */
+            bottom: calc(100% - 150px); left: 50%; transform: translate(-50%, 0);
             z-index: 60; will-change: bottom;
         }
 
         /* Meteoritos Cósmicos */
         .meteor {
             position: absolute; width: 26px; height: 26px;
-            background: var(--meteor); border-radius: 3px; /* Fragmento */
+            background: var(--meteor); border-radius: 3px;
             box-shadow: 0 0 15px var(--meteor), 0 0 30px var(--danger);
             z-index: 40; will-change: top, left;
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -101,16 +101,17 @@
 <body>
 
     <div id="overlay">
-        <h1 style="color:var(--primary); font-size: 26px; letter-spacing: 4px; font-weight: 900; margin-bottom: 10px;">TOCH: COSMIC ASCENSION</h1>
+        <h1 style="color:var(--primary); font-size: 26px; letter-spacing: 4px; font-weight: 900; margin-bottom: 10px;">TOCH: ASCENSION</h1>
         <div style="width:50px; height:2px; background:var(--primary); margin-bottom: 30px;"></div>
         <p style="color:#aaa; margin-bottom: 50px; font-size: 12px; max-width: 320px; line-height: 1.8; text-align: left;">
             <span style="color:white; font-weight:bold;">[MISION]</span> ASCENDER POR EL COSMOS.<br><br>
             <span style="color:white; font-weight:bold;">[CONTROL]</span> TOCA PARA IMPULSAR LA ENERGIA.<br><br>
             <span style="color:var(--danger); font-weight:bold;">[PELIGRO]</span> NO TOQUES LA BARRERA INFERIOR.<br><br>
-            <span style="color:var(--meteor); font-weight:bold;">[DEFENSA]</span> DESTRUYE METEORITOS CON TUS PULSOS CERCANOS.<br><br>
-            <span style="color:var(--primary); font-weight:bold;">[OBJETIVO]</span> ALCANZA LA PUERTA ESTELAR SUPERIOR.
+            <span style="color:var(--meteor); font-weight:bold;">[DEFENSA]</span> DESTRUYE METEORITOS CON TUS PULSOS.<br><br>
+            <span style="color:var(--primary); font-weight:bold;">[OBJETIVO]</span> ALCANZA LA PUERTA SUPERIOR.<br><br>
+            <span style="color:white; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">[INFO] EL JUEGO COMIENZA EN TU PRIMER TOQUE TÁCTIL.</span>
         </p>
-        <button class="btn-start" id="startBtn">INICIAR ASCENSO ESTELAR</button>
+        <button class="btn-start" id="startBtn">INICIAR FASE DE ÓRBITA</button>
     </div>
 
     <div id="hud">
@@ -143,13 +144,15 @@
         const stageH = stage.offsetHeight;
         const stageW = stage.offsetWidth;
         const playerSize = 36;
-        const finishLineY = 62; // Píxeles desde arriba
+        const finishLineY = 64; // Píxeles desde arriba
         const deathLineY = 4;    // Píxeles desde abajo
 
         // Física y Estado
-        let playerY = 100; // Píxeles desde el fondo
+        let startBallY = stageH - 150 - playerSize/2; // Posición vertical inicial (desde el fondo)
+        let playerY = startBallY;
         let playerVelY = 0;
-        let active = false;
+        let appReady = false; // Menú desaparecido
+        let active = false; // Física activada
         let lastTimestamp = 0;
         let targetAltitude = 50.0; // Meta en "Parsecs" virtuales
         let currentAltitude = 0;
@@ -160,41 +163,41 @@
         const gravity = 0.75;         // Fuerza de caída constante
         const tapImpulse = 17;        // Fuerza hacia arriba por tap
         const friction = 0.96;         // Resistencia del "vacío"
-        const meteorSpawnRate = 0.035; // Probabilidad de spawn por frame (un poco más difícil)
+        const meteorSpawnRate = 0.035; // Probabilidad de spawn por frame
         const meteorSpeed = 4.5;        // Velocidad de caída de meteoros
-        const pulseDestroyRadius = 110; // Radio de destrucción del pulso (px)
+        const pulseDestroyRadius = 115; // Radio de destrucción del pulso (px)
 
         // Inicializar el escenario estelar procedimentalmente
         generateStars();
 
-        // Iniciar el ciclo del juego
+        // Pulso inicial del menú
         startBtn.onclick = () => {
             overlay.style.display = "none";
             resetGame();
-            requestAnimationFrame(gameLoop);
+            appReady = true; // El juego está listo para el primer toque
+            active = false; // Pero la física no
+            altitudeTxt.innerText = "ESPERANDO PULSO TÁCTIL...";
+            altitudeTxt.style.color = "var(--primary)";
         };
 
         function resetGame() {
-            playerY = 120;
+            // INICIA ARRIBA
+            playerY = startBallY;
             playerVelY = 0;
             currentAltitude = 0;
-            active = true;
-            lastTimestamp = performance.now();
             // Limpiar meteoros antiguos
             meteorList.forEach(m => m.el.remove());
             meteorList = [];
-            altitudeTxt.innerText = "PARSEC: 0.0";
-            altitudeTxt.style.color = "#fff";
             starY = { far: 0, mid: 0, near: 0 }; // Reset Parallax
         }
 
         // --- GENERACIÓN PROCEDIMENTAL DE ESTRELLAS CÓSMICAS ---
         function generateStars() {
-            // Capa Lejana (Pequeñas y oscuras)
+            // Capa Lejana
             starsFar.style.backgroundImage = createStarTexture(1, '#333', 100);
-            // Capa Media (Medianamente brillantes)
+            // Capa Media
             starsMid.style.backgroundImage = createStarTexture(1.5, '#666', 50);
-            // Capa Cercana (Grandes y brillantes)
+            // Capa Cercana
             starsNear.style.backgroundImage = createStarTexture(2, '#999', 20);
         }
 
@@ -212,10 +215,20 @@
             return `url(${canvas.toDataURL()})`;
         }
 
-        // --- LÓGICA DE PULSACIÓN (TAPPING & DESTRUCCIÓN) ---
+        // --- LÓGICA DE PULSACIÓN (TAPPING, DESTRUCCIÓN E INICIO) ---
         function handleTap(e) {
-            if (!active) return;
+            if (!appReady) return; // Menú todavía puesto
             if (e.cancelable) e.preventDefault();
+
+            // *** ESTA ES LA CLAVE ***
+            // Si es la primera pulsación, activamos la física
+            if (!active) {
+                active = true;
+                lastTimestamp = performance.now();
+                altitudeTxt.innerText = "SISTEMA ACTIVO - PARSEC: 0.0";
+                altitudeTxt.style.color = "#fff";
+                requestAnimationFrame(gameLoop); // Iniciamos el ciclo
+            }
 
             // 1. IMPULSO DE ASCENSO
             playerVelY += tapImpulse;
@@ -299,7 +312,7 @@
 
                 let dist = Math.sqrt(Math.pow(pCenterX - mCenterX, 2) + Math.pow(pCenterY - mCenterY, 2));
 
-                if (dist < (playerSize/2 + 10)) {
+                if (dist < (playerSize/2 + 8)) {
                     // COLISIÓN DETECTADA
                     gameOver("COLISIÓN COSMICA DETECTADA. NÚCLEO INESTABLE.");
                     return;
@@ -309,7 +322,7 @@
 
         // --- CICLO PRINCIPAL DEL JUEGO (GAME LOOP) ---
         function gameLoop(timestamp) {
-            if (!active) return;
+            if (!active) return; // Esto frena la física
             let dt = (timestamp - lastTimestamp) / 1000;
             lastTimestamp = timestamp;
 
@@ -340,7 +353,7 @@
             // Actualizar Altitud (Virtual en Parsecs)
             // Calculamos el progreso hacia la meta visual ( finishLineY es la meta)
             let currentVisualY = stageH - playerY - playerSize/2;
-            let progress = 1 - ( (currentVisualY - finishLineY) / (stageH - finishLineY - 100) );
+            let progress = 1 - ( (currentVisualY - finishLineY) / (startBallY - finishLineY - 100) );
             currentAltitude = Math.max(0, progress * targetAltitude);
             altitudeTxt.innerText = `PARSEC: ${currentAltitude.toFixed(1)}`;
 
@@ -355,6 +368,7 @@
             // Victoria por Puerta Estelar Superior
             if (currentVisualY <= finishLineY) {
                 active = false;
+                appReady = false; // Bloquear toques finales
                 altitudeTxt.innerText = "¡ÓRBITA ESTELAR ALCANZADA!";
                 altitudeTxt.style.color = "var(--primary)";
                 gameOver("¡ASCENSO EXITOSO! SISTEMA COMPLETADO.", true);
@@ -366,11 +380,14 @@
 
         function gameOver(msg, win = false) {
             active = false;
+            appReady = false; // Bloquear toques durante el fin
             // Pequeña pausa para efecto cósmico
             setTimeout(() => {
                 alert(msg);
                 overlay.style.display = "flex";
-                startBtn.innerText = "REINTENTAR ASCENSO";
+                startBtn.innerText = "REINTENTAR ASCENSO ESTELAR";
+                playerY = startBallY; // Reset visual pos
+                player.style.bottom = playerY + "px";
             }, 100);
         }
 
