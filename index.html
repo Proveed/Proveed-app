@@ -3,226 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EQUILIBRIUM</title>
+    <title>EQUILIBRIUM V3</title>
     <style>
-        :root { --p: #32ff7e; --d: #ff3e3e; --b: #020205; --blue: #1e90ff; --green: #2ecc71; }
-        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        :root { --p: #32ff7e; --d: #ff3e3e; --b: #000; --blue: #1e90ff; --green: #2ecc71; }
+        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
         body { margin: 0; background: var(--b); color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
         
-        /* Contenedores de Pantalla */
-        .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; z-index: 10; background: var(--b); }
-        .hidden { display: none !important; }
+        /* Contenedores Principales de Vista (Se alternan físicamente) */
+        .viewport { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; z-index: 10; background: var(--b); }
+        .hud-area { width: 100%; height: 100px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; position: relative; z-index: 200; pointer-events: none; }
 
-        /* Estilo Menú Inicio */
-        #menu { justify-content: center; background: radial-gradient(circle, #0a0a25 0%, #000 100%); }
+        /* Estilo Menú Inicio (Botón de primer toque) */
+        #viewport-menu { justify-content: center; background: radial-gradient(circle, #0a0a25 0%, #000 100%); }
         h1 { font-size: 3rem; letter-spacing: 10px; color: var(--p); text-shadow: 0 0 20px var(--p); margin: 0; }
         
-        /* Estilo Mapa */
-        #map { overflow-y: auto; padding: 20px; display: block; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; max-width: 400px; margin: 30px auto; padding-bottom: 100px; }
-        .node { width: 70px; height: 70px; background: #111; border: 2px solid #333; border-radius: 15px; display: flex; 
-                align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
+        /* Estilo MAPA ESTELAR (Arreglado para scroll) */
+        #viewport-map { background: radial-gradient(circle, #000 0%, #000 100%); padding-top: 40px; }
+        .grid-holder { width: 100%; max-width: 400px; height: calc(100vh - 120px); overflow-y: scroll; -webkit-overflow-scrolling: touch; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; width: 100%; padding-bottom: 80px; }
+        .node { width: 70px; height: 70px; background: #080808; border: 2px solid #222; border-radius: 15px; display: flex; 
+                align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; cursor: pointer; color: #444; }
         .node.open { border-color: var(--p); color: var(--p); box-shadow: 0 0 15px rgba(50,255,126,0.3); }
-        .node.lock { opacity: 0.2; cursor: default; }
-
+        
         /* HUD Juego */
-        #hud { position: absolute; top: 20px; width: 90%; display: flex; justify-content: space-between; z-index: 100; font-weight: 900; }
-        #bar-bg { position: absolute; top: 70px; width: 80%; height: 8px; background: #222; border-radius: 4px; z-index: 100; overflow: hidden; }
-        #bar-fill { width: 0%; height: 100%; background: var(--p); box-shadow: 0 0 15px var(--p); transition: width 0.1s; }
+        .level-text { font-size: 14px; font-weight: 900; color: var(--p); letter-spacing: 2px; }
+        .percentage-text { font-size: 18px; font-weight: 900; font-family: monospace; }
+        .bar-bg { width: 80%; height: 8px; background: #111; border-radius: 4px; overflow: hidden; pointer-events: auto; cursor: pointer; }
+        .bar-fill { width: 0%; height: 100%; background: var(--p); box-shadow: 0 0 15px var(--p); transition: width 0.1s; }
 
         /* Elementos de Juego */
-        #game { background: url('https://i.imgur.com/2c7Y9Fh.jpg') center/cover; }
-        #player { position: absolute; width: 70px; height: 70px; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 50; }
+        #viewport-game { background: url('https://i.imgur.com/2c7Y9Fh.jpg') center/cover; }
+        #world { width: 100%; height: 100%; position: relative; overflow: hidden; }
+        #player { position: absolute; width: 65px; height: 65px; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 50; }
         .meteor { position: absolute; width: 40px; height: 40px; z-index: 40; filter: drop-shadow(0 0 10px var(--d)); }
 
-        .btn { margin-top: 30px; padding: 15px 40px; background: var(--p); color: black; border: none; 
-               border-radius: 50px; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 20px var(--p); }
+        .btn { padding: 16px 45px; background: var(--p); color: black; border: none; border-radius: 50px; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 20px var(--p); pointer-events: auto; }
     </style>
 </head>
 <body>
 
-    <div id="menu" class="screen">
-        <h1>EQUILIBRIUM</h1>
-        <p style="letter-spacing: 5px; opacity: 0.5;">COSMIC STRATEGY</p>
-        <button class="btn" onclick="goToMap()">MAPA DE NIVELES</button>
-    </div>
-
-    <div id="map" class="screen hidden">
-        <h2 style="color: var(--p); margin-top: 40px;">SELECCIONA NIVEL</h2>
-        <div class="grid" id="lvlGrid"></div>
-        <button class="btn" style="background:#444; color:white; box-shadow:none;" onclick="location.reload()">VOLVER</button>
-    </div>
-
-    <div id="game" class="screen hidden">
-        <div id="hud">
-            <span id="txtLvl" style="color:var(--p)">NIVEL 1</span>
-            <span id="txtPerc">0%</span>
-        </div>
-        <div id="bar-bg"><div id="bar-fill"></div></div>
-        <div id="world" style="width:100%; height:100%; position:relative;">
-            <div id="player">
-                <svg viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="48" fill="var(--blue)" stroke="white" stroke-width="1"/>
-                    <path d="M20,40 Q35,20 55,30 Q70,15 85,35 L90,55 Q70,75 50,65 Q30,80 20,60 Z" fill="var(--green)"/>
-                    <path d="M40,75 Q55,95 30,95 Q15,85 30,70 Z" fill="var(--green)"/>
-                </svg>
-            </div>
-        </div>
-    </div>
-
     <script>
-        let unlocked = 1;
-        let activeLvl = 1;
-        let isPlaying = false;
-        let isLive = false;
-        let py, pvy = 0;
-        let progress = 0;
-        let meteors = [];
-        let loopReq;
+        // Variables Globales de Estado
+        let gameState = {
+            unlocked: 1,
+            activeLevel: 1,
+            isPlaying: false,
+            isPhysicsActive: false,
+            py: 0,
+            pvy: 0,
+            progress: 0,
+            meteors: [],
+            animReq: null
+        };
 
-        // Navegación
-        function goToMap() {
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('map').classList.remove('hidden');
-            renderMap();
+        // --- SISTEMA DE NAVEGACIÓN DE VISTAS ---
+        function changeView(viewType) {
+            // Eliminar vistas antiguas para limpiar DOM y eventos
+            const viewports = document.querySelectorAll('.viewport');
+            viewports.forEach(v => v.remove());
+
+            if (viewType === 'MENU') renderMenu();
+            if (viewType === 'MAP') renderMap();
+            if (viewType === 'GAME') renderGame();
+        }
+
+        function renderMenu() {
+            const viewport = document.createElement('div');
+            viewport.id = 'viewport-menu';
+            viewport.className = 'viewport';
+            viewport.innerHTML = `
+                <h1>EQUILIBRIUM</h1>
+                <p style="letter-spacing: 5px; opacity: 0.5;">COSMIC STRATEGY</p>
+                <button class="btn" onclick="changeView('MAP')">ENTRAR AL SISTEMA</button>
+            `;
+            document.body.appendChild(viewport);
         }
 
         function renderMap() {
-            const container = document.getElementById('lvlGrid');
-            container.innerHTML = '';
+            const viewport = document.createElement('div');
+            viewport.id = 'viewport-map';
+            viewport.className = 'viewport';
+            
+            let nodes = '';
             for(let i=1; i<=120; i++) {
-                const node = document.createElement('div');
-                node.className = `node ${i <= unlocked ? 'open' : 'lock'}`;
-                node.innerText = i;
-                if(i <= unlocked) node.onclick = () => startLevel(i);
-                container.appendChild(node);
+                const isOpen = i <= gameState.unlocked;
+                nodes += `<div class="node ${isOpen ? 'open' : 'locked'}" onclick="${isOpen ? `launchLevel(${i})` : ''}">${i}</div>`;
             }
+
+            viewport.innerHTML = `
+                <h2 style="color: var(--p); margin-bottom: 20px;">SISTEMA ESTELAR</h2>
+                <div class="grid-holder">
+                    <div class="grid">${nodes}</div>
+                </div>
+                <button class="btn" style="background:#333; color:white; box-shadow:none; position:fixed; bottom:20px; z-index: 50;" onclick="location.reload()">VOLVER</button>
+            `;
+            document.body.appendChild(viewport);
         }
 
-        function startLevel(n) {
-            activeLvl = n;
-            document.getElementById('map').classList.add('hidden');
-            document.getElementById('game').classList.remove('hidden');
-            document.getElementById('txtLvl').innerText = "NIVEL " + n;
-            initLevel();
+        function launchLevel(n) {
+            gameState.activeLevel = n;
+            changeView('GAME');
         }
 
-        function initLevel() {
-            isPlaying = true;
-            isLive = false;
-            progress = 0;
-            pvy = 0;
-            py = window.innerHeight / 2; // Centro exacto
-            meteors.forEach(m => m.el.remove());
-            meteors = [];
-            updatePlayerUI();
-            document.getElementById('bar-fill').style.width = '0%';
-            document.getElementById('txtPerc').innerText = '0%';
+        // --- SISTEMA DE JUEGO ---
+        function renderGame() {
+            gameState.isPlaying = true;
+            gameState.isPhysicsActive = false;
+            gameState.progress = 0;
+            gameState.pvy = 0;
+            gameState.py = window.innerHeight / 2; // Centro exacto
+            gameState.meteors = [];
+
+            const viewport = document.createElement('div');
+            viewport.id = 'viewport-game';
+            viewport.className = 'viewport';
+            
+            viewport.innerHTML = `
+                <div class="hud-area">
+                    <div style="display:flex; justify-content:space-between; width:90%;">
+                        <span class="level-text">SOLAR:${gameState.activeLevel}</span>
+                        <span class="percentage-text" id="game-perc">0%</span>
+                    </div>
+                    <div class="bar-bg" onclick="die('EQUILIBRIO PERDIDO: REINICIO DE NÚCLEO')">
+                        <div class="bar-fill" id="game-fill"></div>
+                    </div>
+                </div>
+                <div id="world">
+                    <div id="player">
+                        <svg viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="48" fill="var(--blue)" stroke="white" stroke-width="1"/>
+                            <path d="M20,40 Q35,25 55,30 Q70,15 85,35 L90,55 Q70,75 50,65 Q30,80 20,60 Z" fill="var(--green)"/>
+                            <path d="M40,75 Q55,95 30,95 Q15,85 30,70 Z" fill="var(--green)"/>
+                        </svg>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(viewport);
+            
+            // Añadir eventos táctiles específicamente al Escenario
+            const world = document.getElementById('world');
+            world.addEventListener('touchstart', handleInput, {passive: false});
+            world.addEventListener('mousedown', handleInput);
+            
+            updatePlayerPos();
         }
 
-        function updatePlayerUI() {
-            const p = document.getElementById('player');
-            p.style.top = py + 'px';
+        function updatePlayerPos() {
+            const player = document.getElementById('player');
+            if(player) player.style.top = gameState.py + 'px';
         }
 
-        // Entrada de usuario
-        function handleAction(e) {
-            if(!isPlaying) return;
+        function handleInput(e) {
+            if(!gameState.isPlaying) return;
             if(e.cancelable) e.preventDefault();
 
-            if(!isLive) {
-                isLive = true;
-                gameLoop();
+            if(!gameState.isPhysicsActive) {
+                gameState.isPhysicsActive = true;
+                gameState.animReq = requestAnimationFrame(gameLoop);
             }
 
-            // Impulso hacia arriba
-            const force = 15 + (activeLvl * 0.15);
-            pvy -= force;
+            // Impulso hacia arriba (Y disminuye)
+            const force = 16 + (gameState.activeLevel * 0.1);
+            gameState.pvy -= force;
 
-            // Destrucción de meteoritos por toque
-            const tx = e.touches ? e.touches[0].clientX : e.clientX;
-            const ty = e.touches ? e.touches[0].clientY : e.clientY;
-            meteors.forEach((m, i) => {
+            // Destrucción de meteoritos por toque directo
+            const touchX = e.touches ? e.touches[0].clientX : e.clientX;
+            const touchY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            gameState.meteors.forEach((m, i) => {
                 const r = m.el.getBoundingClientRect();
-                const d = Math.hypot(tx - (r.left + 20), ty - (r.top + 20));
-                if(d < 100) {
+                // Calcular distancia del toque al centro del meteoro
+                const d = Math.sqrt(Math.pow(touchX - (r.left + 20), 2) + Math.pow(touchY - (r.top + 20), 2));
+                if(d < 110) { // Radio de destrucción amplio para móvil
                     m.el.remove();
-                    meteors.splice(i, 1);
-                    pvy += 2; // Bonus de ligereza
+                    gameState.meteors.splice(i, 1);
+                    gameState.pvy += 1.5; // Ligereza al destruir
                 }
             });
         }
 
-        window.addEventListener('touchstart', handleAction, {passive: false});
-        window.addEventListener('mousedown', handleAction);
-
-        // Bucle de Juego
         function gameLoop() {
-            if(!isLive) return;
+            if(!gameState.isPhysicsActive) return;
 
-            const gravity = 0.4 + (activeLvl * 0.05);
-            const goal = 400 + (activeLvl * 150);
+            // Gravedad y Fricción
+            const gravity = 0.45 + (gameState.activeLevel * 0.05);
+            const goalDist = 400 + (gameState.activeLevel * 180);
 
-            // Gravedad y Movimiento
-            pvy += gravity;
-            pvy *= 0.98; // Rozamiento
-            py += pvy;
-            updatePlayerUI();
+            gameState.pvy += gravity; // Y aumenta (baja)
+            gameState.pvy *= 0.98;
+            gameState.py += gameState.pvy;
+            
+            updatePlayerPos();
 
             // Progreso
-            progress++;
-            const perc = Math.min((progress / goal) * 100, 100);
-            document.getElementById('bar-fill').style.width = perc + '%';
-            document.getElementById('txtPerc').innerText = Math.floor(perc) + '%';
+            gameState.progress++;
+            const perc = Math.min((gameState.progress / goalDist) * 100, 100);
+            const fill = document.getElementById('game-fill');
+            const percText = document.getElementById('game-perc');
+            if(fill) fill.style.width = perc + '%';
+            if(percText) percText.innerText = Math.floor(perc) + '%';
 
             if(perc >= 100) return win();
 
             // Meteoros
-            if(Math.random() < (0.02 + activeLvl * 0.004)) spawnMeteor();
-            meteors.forEach((m, i) => {
-                m.y += 4 + (activeLvl * 0.2);
+            const meteorRate = 0.02 + (gameState.activeLevel * 0.005);
+            if(Math.random() < meteorRate) spawnMeteor();
+            
+            gameState.meteors.forEach((m, i) => {
+                m.y += 4 + (gameState.activeLevel * 0.2);
                 m.el.style.top = m.y + 'px';
-                if(m.y > window.innerHeight) { m.el.remove(); meteors.splice(i, 1); }
                 
-                // Colisión
+                if(m.y > window.innerHeight) { m.el.remove(); gameState.meteors.splice(i, 1); continue; }
+                
                 const pr = document.getElementById('player').getBoundingClientRect();
                 const mr = m.el.getBoundingClientRect();
-                const dist = Math.hypot((pr.left+35) - (mr.left+20), (pr.top+35) - (mr.top+20));
-                if(dist < 45) return die("¡IMPACTO!");
+                // Distancia entre centros (Tierra r=35, Meteoro r=20)
+                const d = Math.sqrt(Math.pow((pr.left+32)-(mr.left+20),2) + Math.pow((pr.top+32)-(mr.top+20),2));
+                if(d < 45) return die("COLISIÓN: ÓRBITA COMPROMETIDA");
             });
 
-            // Límites
-            if(py < 40 || py > window.innerHeight - 40) return die("EQUILIBRIO PERDIDO");
+            // Límites pantalla (Y disminuye arriba, aumenta abajo)
+            if(gameState.py < 40 || gameState.py > window.innerHeight - 40) {
+                return die("FUERA DE ÓRBITA: GRAVEDAD CRÍTICA");
+            }
 
-            loopReq = requestAnimationFrame(gameLoop);
+            gameState.animReq = requestAnimationFrame(gameLoop);
         }
 
         function spawnMeteor() {
             const el = document.createElement('div');
             el.className = 'meteor';
-            el.innerHTML = `<svg viewBox="0 0 100 100"><path d="M50 10 L80 30 L90 70 L50 90 L10 70 L20 30 Z" fill="#444" stroke="#ff3e3e" stroke-width="5"/></svg>`;
-            el.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+            el.innerHTML = `<svg viewBox="0 0 100 100"><path d="M50 10 L85 30 L95 70 L50 90 L10 70 L20 30 Z" fill="#444" stroke="#ff3e3e" stroke-width="5"/></svg>`;
+            // Spawn horizontal aleatorio (pero dentro de pantalla)
+            el.style.left = Math.random() * (window.innerWidth - 60) + 'px';
             el.style.top = '-50px';
             document.getElementById('world').appendChild(el);
-            meteors.push({ el, y: -50 });
+            gameState.meteors.push({ el, y: -50 });
         }
 
         function win() {
-            isLive = false;
-            cancelAnimationFrame(loopReq);
-            if(activeLvl === unlocked) unlocked++;
-            alert("MISIÓN CUMPLIDA");
-            document.getElementById('game').classList.add('hidden');
-            document.getElementById('map').classList.remove('hidden');
-            renderMap();
+            gameState.isPhysicsActive = false;
+            cancelAnimationFrame(gameState.animReq);
+            if(gameState.activeLevel === gameState.unlocked) gameState.unlocked++;
+            alert("NIVEL " + gameState.activeLevel + " COMPLETO. ÓRBITA SINCRONIZADA.");
+            changeView('MAP');
         }
 
-        function die(m) {
-            isLive = false;
-            cancelAnimationFrame(loopReq);
-            alert(m);
-            initLevel(); // Reinicia el mismo nivel
+        function die(msg) {
+            gameState.isPhysicsActive = false;
+            cancelAnimationFrame(gameState.animReq);
+            alert(msg);
+            renderGame(); // Reinicia el mismo nivel
         }
+
+        // --- ARRANQUE ---
+        renderMenu();
+
     </script>
 </body>
 </html>
