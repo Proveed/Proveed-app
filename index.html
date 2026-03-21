@@ -3,221 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOCH: COSMIC ASCENSION - BALANCED</title>
+    <title>TOCH: COSMIC ASCENSION - LIGHT PULSE</title>
     <style>
         :root {
-            --bg-deep: #020205; --bg-void: #0a0a1a;
-            --primary: #32ff7e; --danger: #ff3e3e;
-            --meteor: #ff9f1a; --ball: #ffffff;
+            /* Colores de la Imagen de Referencia */
+            --primary: #32ff7e; /* Verde Neón Meta */
+            --danger: #ff3e3e;  /* Rojo Neón Muerte */
+            --earth-ocean: #1e90ff; /* Azul Océano */
+            --earth-land: #2ecc71;  /* Verde Continente */
+            --meteor-molten: #ff9f1a; /* Naranja Meteorito */
+            --text: #ffffff;
         }
-        * { box-sizing: border-box; touch-action: none; user-select: none; }
-        body {
-            margin: 0; background: var(--bg-deep); color: white;
-            font-family: 'Courier New', monospace; height: 100vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            overflow: hidden;
-        }
-        #hud {
-            margin-top: 20px; text-align: center; width: 90%; z-index: 100;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.03); padding: 10px 15px;
-            border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-        }
-        #level-txt { font-size: 12px; color: var(--primary); letter-spacing: 2px; }
-        #altitude-txt { font-size: 18px; font-weight: bold; }
 
+        * { box-sizing: border-box; touch-action: none; user-select: none; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: #000;
+            /* Fondo Galáctico Realista de Referencia */
+            background-image: url('https://i.imgur.com/2c7Y9Fh.jpg');
+            background-size: cover; background-position: center;
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* FUENTE MONTSERRAT */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;900&display=swap');
+
+        /* HUD Superior */
+        #hud {
+            position: absolute; top: 20px; left: 5%; width: 90%;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 20px; border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px); z-index: 100;
+        }
+        #location { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.7); }
+        #altitude { font-size: 18px; font-weight: 900; color: #fff; }
+
+        /* Escenario de Juego */
         #stage {
-            position: relative; width: 100vw; height: calc(100vh - 80px);
-            margin-top: 10px; overflow: hidden;
-            background: radial-gradient(circle at center, var(--bg-void) 0%, var(--bg-deep) 100%);
+            position: relative; width: 100vw; flex-grow: 1;
+            margin-top: 80px; overflow: hidden;
         }
-        #stars-far, #stars-mid, #stars-near { position: absolute; inset: 0; width: 100%; height: 100%; background-repeat: repeat; }
-        #death-line { position: absolute; bottom: 0; width: 100%; height: 4px; background: var(--danger); box-shadow: 0 0 15px var(--danger); z-index: 50; }
-        #finish-line { position: absolute; top: 60px; width: 100%; height: 4px; background: var(--primary); box-shadow: 0 0 15px var(--primary); z-index: 50; }
-        #player-ball {
-            position: absolute; width: 38px; height: 38px;
-            background: var(--ball); border-radius: 50%;
-            box-shadow: 0 0 30px var(--ball), inset 0 0 10px rgba(0,0,0,0.5);
-            bottom: calc(100% - 150px); left: 50%; transform: translate(-50%, 0);
+
+        /* LÍNEAS DE BARRERA Neón (Igual a la imagen) */
+        .barrier {
+            position: absolute; width: 100%; height: 5px;
+            border-radius: 2px; z-index: 50;
+        }
+        #finish-line {
+            top: 50px; background: var(--primary);
+            box-shadow: 0 0 15px var(--primary), 0 0 30px var(--primary);
+        }
+        #death-line {
+            bottom: 10px; background: var(--danger);
+            box-shadow: 0 0 15px var(--danger), 0 0 30px var(--danger);
+        }
+
+        /* PLANETA TIERRA SVG (Procedimental) */
+        #player {
+            position: absolute; width: 60px; height: 60px;
             z-index: 60; will-change: bottom;
+            bottom: calc(100% - 180px); left: 50%;
+            transform: translate(-50%, 0);
+            border-radius: 50%; /* Para colisiones */
+            
+            /* Atmósfera neón azul sutil */
+            box-shadow: 0 0 25px rgba(50, 150, 255, 0.6), inset 0 0 10px rgba(255,255,255,0.4);
+            transition: box-shadow 0.1s; /* Para feedback visual de ligereza */
         }
+
+        /* SVG del Planeta Tierra (Continentes y Océanos) */
+        #earth-svg {
+            width: 100%; height: 100%;
+        }
+
+        /* Efecto de Ligereza (Feedback Visual) */
+        #player.light-pulse {
+            box-shadow: 0 0 40px rgba(100, 200, 255, 1), inset 0 0 15px rgba(255,255,255,0.7);
+        }
+
+        /* METEORITOS (Estilo Incandescente) */
         .meteor {
-            position: absolute; width: 26px; height: 26px;
-            background: var(--meteor); border-radius: 3px;
-            box-shadow: 0 0 15px var(--meteor), 0 0 30px var(--danger);
-            z-index: 40; border: 2px solid rgba(255, 255, 255, 0.2);
+            position: absolute; width: 38px; height: 38px;
+            background-color: transparent;
+            /* Imagen de meteorito realista (oFallback básico) */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 5 L70 20 L95 50 L75 80 L50 95 L25 80 L5 50 L30 20 Z" fill="%23555" stroke="%23ff3e3e" stroke-width="5"/></svg>');
+            background-size: cover; background-position: center;
+            
+            /* Brillo de calor neón */
+            box-shadow: 0 0 15px var(--meteor-molten), 0 0 30px var(--danger);
+            z-index: 40; will-change: top, left;
         }
+
+        /* Superposición de Pantalla */
         #overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.97);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 1000; text-align: center; padding: 30px;
+            z-index: 1000; text-align: center; padding: 40px;
+            backdrop-filter: blur(8px);
         }
-        .btn-start {
-            padding: 20px 50px; background: transparent; color: var(--primary);
-            border: 2px solid var(--primary); font-weight: 900; border-radius: 5px; cursor: pointer;
+        h1 { font-weight: 900; font-size: 30px; letter-spacing: 5px; margin-bottom: 10px; color: var(--primary); text-shadow: 0 0 20px var(--primary); }
+        p { color: #aaa; font-size: 13px; line-height: 1.8; max-width: 380px; margin-bottom: 50px; }
+        .btn {
+            padding: 18px 50px; background: transparent; color: var(--primary); border: 2px solid var(--primary);
+            font-weight: 900; font-size: 15px; border-radius: 4px; cursor: pointer; text-transform: uppercase;
         }
+        .btn:active { background: var(--primary); color: black; }
+
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <h1 style="color:var(--primary); font-size: 26px; letter-spacing: 4px;">TOCH: ASCENSION</h1>
-        <p style="color:#aaa; margin-bottom: 50px; font-size: 12px; max-width: 320px; line-height: 1.8;">
-            LA GRAVEDAD HA SIDO CALIBRADA.<br><br>
-            TOCA PARA SUBIR. EL PRIMER TOQUE ACTIVA EL DESCENSO.<br><br>
-            DESTRUYE METEORITOS CON TUS PULSOS.
+        <h1>TOCH</h1>
+        <div style="width:60px; height:2px; background:var(--primary); margin-bottom: 30px;"></div>
+        <p id="level-desc">
+            <b style="color:white;">MISIÓN: COSMIC ASCENSION - TIERRA</b><br><br>
+            Protege el Planeta Tierra. Toca para impulsarlo hacia arriba.<br><br>
+            Evita la barrera roja inferior y los meteoritos incandescentes.<br><br>
+            Tus pulsaciones destruyen amenazas cercanas.<br><br>
+            <b style="color:var(--earth-ocean);">RECOMPENSA: Al destruir un meteorito, la Tierra se volverá LIGERA momentáneamente.</b>
         </p>
-        <button class="btn-start" id="startBtn">CALIBRAR Y COMENZAR</button>
+        <button class="btn" id="startBtn">INICIAR ÓRBITA</button>
     </div>
 
     <div id="hud">
-        <div id="level-txt">VIP-STATION 01</div>
-        <div id="altitude-txt">PARSEC: 0.0</div>
+        <div id="location">SOLAR 01: TIERRA</div>
+        <div id="altitude">0.0 PARSEC</div>
     </div>
 
     <div id="stage">
-        <div id="stars-far"></div><div id="stars-mid"></div><div id="stars-near"></div>
-        <div id="finish-line"></div>
-        <div id="player-ball"></div>
-        <div id="death-line"></div>
+        <div class="barrier" id="finish-line"></div>
+        
+        <div id="player">
+            <svg id="earth-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" fill="var(--earth-ocean)" stroke="white" stroke-width="1"/>
+                <path d="M25,15 Q30,25 40,20 Q50,30 45,40 L30,50 Q20,40 15,30 Z" fill="var(--earth-land)"/>
+                <path d="M30,50 Q35,60 30,75 L20,85 Q15,75 20,60 Z" fill="var(--earth-land)"/>
+                <path d="M55,15 Q60,20 65,15 L75,20 Q70,30 60,35 Z" fill="var(--earth-land)"/>
+                <path d="M60,35 Q70,45 65,65 L55,75 Q50,65 55,50 Z" fill="var(--earth-land)"/>
+                <path d="M65,15 L85,10 Q95,20 90,40 Q80,50 70,45 Z" fill="var(--earth-land)"/>
+            </svg>
+        </div>
+
+        <div class="barrier" id="death-line"></div>
     </div>
 
     <script>
-        const player = document.getElementById('player-ball');
+        // Elementos del DOM
+        const player = document.getElementById('player');
         const stage = document.getElementById('stage');
-        const altitudeTxt = document.getElementById('altitude-txt');
+        const altitudeTxt = document.getElementById('altitude');
         const startBtn = document.getElementById('startBtn');
         const overlay = document.getElementById('overlay');
-        const starsFar = document.getElementById('stars-far'), starsMid = document.getElementById('stars-mid'), starsNear = document.getElementById('stars-near');
+        const levelDesc = document.getElementById('level-desc');
 
-        const stageH = stage.offsetHeight, stageW = stage.offsetWidth;
-        const playerSize = 38, finishLineY = 64, deathLineY = 4;
+        // Dimensiones y Límites
+        const stageH = stage.offsetHeight;
+        const stageW = stage.offsetWidth;
+        const playerSize = 60; 
+        const finishLineY = 66; 
+        const deathLineY = 16;   
 
-        let startBallY = stageH - 150 - playerSize/2;
-        let playerY = startBallY, playerVelY = 0;
-        let appReady = false, active = false, lastTimestamp = 0;
-        let currentAltitude = 0, meteorList = [], starY = { far: 0, mid: 0, near: 0 };
+        // Estado del Juego y Física
+        let startY = stageH - 180 - playerSize/2; 
+        let playerY = startY;
+        let playerVelY = 0;
+        let active = false; 
+        let menuVisible = true;
+        let lastTimestamp = 0;
+        let currentAltitude = 0;
+        let targetAltitude = 50.0; 
+        let meteorList = [];
 
-        // --- CALIBRACIÓN DE FÍSICA MEJORADA ---
-        const gravity = 0.45;         // MÁS SUAVE (Antes 0.75)
-        const tapImpulse = 21;        // MÁS FUERTE (Antes 17)
-        const friction = 0.98;        // MÁS FLUIDO (Antes 0.96)
-        const meteorSpawnRate = 0.03; 
-        const meteorSpeed = 4.0;
-        const pulseDestroyRadius = 120;
+        // --- CALIBRACIÓN DE FÍSICA ---
+        const normalGravity = 0.55;    // Gravedad Base
+        const tapImpulse = 20;         // Impulso de salto
+        const friction = 0.97;         // Fricción
+        const meteorSpawnRate = 0.04; 
+        const meteorSpeed = 4.2; 
+        const pulseDestroyRadius = 135; 
 
-        generateStars();
+        // Variables de la Lógica "Light Pulse"
+        let currentGravity = normalGravity;
+        let lightPulseActive = false;
+        let lightPulseTimer = null;
+        const lightPulseDuration = 300; // 0.3 segundos de ligereza
 
+        // Lógica del Botón de Inicio
         startBtn.onclick = () => {
             overlay.style.display = "none";
+            menuVisible = false;
             resetGame();
-            appReady = true; active = false;
-            altitudeTxt.innerText = "ESPERANDO PULSO...";
+            active = false; 
+            altitudeTxt.innerText = "ESPERANDO PULSO TÁCTIL...";
+            altitudeTxt.style.color = "var(--primary)";
         };
 
         function resetGame() {
-            playerY = startBallY; playerVelY = 0; currentAltitude = 0;
-            meteorList.forEach(m => m.el.remove()); meteorList = [];
-            starY = { far: 0, mid: 0, near: 0 };
+            playerY = startY;
+            playerVelY = 0;
+            currentAltitude = 0;
+            // Limpiar meteoros antiguos
+            meteorList.forEach(m => m.el.remove());
+            meteorList = [];
             player.style.bottom = playerY + "px";
+            // Reset de ligereza
+            deactivateLightPulse();
         }
 
-        function generateStars() {
-            starsFar.style.backgroundImage = createStarTexture(1, '#333', 100);
-            starsMid.style.backgroundImage = createStarTexture(1.5, '#666', 50);
-            starsNear.style.backgroundImage = createStarTexture(2, '#999', 20);
-        }
-
-        function createStarTexture(size, color, count) {
-            let canvas = document.createElement('canvas');
-            canvas.width = stageW; canvas.height = stageH;
-            let ctx = canvas.getContext('2d');
-            ctx.fillStyle = color;
-            for (let i = 0; i < count; i++) {
-                ctx.beginPath(); ctx.arc(Math.random() * stageW, Math.random() * stageH, size, 0, Math.PI * 2); ctx.fill();
-            }
-            return `url(${canvas.toDataURL()})`;
-        }
-
+        // --- LÓGICA DE PULSACIÓN (IMPULSO, DESTRUCCIÓN Y LIGEREZA) ---
         function handleTap(e) {
-            if (!appReady) return;
+            if (menuVisible) return; 
             if (e.cancelable) e.preventDefault();
+
+            // Activar física al primer toque
             if (!active) {
-                active = true; lastTimestamp = performance.now();
+                active = true;
+                lastTimestamp = performance.now();
                 requestAnimationFrame(gameLoop);
             }
+
+            // 1. IMPULSO DE ASCENSO
             playerVelY += tapImpulse;
+
+            // 2. ONDA DE CHOQUE (Destruir Meteoros)
             let touchX, touchY;
             if (e.touches) { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }
             else { touchX = e.clientX; touchY = e.clientY; }
-            let rect = stage.getBoundingClientRect();
-            let clickX = touchX - rect.left, clickY = touchY - rect.top;
 
+            let rect = stage.getBoundingClientRect();
+            let clickX = touchX - rect.left;
+            let clickY = touchY - rect.top;
+
+            // Verificar meteoros cercanos
             for (let i = meteorList.length - 1; i >= 0; i--) {
-                let m = meteorList[i], mRect = m.el.getBoundingClientRect();
-                let mCenterX = mRect.left + mRect.width/2 - rect.left, mCenterY = mRect.top + mRect.height/2 - rect.top;
+                let m = meteorList[i];
+                let mRect = m.el.getBoundingClientRect();
+                let mCenterX = mRect.left + mRect.width/2 - rect.left;
+                let mCenterY = mRect.top + mRect.height/2 - rect.top;
+
                 let dist = Math.sqrt(Math.pow(clickX - mCenterX, 2) + Math.pow(clickY - mCenterY, 2));
+
                 if (dist < pulseDestroyRadius) {
-                    m.el.remove(); meteorList.splice(i, 1);
-                    createExplosion(mCenterX, mCenterY);
+                    // DESTRUIR METEORO
+                    m.el.remove();
+                    meteorList.splice(i, 1);
+                    createExplosion(mCenterX, mCenterY); 
+
+                    // --- NUEVA LÓGICA: ACTIVAR PULSO DE LIGEREZA ---
+                    activateLightPulse();
                 }
             }
         }
 
+        function activateLightPulse() {
+            // Cancelar el temporizador anterior si existía
+            if (lightPulseTimer) clearTimeout(lightPulseTimer);
+
+            lightPulseActive = true;
+            currentGravity = normalGravity / 2; // Reducir la gravedad a la mitad
+            player.classList.add('light-pulse'); // Feedback Visual
+
+            // Establecer el temporizador para desactivar la ligereza
+            lightPulseTimer = setTimeout(deactivateLightPulse, lightPulseDuration);
+        }
+
+        function deactivateLightPulse() {
+            lightPulseActive = false;
+            currentGravity = normalGravity; // Restaurar gravedad normal
+            player.classList.remove('light-pulse'); // Feedback Visual
+            lightPulseTimer = null;
+        }
+
+        // Eventos para móvil y PC
         stage.addEventListener('touchstart', handleTap, {passive: false});
         stage.addEventListener('mousedown', (e) => { if (!('ontouchstart' in window)) handleTap(e); });
 
+        // --- SISTEMA DE METEORITOS ---
         function spawnMeteor() {
             if (Math.random() < meteorSpawnRate) {
-                let el = document.createElement('div'); el.className = 'meteor';
-                let x = Math.random() * (stageW - 26);
-                el.style.left = x + "px"; el.style.top = "-30px";
-                stage.appendChild(el); meteorList.push({ el: el, y: -30 });
+                let el = document.createElement('div');
+                el.className = 'meteor';
+                let x = Math.random() * (stageW - 40);
+                el.style.left = x + "px";
+                el.style.top = "-50px"; 
+                stage.appendChild(el);
+                meteorList.push({ el: el, y: -50 });
             }
         }
 
         function updateMeteors() {
             for (let i = meteorList.length - 1; i >= 0; i--) {
-                let m = meteorList[i]; m.y += meteorSpeed; m.el.style.top = m.y + "px";
-                if (m.y > stageH) { m.el.remove(); meteorList.splice(i, 1); continue; }
-                let pRect = player.getBoundingClientRect(), mRect = m.el.getBoundingClientRect();
-                let dist = Math.sqrt(Math.pow((pRect.left+19)-(mRect.left+13),2)+Math.pow((pRect.top+19)-(mRect.top+13),2));
-                if (dist < 28) { gameOver("COLISIÓN DETECTADA."); return; }
+                let m = meteorList[i];
+                m.y += meteorSpeed;
+                m.el.style.top = m.y + "px";
+
+                if (m.y > stageH) {
+                    m.el.remove();
+                    meteorList.splice(i, 1);
+                    continue;
+                }
+
+                // COLISIÓN CON LA TIERRA
+                let pRect = player.getBoundingClientRect();
+                let mRect = m.el.getBoundingClientRect();
+
+                let pCenterX = pRect.left + playerSize/2;
+                let pCenterY = pRect.top + playerSize/2;
+                let mCenterX = mRect.left + 19; 
+                let mCenterY = mRect.top + 19;
+
+                let dist = Math.sqrt(Math.pow(pCenterX - mCenterX, 2) + Math.pow(pCenterY - mCenterY, 2));
+
+                if (dist < (playerSize/2 + 15)) {
+                    gameOver("COLISIÓN DETECTADA. LA TIERRA HA SIDO IMPACTADA.");
+                    return;
+                }
             }
         }
 
+        // --- CICLO PRINCIPAL DEL JUEGO (GAME LOOP) ---
         function gameLoop(timestamp) {
             if (!active) return;
-            let dt = (timestamp - lastTimestamp) / 1000; lastTimestamp = timestamp;
-            playerVelY -= gravity; playerVelY *= friction; playerY += playerVelY;
+            let dt = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            // 1. FÍSICA DEL JUGADOR (Usando gravedad dinámica)
+            playerVelY -= currentGravity; // Caída
+            playerVelY *= friction;
+            playerY += playerVelY;
+
             player.style.bottom = playerY + "px";
-            if (playerVelY > 0) {
-                starY.far += playerVelY * 0.01; starY.mid += playerVelY * 0.05; starY.near += playerVelY * 0.2;
-                starsFar.style.transform = `translateY(${starY.far % stageH}px)`;
-                starsMid.style.transform = `translateY(${starY.mid % stageH}px)`;
-                starsNear.style.transform = `translateY(${starY.near % stageH}px)`;
+
+            // 2. ACTUALIZAR SISTEMAS
+            spawnMeteor();
+            updateMeteors();
+
+            // Actualizar Altitud
+            let currentVisualY = stageH - playerY - playerSize/2;
+            let progress = 1 - ((currentVisualY - finishLineY) / (startY - finishLineY));
+            currentAltitude = Math.max(0, progress * targetAltitude);
+            altitudeTxt.innerText = `${currentAltitude.toFixed(1)} PARSEC`;
+            altitudeTxt.style.color = "#fff";
+
+            // 3. CONDICIONES DE DERROTA/VICTORIA
+            if (playerY <= deathLineY) {
+                gameOver("LA TIERRA CAYÓ AL VACÍO INFERIOR.");
+                return;
             }
-            spawnMeteor(); updateMeteors();
-            let currentVisualY = stageH - playerY - 19;
-            let progress = 1 - ((currentVisualY - finishLineY) / (startBallY - finishLineY));
-            altitudeTxt.innerText = `PARSEC: ${Math.max(0, progress * 50).toFixed(1)}`;
-            if (playerY <= deathLineY) { gameOver("CAÍSTE AL VACÍO."); return; }
-            if (currentVisualY <= finishLineY) { gameOver("¡NIVEL COMPLETADO!", true); return; }
-            requestAnimationFrame(gameLoop);
+            if (currentVisualY <= finishLineY) {
+                gameOver("¡MISION EXITOSA! SISTEMA SINCRONIZADO.", true);
+                return;
+            }
+
+            if (active) requestAnimationFrame(gameLoop);
         }
 
         function gameOver(msg, win = false) {
-            active = false; appReady = false;
-            setTimeout(() => { alert(msg); overlay.style.display = "flex"; }, 100);
+            active = false;
+            menuVisible = true;
+            deactivateLightPulse(); // Reset por si acaso
+            setTimeout(() => {
+                alert(msg);
+                overlay.style.display = "flex";
+                startBtn.innerText = "REINTENTAR MISIÓN";
+                levelDesc.innerHTML = `<b style="color:${win ? 'var(--primary)' : 'var(--danger)'};">${win ? '¡VICTORIA!' : 'FALLO EN LA MISIÓN'}</b><br><br>${msg}`;
+                playerY = startY; 
+                player.style.bottom = playerY + "px";
+            }, 100);
         }
 
         function createExplosion(x, y) {
+            // Nova blanca cósmica sutil
             let ex = document.createElement('div');
-            ex.style.cssText = `position:absolute;width:5px;height:5px;background:white;border-radius:50%;left:${x}px;top:${y}px;transform:translate(-50%,-50%);transition:all 0.25s;z-index:35;box-shadow:0 0 15px white;`;
+            ex.style.cssText = `position:absolute;width:5px;height:5px;background:white;border-radius:50%;left:${x}px;top:${y}px;transform:translate(-50%,-50%);transition:all 0.2s ease-out;z-index:35;box-shadow:0 0 15px white;`;
             stage.appendChild(ex);
-            requestAnimationFrame(() => { ex.style.transform = 'translate(-50%,-50%) scale(12)'; ex.style.opacity = '0'; });
-            setTimeout(() => ex.remove(), 250);
+            requestAnimationFrame(() => { ex.style.transform = 'translate(-50%,-50%) scale(15)'; ex.style.opacity = '0'; });
+            setTimeout(() => ex.remove(), 200);
         }
     </script>
 </body>
