@@ -3,259 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EQUILIBRIUM: COSMIC STRATEGY</title>
+    <title>EQUILIBRIUM</title>
     <style>
-        :root {
-            --primary: #32ff7e; --danger: #ff3e3e;
-            --ocean: #1e90ff; --land: #2ecc71;
-            --void: #020205;
-        }
-        * { box-sizing: border-box; touch-action: none; user-select: none; }
-        body {
-            margin: 0; background: var(--void); color: white;
-            font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden;
-        }
-
-        /* VISTAS */
-        .view { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+        :root { --p: #32ff7e; --d: #ff3e3e; --b: #020205; --blue: #1e90ff; --green: #2ecc71; }
+        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--b); color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
+        
+        /* Contenedores de Pantalla */
+        .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; z-index: 10; background: var(--b); }
         .hidden { display: none !important; }
 
-        /* MAPA ESTELAR */
-        #screen-map { 
-            background: radial-gradient(circle, #0a0a25 0%, #000 100%); 
-            justify-content: flex-start; padding-top: 40px; overflow-y: auto;
-        }
-        .level-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
-            padding: 20px; max-width: 400px; margin-bottom: 100px;
-        }
-        .level-node {
-            width: 65px; height: 65px; background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.2); border-radius: 15px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 18px; cursor: pointer; transition: 0.3s;
-        }
-        .level-node.unlocked { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 15px rgba(50, 255, 126, 0.3); }
-        .level-node.locked { opacity: 0.2; cursor: not-allowed; }
+        /* Estilo Menú Inicio */
+        #menu { justify-content: center; background: radial-gradient(circle, #0a0a25 0%, #000 100%); }
+        h1 { font-size: 3rem; letter-spacing: 10px; color: var(--p); text-shadow: 0 0 20px var(--p); margin: 0; }
+        
+        /* Estilo Mapa */
+        #map { overflow-y: auto; padding: 20px; display: block; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; max-width: 400px; margin: 30px auto; padding-bottom: 100px; }
+        .node { width: 70px; height: 70px; background: #111; border: 2px solid #333; border-radius: 15px; display: flex; 
+                align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
+        .node.open { border-color: var(--p); color: var(--p); box-shadow: 0 0 15px rgba(50,255,126,0.3); }
+        .node.lock { opacity: 0.2; cursor: default; }
 
-        /* HUD JUEGO */
-        #hud {
-            position: absolute; top: 20px; width: 90%; z-index: 100;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;
-            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
-        }
-        #progress-track { position: absolute; top: 95px; width: 80%; height: 6px; background: #222; border-radius: 3px; z-index: 100; }
-        #progress-fill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary); border-radius: 3px; }
+        /* HUD Juego */
+        #hud { position: absolute; top: 20px; width: 90%; display: flex; justify-content: space-between; z-index: 100; font-weight: 900; }
+        #bar-bg { position: absolute; top: 70px; width: 80%; height: 8px; background: #222; border-radius: 4px; z-index: 100; overflow: hidden; }
+        #bar-fill { width: 0%; height: 100%; background: var(--p); box-shadow: 0 0 15px var(--p); transition: width 0.1s; }
 
-        /* JUEGO */
-        #stage { position: relative; width: 100vw; height: 100vh; overflow: hidden; background: url('https://i.imgur.com/2c7Y9Fh.jpg') center/cover; }
-        #player {
-            position: absolute; width: 70px; height: 70px; z-index: 60;
-            left: 50%; top: 50%; transform: translate(-50%, -50%);
-            filter: drop-shadow(0 0 20px var(--ocean)); will-change: top;
-        }
-        .meteor {
-            position: absolute; width: 45px; height: 45px; z-index: 40;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 10 L85 30 L95 70 L50 95 L5 70 L15 30 Z" fill="%23444" stroke="%23ff3e3e" stroke-width="5"/></svg>');
-            background-size: cover; filter: drop-shadow(0 0 10px var(--danger));
-        }
+        /* Elementos de Juego */
+        #game { background: url('https://i.imgur.com/2c7Y9Fh.jpg') center/cover; }
+        #player { position: absolute; width: 70px; height: 70px; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 50; }
+        .meteor { position: absolute; width: 40px; height: 40px; z-index: 40; filter: drop-shadow(0 0 10px var(--d)); }
 
-        .btn {
-            background: var(--primary); color: black; border: none; padding: 18px 45px;
-            font-weight: 900; border-radius: 12px; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 0 20px var(--primary); margin: 20px;
-        }
+        .btn { margin-top: 30px; padding: 15px 40px; background: var(--p); color: black; border: none; 
+               border-radius: 50px; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 20px var(--p); }
     </style>
 </head>
 <body>
 
-    <div id="screen-start" class="view">
-        <h1 style="font-size: 45px; letter-spacing: 8px; color: var(--primary); text-shadow: 0 0 30px var(--primary);">EQUILIBRIUM</h1>
-        <p style="letter-spacing: 3px; opacity: 0.7;">COSMIC STRATEGY</p>
-        <button class="btn" onclick="initMap()">MAPA ESTELAR</button>
+    <div id="menu" class="screen">
+        <h1>EQUILIBRIUM</h1>
+        <p style="letter-spacing: 5px; opacity: 0.5;">COSMIC STRATEGY</p>
+        <button class="btn" onclick="goToMap()">MAPA DE NIVELES</button>
     </div>
 
-    <div id="screen-map" class="view hidden">
-        <h2 style="color: var(--primary); letter-spacing: 2px;">SISTEMA DE NIVELES</h2>
-        <div class="level-grid" id="level-grid"></div>
-        <button class="btn" style="background:#333; color:white; position:fixed; bottom:20px;" onclick="backToMenu()">VOLVER</button>
+    <div id="map" class="screen hidden">
+        <h2 style="color: var(--p); margin-top: 40px;">SELECCIONA NIVEL</h2>
+        <div class="grid" id="lvlGrid"></div>
+        <button class="btn" style="background:#444; color:white; box-shadow:none;" onclick="location.reload()">VOLVER</button>
     </div>
 
-    <div id="screen-game" class="view hidden">
+    <div id="game" class="screen hidden">
         <div id="hud">
-            <div id="lvl-tag" style="font-weight: 900; color: var(--primary);">NIVEL 1</div>
-            <div id="perc-tag" style="font-family: monospace;">0%</div>
+            <span id="txtLvl" style="color:var(--p)">NIVEL 1</span>
+            <span id="txtPerc">0%</span>
         </div>
-        <div id="progress-track"><div id="progress-fill"></div></div>
-        
-        <div id="stage">
+        <div id="bar-bg"><div id="bar-fill"></div></div>
+        <div id="world" style="width:100%; height:100%; position:relative;">
             <div id="player">
                 <svg viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="48" fill="var(--ocean)" stroke="white" stroke-width="1"/>
-                    <path d="M20,40 Q35,25 50,30 Q65,15 80,30 L90,50 Q75,70 55,60 Q35,80 20,60 Z" fill="var(--land)"/>
-                    <path d="M40,70 Q55,95 30,95 Q15,80 30,65 Z" fill="var(--land)"/>
+                    <circle cx="50" cy="50" r="48" fill="var(--blue)" stroke="white" stroke-width="1"/>
+                    <path d="M20,40 Q35,20 55,30 Q70,15 85,35 L90,55 Q70,75 50,65 Q30,80 20,60 Z" fill="var(--green)"/>
+                    <path d="M40,75 Q55,95 30,95 Q15,85 30,70 Z" fill="var(--green)"/>
                 </svg>
             </div>
         </div>
     </div>
 
     <script>
-        // Variables Globales
-        let unlockedLvls = 1; 
-        let currentLvl = 1;
-        let isPhysicsOn = false;
-        let pY, pVelY = 0;
+        let unlocked = 1;
+        let activeLvl = 1;
+        let isPlaying = false;
+        let isLive = false;
+        let py, pvy = 0;
+        let progress = 0;
         let meteors = [];
-        let score = 0;
-        let animFrame;
+        let loopReq;
 
-        const screenStart = document.getElementById('screen-start');
-        const screenMap = document.getElementById('screen-map');
-        const screenGame = document.getElementById('screen-game');
-        const player = document.getElementById('player');
-        const levelGrid = document.getElementById('level-grid');
-
-        // Función para mostrar el mapa
-        function initMap() {
-            screenStart.classList.add('hidden');
-            screenMap.classList.remove('hidden');
-            renderGrid();
+        // Navegación
+        function goToMap() {
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('map').classList.remove('hidden');
+            renderMap();
         }
 
-        function backToMenu() {
-            screenMap.classList.add('hidden');
-            screenStart.classList.remove('hidden');
-        }
-
-        function renderGrid() {
-            levelGrid.innerHTML = '';
+        function renderMap() {
+            const container = document.getElementById('lvlGrid');
+            container.innerHTML = '';
             for(let i=1; i<=120; i++) {
                 const node = document.createElement('div');
-                node.className = `level-node ${i <= unlockedLvls ? 'unlocked' : 'locked'}`;
+                node.className = `node ${i <= unlocked ? 'open' : 'lock'}`;
                 node.innerText = i;
-                if(i <= unlockedLvls) node.onclick = () => launchLevel(i);
-                levelGrid.appendChild(node);
+                if(i <= unlocked) node.onclick = () => startLevel(i);
+                container.appendChild(node);
             }
         }
 
-        function launchLevel(lvl) {
-            currentLvl = lvl;
-            screenMap.classList.add('hidden');
-            screenGame.classList.remove('hidden');
-            document.getElementById('lvl-tag').innerText = `NIVEL ${lvl}`;
-            setupGame();
+        function startLevel(n) {
+            activeLvl = n;
+            document.getElementById('map').classList.add('hidden');
+            document.getElementById('game').classList.remove('hidden');
+            document.getElementById('txtLvl').innerText = "NIVEL " + n;
+            initLevel();
         }
 
-        function setupGame() {
-            isPhysicsOn = false;
-            score = 0;
-            pVelY = 0;
-            pY = window.innerHeight / 2; // Inicia en el centro
-            player.style.top = pY + 'px';
-            player.style.left = '50%';
-            document.getElementById('progress-fill').style.width = '0%';
-            document.getElementById('perc-tag').innerText = '0%';
+        function initLevel() {
+            isPlaying = true;
+            isLive = false;
+            progress = 0;
+            pvy = 0;
+            py = window.innerHeight / 2; // Centro exacto
             meteors.forEach(m => m.el.remove());
             meteors = [];
+            updatePlayerUI();
+            document.getElementById('bar-fill').style.width = '0%';
+            document.getElementById('txtPerc').innerText = '0%';
         }
 
-        function handleInput(e) {
-            if(screenGame.classList.contains('hidden')) return;
+        function updatePlayerUI() {
+            const p = document.getElementById('player');
+            p.style.top = py + 'px';
+        }
+
+        // Entrada de usuario
+        function handleAction(e) {
+            if(!isPlaying) return;
             if(e.cancelable) e.preventDefault();
-            
-            if(!isPhysicsOn) {
-                isPhysicsOn = true;
-                animFrame = requestAnimationFrame(update);
+
+            if(!isLive) {
+                isLive = true;
+                gameLoop();
             }
 
-            const diff = 16 + (currentLvl * 0.1);
-            pVelY -= diff; // Impulso hacia arriba
+            // Impulso hacia arriba
+            const force = 15 + (activeLvl * 0.15);
+            pvy -= force;
 
-            // Destruir meteoros al tocar cerca de ellos
-            const touchX = e.touches ? e.touches[0].clientX : e.clientX;
-            const touchY = e.touches ? e.touches[0].clientY : e.clientY;
-
-            for(let i=meteors.length-1; i>=0; i--) {
-                const m = meteors[i];
+            // Destrucción de meteoritos por toque
+            const tx = e.touches ? e.touches[0].clientX : e.clientX;
+            const ty = e.touches ? e.touches[0].clientY : e.clientY;
+            meteors.forEach((m, i) => {
                 const r = m.el.getBoundingClientRect();
-                const d = Math.sqrt((touchX - (r.left+22))**2 + (touchY - (r.top+22))**2);
-                if(d < 120) {
+                const d = Math.hypot(tx - (r.left + 20), ty - (r.top + 20));
+                if(d < 100) {
                     m.el.remove();
                     meteors.splice(i, 1);
-                    pVelY += 1.5; // Ligereza
+                    pvy += 2; // Bonus de ligereza
                 }
-            }
+            });
         }
 
-        window.addEventListener('touchstart', handleInput, {passive: false});
-        window.addEventListener('mousedown', handleInput);
+        window.addEventListener('touchstart', handleAction, {passive: false});
+        window.addEventListener('mousedown', handleAction);
 
-        function update() {
-            if(!isPhysicsOn) return;
+        // Bucle de Juego
+        function gameLoop() {
+            if(!isLive) return;
 
-            const gravity = 0.45 + (currentLvl * 0.04);
-            const targetScore = 500 + (currentLvl * 200);
-            
-            pVelY += gravity;
-            pVelY *= 0.98;
-            pY += pVelY;
-            player.style.top = pY + 'px';
+            const gravity = 0.4 + (activeLvl * 0.05);
+            const goal = 400 + (activeLvl * 150);
 
-            // Puntuación si te mantienes vivo
-            score++;
-            const p = Math.min((score / targetScore) * 100, 100);
-            document.getElementById('progress-fill').style.width = p + '%';
-            document.getElementById('perc-tag').innerText = Math.floor(p) + '%';
+            // Gravedad y Movimiento
+            pvy += gravity;
+            pvy *= 0.98; // Rozamiento
+            py += pvy;
+            updatePlayerUI();
 
-            if(p >= 100) return win();
+            // Progreso
+            progress++;
+            const perc = Math.min((progress / goal) * 100, 100);
+            document.getElementById('bar-fill').style.width = perc + '%';
+            document.getElementById('txtPerc').innerText = Math.floor(perc) + '%';
+
+            if(perc >= 100) return win();
 
             // Meteoros
-            const mFreq = 0.02 + (currentLvl * 0.005);
-            if(Math.random() < mFreq) spawnMeteor();
-            
-            for(let i=meteors.length-1; i>=0; i--) {
-                const m = meteors[i];
-                m.y += 4 + (currentLvl * 0.2);
+            if(Math.random() < (0.02 + activeLvl * 0.004)) spawnMeteor();
+            meteors.forEach((m, i) => {
+                m.y += 4 + (activeLvl * 0.2);
                 m.el.style.top = m.y + 'px';
+                if(m.y > window.innerHeight) { m.el.remove(); meteors.splice(i, 1); }
                 
-                if(m.y > window.innerHeight) { m.el.remove(); meteors.splice(i, 1); continue; }
-                
-                const pr = player.getBoundingClientRect();
+                // Colisión
+                const pr = document.getElementById('player').getBoundingClientRect();
                 const mr = m.el.getBoundingClientRect();
-                const dist = Math.sqrt((pr.left+35 - (mr.left+22))**2 + (pr.top+35 - (mr.top+22))**2);
-                if(dist < 48) return fail("¡IMPACTO!");
-            }
+                const dist = Math.hypot((pr.left+35) - (mr.left+20), (pr.top+35) - (mr.top+20));
+                if(dist < 45) return die("¡IMPACTO!");
+            });
 
-            // Límites pantalla
-            if(pY > window.innerHeight - 35 || pY < 35) return fail("FUERA DE ÓRBITA");
+            // Límites
+            if(py < 40 || py > window.innerHeight - 40) return die("EQUILIBRIO PERDIDO");
 
-            animFrame = requestAnimationFrame(update);
+            loopReq = requestAnimationFrame(gameLoop);
         }
 
         function spawnMeteor() {
             const el = document.createElement('div');
             el.className = 'meteor';
-            el.style.left = Math.random() * (window.innerWidth - 45) + 'px';
+            el.innerHTML = `<svg viewBox="0 0 100 100"><path d="M50 10 L80 30 L90 70 L50 90 L10 70 L20 30 Z" fill="#444" stroke="#ff3e3e" stroke-width="5"/></svg>`;
+            el.style.left = Math.random() * (window.innerWidth - 50) + 'px';
             el.style.top = '-50px';
-            document.getElementById('stage').appendChild(el);
-            meteors.push({el, y: -50});
+            document.getElementById('world').appendChild(el);
+            meteors.push({ el, y: -50 });
         }
 
         function win() {
-            isPhysicsOn = false;
-            cancelAnimationFrame(animFrame);
-            if(currentLvl === unlockedLvls) unlockedLvls++;
-            alert("SISTEMA SINCRONIZADO: NIVEL COMPLETADO");
-            screenGame.classList.add('hidden');
-            initMap();
+            isLive = false;
+            cancelAnimationFrame(loopReq);
+            if(activeLvl === unlocked) unlocked++;
+            alert("MISIÓN CUMPLIDA");
+            document.getElementById('game').classList.add('hidden');
+            document.getElementById('map').classList.remove('hidden');
+            renderMap();
         }
 
-        function fail(reason) {
-            isPhysicsOn = false;
-            cancelAnimationFrame(animFrame);
-            alert(reason);
-            setupGame();
+        function die(m) {
+            isLive = false;
+            cancelAnimationFrame(loopReq);
+            alert(m);
+            initLevel(); // Reinicia el mismo nivel
         }
     </script>
 </body>
