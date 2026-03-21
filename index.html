@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TOCH: EQUILIBRIO REAL</title>
+    <style>
+        :root { --bg: #000; --line: #32ff7e; --ball: #ff9f1a; }
+        body {
+            margin: 0; background: var(--bg); color: white;
+            font-family: sans-serif; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            overflow: hidden; touch-action: none;
+        }
+        #ui { position: absolute; top: 40px; text-align: center; z-index: 20; }
+        #timer { font-size: 50px; font-weight: 900; color: var(--line); font-family: monospace; }
+        
+        /* Escenario */
+        #world { position: relative; width: 100vw; height: 300px; display: flex; align-items: center; justify-content: center; }
+        
+        /* La Viga Estrecha */
+        .rail {
+            position: absolute; height: 8px; background: var(--line);
+            box-shadow: 0 0 20px var(--line); border-radius: 4px;
+        }
+        #rail-1 { left: 5%; width: 40%; } /* Viga Izquierda */
+        #rail-2 { right: 5%; width: 40%; } /* Viga Derecha */
+        /* El centro es VACÍO (entre 45% y 55%) */
+
+        #ball {
+            position: absolute; width: 28px; height: 28px;
+            background: var(--ball); border-radius: 50%;
+            box-shadow: 0 0 25px var(--ball), inset 0 0 10px white;
+            top: 50%; left: 25%; transform: translate(-50%, -50%);
+            z-index: 10; transition: top 0.5s ease-in;
+        }
+
+        #setup {
+            position: absolute; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100;
+        }
+        .btn {
+            padding: 20px 40px; background: var(--line); color: black;
+            border: none; border-radius: 50px; font-weight: bold; font-size: 18px;
+        }
+        #debug { position: absolute; bottom: 20px; font-size: 12px; color: #444; }
+    </style>
+</head>
+<body>
+
+    <div id="setup">
+        <h2 style="color:var(--line)">DESAFÍO DE PRECISIÓN</h2>
+        <p style="text-align:center; padding: 20px;">Mantén el móvil plano y pulsa para sincronizar los sensores.</p>
+        <button class="btn" id="startBtn">ACTIVAR SENSORES</button>
+    </div>
+
+    <div id="ui">
+        <div id="timer">60.00</div>
+        <div id="status">SISTEMA NIVELADO</div>
+    </div>
+
+    <div id="world">
+        <div class="rail" id="rail-1"></div>
+        <div class="rail" id="rail-2"></div>
+        <div id="ball"></div>
+    </div>
+
+    <div id="debug">SENSOR: <span id="valX">0</span></div>
+
+    <script>
+        const ball = document.getElementById('ball');
+        const timerTxt = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const setup = document.getElementById('setup');
+        const valX = document.getElementById('valX');
+
+        let posX = 25; // Inicia en la viga izquierda
+        let velX = 0;
+        let tiltX = 0;
+        let isLive = false;
+        let timeLeft = 60;
+
+        // FUNCIÓN CLAVE: Captura el movimiento real del hardware
+        function processMotion(event) {
+            // Gamma es la inclinación lateral del teléfono
+            tiltX = event.gamma || 0; 
+            valX.innerText = tiltX.toFixed(2); // Para que veas que sí recibe datos
+        }
+
+        function update() {
+            if (!isLive) return;
+
+            // FÍSICA: Si inclinas a la derecha (tiltX > 0), velX aumenta
+            velX += tiltX * 0.05; 
+            velX *= 0.94; // Rozamiento para control
+            posX += velX * 0.1;
+
+            ball.style.left = posX + "%";
+
+            // LÓGICA DE CAÍDA (Muerte por vacío)
+            // Vacíos: Menos de 5%, Más de 95%, y el Hueco Central (45% a 55%)
+            let enViga1 = (posX >= 5 && posX <= 45);
+            let enViga2 = (posX >= 55 && posX <= 95);
+
+            if (!enViga1 && !enViga2) {
+                die("CAÍDA AL VACÍO");
+            }
+
+            timeLeft -= 0.016; // Aprox 60fps
+            timerTxt.innerText = Math.max(0, timeLeft).toFixed(2);
+
+            if (timeLeft <= 0) die("¡NIVEL COMPLETADO!", true);
+
+            if (isLive) requestAnimationFrame(update);
+        }
+
+        function die(msg, win = false) {
+            isLive = false;
+            ball.style.top = "1000px"; // Efecto de caerse
+            alert(msg);
+            location.reload();
+        }
+
+        startBtn.onclick = () => {
+            // Pedir permiso en iPhone/iOS
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(state => {
+                        if (state === 'granted') {
+                            window.addEventListener('deviceorientation', processMotion);
+                            run();
+                        }
+                    });
+            } else {
+                // Android y otros
+                window.addEventListener('deviceorientation', processMotion);
+                run();
+            }
+        };
+
+        function run() {
+            setup.style.display = "none";
+            isLive = true;
+            update();
+        }
+    </script>
+</body>
+</html>
