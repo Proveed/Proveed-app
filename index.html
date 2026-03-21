@@ -3,50 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOCH: CONTROL TOTAL</title>
+    <title>TOCH: TOUCH RESISTANCE</title>
     <style>
-        :root { --bg: #000; --line: #32ff7e; --ball: #ff9f1a; }
+        :root { --bg: #050505; --line: #32ff7e; --ball: #ff9f1a; }
         body {
             margin: 0; background: var(--bg); color: white;
             font-family: 'Courier New', monospace; height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            overflow: hidden; touch-action: none;
+            overflow: hidden; touch-action: none; user-select: none;
         }
-        #ui { position: absolute; top: 40px; text-align: center; width: 100%; }
-        #timer { font-size: 45px; color: var(--line); font-weight: bold; }
+        #ui { position: absolute; top: 50px; text-align: center; }
+        #timer { font-size: 50px; font-weight: bold; color: var(--line); }
         
-        #track { position: relative; width: 90vw; height: 150px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #111; }
-        .rail { position: absolute; height: 8px; background: var(--line); box-shadow: 0 0 20px var(--line); border-radius: 10px; width: 40%; }
+        #track {
+            position: relative; width: 90vw; height: 120px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .rail { position: absolute; height: 8px; background: var(--line); border-radius: 10px; box-shadow: 0 0 15px var(--line); width: 42%; }
         #r-left { left: 0; }
         #r-right { right: 0; }
 
         #ball {
-            position: absolute; width: 30px; height: 30px;
+            position: absolute; width: 50px; height: 50px; /* Más grande para el dedo */
             background: var(--ball); border-radius: 50%;
-            box-shadow: 0 0 25px var(--ball), inset 0 0 10px white;
-            top: 50%; left: 20%; transform: translate(-50%, -50%);
-            z-index: 10;
+            box-shadow: 0 0 30px var(--ball), inset 0 0 10px white;
+            top: 50%; left: 21%; transform: translate(-50%, -50%);
+            z-index: 10; cursor: pointer;
         }
 
-        #modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000;
-        }
-        .btn { padding: 25px 50px; background: var(--line); color: black; border: none; font-weight: 900; font-size: 20px; border-radius: 10px; cursor: pointer; }
-        #debug-panel { position: absolute; bottom: 20px; font-size: 10px; color: #444; text-align: left; width: 80%; }
+        #msg { margin-top: 50px; color: #666; text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+        #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 100; }
+        .btn { padding: 20px 40px; background: var(--line); border: none; font-weight: bold; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="modal">
-        <h1 style="color:var(--line); margin-bottom: 10px;">TOCH SENSOR TEST</h1>
-        <p style="text-align:center; padding: 0 30px; font-size: 14px; color: #888;">1. Sujeta el móvil horizontal.<br>2. Presiona el botón verde.</p>
-        <button class="btn" id="initBtn">CONECTAR HARDWARE</button>
+    <div id="overlay">
+        <button class="btn" id="startBtn">INICIAR RESISTENCIA</button>
     </div>
 
     <div id="ui">
         <div id="timer">60.00</div>
-        <div id="status" style="font-size: 10px; letter-spacing: 2px;">NIVEL: VIP-120</div>
+        <div style="font-size: 10px; color: var(--line);">MANTÉN EL CONTACTO</div>
     </div>
 
     <div id="track">
@@ -55,85 +53,91 @@
         <div id="ball"></div>
     </div>
 
-    <div id="debug-panel">
-        G-SENSOR: <span id="gx">0.0</span> | B-SENSOR: <span id="gy">0.0</span><br>
-        SYSTEM: <span id="sys">OFFLINE</span>
-    </div>
+    <div id="msg">ARRASTRA PARA EQUILIBRAR<br>CUIDADO CON EL CENTRO</div>
 
     <script>
         const ball = document.getElementById('ball');
         const timerTxt = document.getElementById('timer');
-        const initBtn = document.getElementById('initBtn');
-        const modal = document.getElementById('modal');
-        const debugX = document.getElementById('gx');
-        const debugY = document.getElementById('gy');
-        const debugS = document.getElementById('sys');
+        const startBtn = document.getElementById('startBtn');
+        const overlay = document.getElementById('overlay');
 
-        let posX = 20, velX = 0, tiltX = 0, active = false, time = 60;
+        let posX = 21; // Porcentaje
+        let isDragging = false;
+        let time = 60;
+        let active = false;
+        let drift = 0.15; // La fuerza que empuja la bola al vacío automáticamente
 
-        // ESTA FUNCIÓN ESCUCHA EL MOVIMIENTO FÍSICO
-        function orientationHandler(e) {
-            // Gamma es la inclinación de lado a lado (lo que tú quieres)
-            tiltX = e.gamma || 0; 
-            debugX.innerText = tiltX.toFixed(1);
-            debugY.innerText = (e.beta || 0).toFixed(1);
-            debugS.innerText = "ONLINE";
+        // Iniciar el juego
+        startBtn.onclick = () => {
+            overlay.style.display = "none";
+            active = true;
+            time = 60;
+            posX = 21;
+            drift = 0.15;
+            loop();
+        };
+
+        // Eventos de Toque / Mouse
+        function onStart(e) { if(active) isDragging = true; }
+        function onEnd() { isDragging = false; }
+        function onMove(e) {
+            if (!isDragging || !active) return;
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            // Convertir posición de pantalla a porcentaje del track
+            let rect = document.getElementById('track').getBoundingClientRect();
+            posX = ((clientX - rect.left) / rect.width) * 100;
         }
 
-        function gameLoop() {
+        ball.addEventListener('mousedown', onStart);
+        ball.addEventListener('touchstart', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('touchmove', onMove);
+        window.addEventListener('mouseup', onEnd);
+        window.addEventListener('touchend', onEnd);
+
+        function loop() {
             if (!active) return;
 
-            // FÍSICA DE DESEQUILIBRIO
-            // Si el móvil está inclinado 10 grados, la bola acelera 10 unidades
-            velX += (tiltX * 0.15); // Sensibilidad alta
-            velX *= 0.95; // Fricción suave
-            posX += (velX * 0.1);
+            // Lógica de "Voluntad Propia": la bola siempre intenta escapar
+            // Si no la mueves, ella se desliza sola hacia el borde más cercano
+            if (!isDragging) {
+                if (posX < 50) posX -= drift;
+                else posX += drift;
+            }
 
+            // Dificultad progresiva: cada segundo la bola "pesa" más (escapa más rápido)
+            drift += 0.0001;
+
+            // Renderizado
             ball.style.left = posX + "%";
 
-            // Lógica de caída (Muerte por vacío)
-            // No hay viga entre 40% y 60% (CENTRO) ni en los extremos
-            let safe = (posX >= 0 && posX <= 40) || (posX >= 60 && posX <= 100);
+            // Verificar si el dedo soltó la bola o si cayó al vacío
+            let inViga1 = (posX >= 0 && posX <= 42);
+            let inViga2 = (posX >= 58 && posX <= 100);
 
-            if (!safe) {
-                active = false;
-                alert("CAÍSTE AL VACÍO");
-                location.reload();
+            if (!inViga1 && !inViga2) {
+                gameOver("CAÍSTE AL VACÍO");
                 return;
+            }
+
+            // El castigo por no tocarla
+            if (!isDragging && active) {
+                // Si pasan más de 0.5 segundos sin tocarla, podrías perder (opcional)
+                // Por ahora, solo dejamos que el "drift" haga su trabajo
             }
 
             time -= 0.016;
             timerTxt.innerText = Math.max(0, time).toFixed(2);
-            if (time <= 0) { alert("¡NIVEL COMPLETADO!"); location.reload(); }
 
-            requestAnimationFrame(gameLoop);
+            if (time <= 0) gameOver("¡MAESTRO DE LA RESISTENCIA!", true);
+            else requestAnimationFrame(loop);
         }
 
-        initBtn.onclick = () => {
-            // Intentar activar sensores
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                // Caso iOS (iPhone)
-                DeviceOrientationEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            window.addEventListener('deviceorientation', orientationHandler, true);
-                            startApp();
-                        } else {
-                            alert("Permiso de sensores denegado.");
-                        }
-                    })
-                    .catch(e => alert("Error en sensores: " + e));
-            } else {
-                // Caso Android y otros
-                window.addEventListener('deviceorientation', orientationHandler, true);
-                startApp();
-            }
-        };
-
-        function startApp() {
-            modal.style.display = "none";
-            active = true;
-            gameLoop();
+        function gameOver(m, win = false) {
+            active = false;
+            alert(m);
+            overlay.style.display = "flex";
+            startBtn.innerText = "REINTENTAR";
         }
     </script>
 </body>
