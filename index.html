@@ -3,390 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOCH: COSMIC ASCENSION - LIGHT PULSE</title>
+    <title>TOCH: GALACTIC JOURNEY</title>
     <style>
         :root {
-            /* Colores de la Imagen de Referencia */
-            --primary: #32ff7e; /* Verde Neón Meta */
-            --danger: #ff3e3e;  /* Rojo Neón Muerte */
-            --earth-ocean: #1e90ff; /* Azul Océano */
-            --earth-land: #2ecc71;  /* Verde Continente */
-            --meteor-molten: #ff9f1a; /* Naranja Meteorito */
+            --primary: #32ff7e; --danger: #ff3e3e;
+            --earth-ocean: #1e90ff; --earth-land: #2ecc71;
             --text: #ffffff;
         }
-
         * { box-sizing: border-box; touch-action: none; user-select: none; }
-
         body {
-            margin: 0; padding: 0;
-            background-color: #000;
-            /* Fondo Galáctico Realista de Referencia */
-            background-image: url('https://i.imgur.com/2c7Y9Fh.jpg');
-            background-size: cover; background-position: center;
-            color: var(--text);
-            font-family: 'Montserrat', sans-serif;
-            height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column;
+            margin: 0; padding: 0; background-color: #000;
+            background-image: radial-gradient(circle at center, #0a0a2a 0%, #000 100%);
+            color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif;
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* FUENTE MONTSERRAT */
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;900&display=swap');
-
-        /* HUD Superior */
+        /* HUD */
         #hud {
-            position: absolute; top: 20px; left: 5%; width: 90%;
+            position: absolute; top: 15px; left: 5%; width: 90%;
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px 20px; border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.07); padding: 12px 20px;
+            border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px); z-index: 100;
         }
-        #location { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.7); }
-        #altitude { font-size: 18px; font-weight: 900; color: #fff; }
+        #level-info { font-size: 14px; font-weight: 900; color: var(--primary); letter-spacing: 1px; }
+        #altitude { font-size: 16px; font-weight: bold; color: #fff; }
 
-        /* Escenario de Juego */
-        #stage {
-            position: relative; width: 100vw; flex-grow: 1;
-            margin-top: 80px; overflow: hidden;
+        /* Barra de Progreso del Nivel */
+        #progress-container {
+            position: absolute; top: 85px; left: 10%; width: 80%; height: 4px;
+            background: rgba(255,255,255,0.1); border-radius: 2px; z-index: 100;
         }
+        #progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.1s; }
 
-        /* LÍNEAS DE BARRERA Neón (Igual a la imagen) */
-        .barrier {
-            position: absolute; width: 100%; height: 5px;
-            border-radius: 2px; z-index: 50;
-        }
-        #finish-line {
-            top: 50px; background: var(--primary);
-            box-shadow: 0 0 15px var(--primary), 0 0 30px var(--primary);
-        }
-        #death-line {
-            bottom: 10px; background: var(--danger);
-            box-shadow: 0 0 15px var(--danger), 0 0 30px var(--danger);
-        }
+        #stage { position: relative; width: 100vw; flex-grow: 1; overflow: hidden; }
 
-        /* PLANETA TIERRA SVG (Procedimental) */
+        .barrier { position: absolute; width: 100%; height: 4px; z-index: 50; }
+        #finish-line { top: 40px; background: var(--primary); box-shadow: 0 0 20px var(--primary); }
+        #death-line { bottom: 10px; background: var(--danger); box-shadow: 0 0 20px var(--danger); }
+
+        /* Tierra SVG */
         #player {
-            position: absolute; width: 60px; height: 60px;
-            z-index: 60; will-change: bottom;
-            bottom: calc(100% - 180px); left: 50%;
-            transform: translate(-50%, 0);
-            border-radius: 50%; /* Para colisiones */
-            
-            /* Atmósfera neón azul sutil */
-            box-shadow: 0 0 25px rgba(50, 150, 255, 0.6), inset 0 0 10px rgba(255,255,255,0.4);
-            transition: box-shadow 0.1s; /* Para feedback visual de ligereza */
+            position: absolute; width: 55px; height: 55px; z-index: 60;
+            bottom: 100px; left: 50%; transform: translate(-50%, 0);
+            border-radius: 50%; box-shadow: 0 0 25px rgba(30, 144, 255, 0.5);
+            transition: transform 0.1s;
         }
+        #player.light { box-shadow: 0 0 40px #fff; transform: translate(-50%, 0) scale(1.1); }
 
-        /* SVG del Planeta Tierra (Continentes y Océanos) */
-        #earth-svg {
-            width: 100%; height: 100%;
-        }
-
-        /* Efecto de Ligereza (Feedback Visual) */
-        #player.light-pulse {
-            box-shadow: 0 0 40px rgba(100, 200, 255, 1), inset 0 0 15px rgba(255,255,255,0.7);
-        }
-
-        /* METEORITOS (Estilo Incandescente) */
         .meteor {
-            position: absolute; width: 38px; height: 38px;
-            background-color: transparent;
-            /* Imagen de meteorito realista (oFallback básico) */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 5 L70 20 L95 50 L75 80 L50 95 L25 80 L5 50 L30 20 Z" fill="%23555" stroke="%23ff3e3e" stroke-width="5"/></svg>');
-            background-size: cover; background-position: center;
-            
-            /* Brillo de calor neón */
-            box-shadow: 0 0 15px var(--meteor-molten), 0 0 30px var(--danger);
-            z-index: 40; will-change: top, left;
+            position: absolute; width: 35px; height: 35px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 5 L80 30 L90 70 L50 95 L10 70 L20 30 Z" fill="%23444" stroke="%23ff9f1a" stroke-width="4"/></svg>');
+            background-size: cover; z-index: 40; box-shadow: 0 0 15px #ff4500;
         }
 
-        /* Superposición de Pantalla */
         #overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 1000; text-align: center; padding: 40px;
-            backdrop-filter: blur(8px);
         }
-        h1 { font-weight: 900; font-size: 30px; letter-spacing: 5px; margin-bottom: 10px; color: var(--primary); text-shadow: 0 0 20px var(--primary); }
-        p { color: #aaa; font-size: 13px; line-height: 1.8; max-width: 380px; margin-bottom: 50px; }
         .btn {
-            padding: 18px 50px; background: transparent; color: var(--primary); border: 2px solid var(--primary);
-            font-weight: 900; font-size: 15px; border-radius: 4px; cursor: pointer; text-transform: uppercase;
+            padding: 18px 45px; background: var(--primary); color: #000;
+            border: none; font-weight: 900; border-radius: 8px; cursor: pointer;
+            text-transform: uppercase; margin-top: 20px;
         }
-        .btn:active { background: var(--primary); color: black; }
-
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <h1>TOCH</h1>
-        <div style="width:60px; height:2px; background:var(--primary); margin-bottom: 30px;"></div>
-        <p id="level-desc">
-            <b style="color:white;">MISIÓN: COSMIC ASCENSION - TIERRA</b><br><br>
-            Protege el Planeta Tierra. Toca para impulsarlo hacia arriba.<br><br>
-            Evita la barrera roja inferior y los meteoritos incandescentes.<br><br>
-            Tus pulsaciones destruyen amenazas cercanas.<br><br>
-            <b style="color:var(--earth-ocean);">RECOMPENSA: Al destruir un meteorito, la Tierra se volverá LIGERA momentáneamente.</b>
-        </p>
-        <button class="btn" id="startBtn">INICIAR ÓRBITA</button>
+        <h1 id="title" style="color:var(--primary); font-size: 40px; margin-bottom: 5px;">TOCH</h1>
+        <h2 id="subtitle" style="margin-bottom: 30px; font-size: 14px; letter-spacing: 2px;">GALACTIC ASCENSION</h2>
+        <p id="msg" style="max-width: 300px; color: #ccc; font-size: 14px;">Toca para elevar la Tierra y alcanzar la órbita segura.</p>
+        <button class="btn" id="startBtn">INICIAR MISIÓN</button>
     </div>
 
     <div id="hud">
-        <div id="location">SOLAR 01: TIERRA</div>
-        <div id="altitude">0.0 PARSEC</div>
+        <div id="level-info">NIVEL 1</div>
+        <div id="altitude">0% COMPLETADO</div>
     </div>
+    <div id="progress-container"><div id="progress-bar"></div></div>
 
     <div id="stage">
         <div class="barrier" id="finish-line"></div>
-        
         <div id="player">
-            <svg id="earth-svg" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="48" fill="var(--earth-ocean)" stroke="white" stroke-width="1"/>
-                <path d="M25,15 Q30,25 40,20 Q50,30 45,40 L30,50 Q20,40 15,30 Z" fill="var(--earth-land)"/>
-                <path d="M30,50 Q35,60 30,75 L20,85 Q15,75 20,60 Z" fill="var(--earth-land)"/>
-                <path d="M55,15 Q60,20 65,15 L75,20 Q70,30 60,35 Z" fill="var(--earth-land)"/>
-                <path d="M60,35 Q70,45 65,65 L55,75 Q50,65 55,50 Z" fill="var(--earth-land)"/>
-                <path d="M65,15 L85,10 Q95,20 90,40 Q80,50 70,45 Z" fill="var(--earth-land)"/>
+            <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" fill="var(--earth-ocean)"/>
+                <path d="M20,30 Q30,20 45,25 Q55,15 70,20 L85,40 Q70,55 50,50 Q35,65 20,50 Z" fill="var(--earth-land)"/>
+                <path d="M40,60 Q50,85 30,90 Q15,80 25,65 Z" fill="var(--earth-land)"/>
+                <path d="M65,55 Q85,75 75,90 Q60,85 60,70 Z" fill="var(--earth-land)"/>
             </svg>
         </div>
-
         <div class="barrier" id="death-line"></div>
     </div>
 
     <script>
-        // Elementos del DOM
-        const player = document.getElementById('player');
-        const stage = document.getElementById('stage');
-        const altitudeTxt = document.getElementById('altitude');
-        const startBtn = document.getElementById('startBtn');
-        const overlay = document.getElementById('overlay');
-        const levelDesc = document.getElementById('level-desc');
+        const player = document.getElementById('player'), stage = document.getElementById('stage');
+        const levelInfo = document.getElementById('level-info'), altitudeTxt = document.getElementById('altitude');
+        const progressBar = document.getElementById('progress-bar'), startBtn = document.getElementById('startBtn');
+        const overlay = document.getElementById('overlay'), msg = document.getElementById('msg');
 
-        // Dimensiones y Límites
-        const stageH = stage.offsetHeight;
-        const stageW = stage.offsetWidth;
-        const playerSize = 60; 
-        const finishLineY = 66; 
-        const deathLineY = 16;   
-
-        // Estado del Juego y Física
-        let startY = stageH - 180 - playerSize/2; 
-        let playerY = startY;
-        let playerVelY = 0;
-        let active = false; 
-        let menuVisible = true;
-        let lastTimestamp = 0;
-        let currentAltitude = 0;
-        let targetAltitude = 50.0; 
+        // Configuración de niveles
+        let currentLevel = 1;
+        let progress = 0; 
+        let gameActive = false, physicsActive = false;
+        let playerY = 100, playerVelY = 0;
         let meteorList = [];
 
-        // --- CALIBRACIÓN DE FÍSICA ---
-        const normalGravity = 0.55;    // Gravedad Base
-        const tapImpulse = 20;         // Impulso de salto
-        const friction = 0.97;         // Fricción
-        const meteorSpawnRate = 0.04; 
-        const meteorSpeed = 4.2; 
-        const pulseDestroyRadius = 135; 
-
-        // Variables de la Lógica "Light Pulse"
-        let currentGravity = normalGravity;
-        let lightPulseActive = false;
-        let lightPulseTimer = null;
-        const lightPulseDuration = 300; // 0.3 segundos de ligereza
-
-        // Lógica del Botón de Inicio
-        startBtn.onclick = () => {
-            overlay.style.display = "none";
-            menuVisible = false;
-            resetGame();
-            active = false; 
-            altitudeTxt.innerText = "ESPERANDO PULSO TÁCTIL...";
-            altitudeTxt.style.color = "var(--primary)";
+        // Parámetros que cambian con el nivel
+        let config = {
+            gravity: 0.5,
+            impulse: 18,
+            targetDistance: 600, // Qué tan largo es el nivel
+            meteorFreq: 0.02
         };
 
-        function resetGame() {
-            playerY = startY;
-            playerVelY = 0;
-            currentAltitude = 0;
-            // Limpiar meteoros antiguos
-            meteorList.forEach(m => m.el.remove());
-            meteorList = [];
-            player.style.bottom = playerY + "px";
-            // Reset de ligereza
-            deactivateLightPulse();
+        function updateLevelConfig() {
+            config.gravity = 0.45 + (currentLevel * 0.03); // Sube gravedad
+            config.impulse = 18 + (currentLevel * 0.2);   // Sube fuerza un poco
+            config.targetDistance = 500 + (currentLevel * 300); // Niveles más largos
+            config.meteorFreq = currentLevel > 3 ? 0.02 + (currentLevel * 0.005) : 0;
+            levelInfo.innerText = `NIVEL ${currentLevel}`;
         }
 
-        // --- LÓGICA DE PULSACIÓN (IMPULSO, DESTRUCCIÓN Y LIGEREZA) ---
+        startBtn.onclick = () => {
+            overlay.style.display = 'none';
+            gameActive = true;
+            physicsActive = false;
+            resetPlayer();
+        };
+
+        function resetPlayer() {
+            playerY = 100; playerVelY = 0; progress = 0;
+            player.style.bottom = playerY + "px";
+            progressBar.style.width = "0%";
+            meteorList.forEach(m => m.el.remove());
+            meteorList = [];
+        }
+
         function handleTap(e) {
-            if (menuVisible) return; 
+            if (!gameActive) return;
             if (e.cancelable) e.preventDefault();
+            if (!physicsActive) { physicsActive = true; requestAnimationFrame(gameLoop); }
 
-            // Activar física al primer toque
-            if (!active) {
-                active = true;
-                lastTimestamp = performance.now();
-                requestAnimationFrame(gameLoop);
-            }
+            playerVelY += config.impulse;
 
-            // 1. IMPULSO DE ASCENSO
-            playerVelY += tapImpulse;
-
-            // 2. ONDA DE CHOQUE (Destruir Meteoros)
-            let touchX, touchY;
-            if (e.touches) { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }
-            else { touchX = e.clientX; touchY = e.clientY; }
-
+            // Destruir meteoros cercanos
             let rect = stage.getBoundingClientRect();
-            let clickX = touchX - rect.left;
-            let clickY = touchY - rect.top;
+            let tx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            let ty = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
 
-            // Verificar meteoros cercanos
             for (let i = meteorList.length - 1; i >= 0; i--) {
-                let m = meteorList[i];
-                let mRect = m.el.getBoundingClientRect();
-                let mCenterX = mRect.left + mRect.width/2 - rect.left;
-                let mCenterY = mRect.top + mRect.height/2 - rect.top;
-
-                let dist = Math.sqrt(Math.pow(clickX - mCenterX, 2) + Math.pow(clickY - mCenterY, 2));
-
-                if (dist < pulseDestroyRadius) {
-                    // DESTRUIR METEORO
-                    m.el.remove();
-                    meteorList.splice(i, 1);
-                    createExplosion(mCenterX, mCenterY); 
-
-                    // --- NUEVA LÓGICA: ACTIVAR PULSO DE LIGEREZA ---
-                    activateLightPulse();
+                let m = meteorList[i], mRect = m.el.getBoundingClientRect();
+                let mx = mRect.left + 17 - rect.left, my = mRect.top + 17 - rect.top;
+                if (Math.sqrt((tx-mx)**2 + (ty-my)**2) < 120) {
+                    m.el.remove(); meteorList.splice(i, 1);
+                    activateLightEffect();
                 }
             }
         }
 
-        function activateLightPulse() {
-            // Cancelar el temporizador anterior si existía
-            if (lightPulseTimer) clearTimeout(lightPulseTimer);
-
-            lightPulseActive = true;
-            currentGravity = normalGravity / 2; // Reducir la gravedad a la mitad
-            player.classList.add('light-pulse'); // Feedback Visual
-
-            // Establecer el temporizador para desactivar la ligereza
-            lightPulseTimer = setTimeout(deactivateLightPulse, lightPulseDuration);
+        function activateLightEffect() {
+            player.classList.add('light');
+            setTimeout(() => player.classList.remove('light'), 200);
+            playerVelY += 2; // Pequeño empujón extra al destruir
         }
 
-        function deactivateLightPulse() {
-            lightPulseActive = false;
-            currentGravity = normalGravity; // Restaurar gravedad normal
-            player.classList.remove('light-pulse'); // Feedback Visual
-            lightPulseTimer = null;
-        }
+        stage.addEventListener('touchstart', handleTap, {passive:false});
+        stage.addEventListener('mousedown', handleTap);
 
-        // Eventos para móvil y PC
-        stage.addEventListener('touchstart', handleTap, {passive: false});
-        stage.addEventListener('mousedown', (e) => { if (!('ontouchstart' in window)) handleTap(e); });
+        function gameLoop() {
+            if (!physicsActive) return;
 
-        // --- SISTEMA DE METEORITOS ---
-        function spawnMeteor() {
-            if (Math.random() < meteorSpawnRate) {
-                let el = document.createElement('div');
-                el.className = 'meteor';
-                let x = Math.random() * (stageW - 40);
-                el.style.left = x + "px";
-                el.style.top = "-50px"; 
-                stage.appendChild(el);
-                meteorList.push({ el: el, y: -50 });
+            playerVelY -= config.gravity;
+            playerVelY *= 0.97; // fricción
+            playerY += playerVelY;
+            player.style.bottom = playerY + "px";
+
+            // Progreso del nivel basado en cuánto tiempo te mantienes arriba
+            if (playerY > 200) { 
+                progress += 1;
+                let perc = (progress / config.targetDistance) * 100;
+                progressBar.style.width = Math.min(perc, 100) + "%";
+                altitudeTxt.innerText = Math.floor(perc) + "% COMPLETADO";
+
+                if (perc >= 100) return winLevel();
             }
+
+            // Obstáculos
+            if (Math.random() < config.meteorFreq) spawnMeteor();
+            updateMeteors();
+
+            // Muerte
+            if (playerY <= 15) return gameOver("LA TIERRA CAYÓ AL VACÍO.");
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function spawnMeteor() {
+            let el = document.createElement('div'); el.className = 'meteor';
+            el.style.left = Math.random() * (window.innerWidth - 40) + "px";
+            el.style.top = "-40px";
+            stage.appendChild(el);
+            meteorList.push({ el, y: -40 });
         }
 
         function updateMeteors() {
             for (let i = meteorList.length - 1; i >= 0; i--) {
-                let m = meteorList[i];
-                m.y += meteorSpeed;
-                m.el.style.top = m.y + "px";
-
-                if (m.y > stageH) {
-                    m.el.remove();
-                    meteorList.splice(i, 1);
-                    continue;
-                }
-
-                // COLISIÓN CON LA TIERRA
-                let pRect = player.getBoundingClientRect();
-                let mRect = m.el.getBoundingClientRect();
-
-                let pCenterX = pRect.left + playerSize/2;
-                let pCenterY = pRect.top + playerSize/2;
-                let mCenterX = mRect.left + 19; 
-                let mCenterY = mRect.top + 19;
-
-                let dist = Math.sqrt(Math.pow(pCenterX - mCenterX, 2) + Math.pow(pCenterY - mCenterY, 2));
-
-                if (dist < (playerSize/2 + 15)) {
-                    gameOver("COLISIÓN DETECTADA. LA TIERRA HA SIDO IMPACTADA.");
-                    return;
+                let m = meteorList[i]; m.y += 4; m.el.style.top = m.y + "px";
+                if (m.y > window.innerHeight) { m.el.remove(); meteorList.splice(i,1); continue; }
+                let pR = player.getBoundingClientRect(), mR = m.el.getBoundingClientRect();
+                if (Math.sqrt((pR.left+27-mR.left-17)**2 + (pR.top+27-mR.top-17)**2) < 40) {
+                    gameOver("¡IMPACTO DE METEORITO!");
                 }
             }
         }
 
-        // --- CICLO PRINCIPAL DEL JUEGO (GAME LOOP) ---
-        function gameLoop(timestamp) {
-            if (!active) return;
-            let dt = (timestamp - lastTimestamp) / 1000;
-            lastTimestamp = timestamp;
-
-            // 1. FÍSICA DEL JUGADOR (Usando gravedad dinámica)
-            playerVelY -= currentGravity; // Caída
-            playerVelY *= friction;
-            playerY += playerVelY;
-
-            player.style.bottom = playerY + "px";
-
-            // 2. ACTUALIZAR SISTEMAS
-            spawnMeteor();
-            updateMeteors();
-
-            // Actualizar Altitud
-            let currentVisualY = stageH - playerY - playerSize/2;
-            let progress = 1 - ((currentVisualY - finishLineY) / (startY - finishLineY));
-            currentAltitude = Math.max(0, progress * targetAltitude);
-            altitudeTxt.innerText = `${currentAltitude.toFixed(1)} PARSEC`;
-            altitudeTxt.style.color = "#fff";
-
-            // 3. CONDICIONES DE DERROTA/VICTORIA
-            if (playerY <= deathLineY) {
-                gameOver("LA TIERRA CAYÓ AL VACÍO INFERIOR.");
-                return;
-            }
-            if (currentVisualY <= finishLineY) {
-                gameOver("¡MISION EXITOSA! SISTEMA SINCRONIZADO.", true);
-                return;
-            }
-
-            if (active) requestAnimationFrame(gameLoop);
+        function winLevel() {
+            physicsActive = false;
+            currentLevel++;
+            updateLevelConfig();
+            overlay.style.display = 'flex';
+            document.getElementById('title').innerText = "¡ÓRBITA ALCANZADA!";
+            msg.innerText = `Prepárate para el Nivel ${currentLevel}. La gravedad es mayor.`;
+            startBtn.innerText = "SIGUIENTE NIVEL";
         }
 
-        function gameOver(msg, win = false) {
-            active = false;
-            menuVisible = true;
-            deactivateLightPulse(); // Reset por si acaso
-            setTimeout(() => {
-                alert(msg);
-                overlay.style.display = "flex";
-                startBtn.innerText = "REINTENTAR MISIÓN";
-                levelDesc.innerHTML = `<b style="color:${win ? 'var(--primary)' : 'var(--danger)'};">${win ? '¡VICTORIA!' : 'FALLO EN LA MISIÓN'}</b><br><br>${msg}`;
-                playerY = startY; 
-                player.style.bottom = playerY + "px";
-            }, 100);
+        function gameOver(reason) {
+            physicsActive = false;
+            overlay.style.display = 'flex';
+            document.getElementById('title').innerText = "MISIÓN FALLIDA";
+            msg.innerText = reason;
+            startBtn.innerText = "REINTENTAR NIVEL";
         }
 
-        function createExplosion(x, y) {
-            // Nova blanca cósmica sutil
-            let ex = document.createElement('div');
-            ex.style.cssText = `position:absolute;width:5px;height:5px;background:white;border-radius:50%;left:${x}px;top:${y}px;transform:translate(-50%,-50%);transition:all 0.2s ease-out;z-index:35;box-shadow:0 0 15px white;`;
-            stage.appendChild(ex);
-            requestAnimationFrame(() => { ex.style.transform = 'translate(-50%,-50%) scale(15)'; ex.style.opacity = '0'; });
-            setTimeout(() => ex.remove(), 200);
-        }
+        updateLevelConfig();
     </script>
 </body>
 </html>
