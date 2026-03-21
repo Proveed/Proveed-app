@@ -3,141 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOCH: TOUCH RESISTANCE</title>
+    <title>TOCH: CORE HOLD</title>
     <style>
-        :root { --bg: #050505; --line: #32ff7e; --ball: #ff9f1a; }
+        :root {
+            --bg: #000000;
+            --primary: #32ff7e; /* Verde Neón */
+            --accent: #ff9f1a;  /* Naranja Energía */
+            --danger: #ff3e3e;  /* Rojo Alerta */
+        }
+
+        * { box-sizing: border-box; touch-action: none; user-select: none; }
+
         body {
             margin: 0; background: var(--bg); color: white;
             font-family: 'Courier New', monospace; height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            overflow: hidden; touch-action: none; user-select: none;
+            overflow: hidden;
         }
-        #ui { position: absolute; top: 50px; text-align: center; }
-        #timer { font-size: 50px; font-weight: bold; color: var(--line); }
-        
-        #track {
-            position: relative; width: 90vw; height: 120px;
+
+        /* Interfaz Superior (HUD) */
+        #hud {
+            position: absolute; top: 40px; text-align: center; width: 80%;
+        }
+        #timer { font-size: 55px; font-weight: 900; color: var(--primary); text-shadow: 0 0 15px var(--primary); }
+        #intensity-bar {
+            width: 100%; height: 4px; background: #222; margin-top: 10px; border-radius: 2px; overflow: hidden;
+        }
+        #intensity-fill { width: 0%; height: 100%; background: var(--accent); transition: width 0.1s linear; }
+
+        /* Escenario de Juego */
+        #stage {
+            position: relative; width: 100vw; height: 150px;
             display: flex; align-items: center; justify-content: center;
         }
-        .rail { position: absolute; height: 8px; background: var(--line); border-radius: 10px; box-shadow: 0 0 15px var(--line); width: 42%; }
-        #r-left { left: 0; }
-        #r-right { right: 0; }
 
-        #ball {
-            position: absolute; width: 50px; height: 50px; /* Más grande para el dedo */
-            background: var(--ball); border-radius: 50%;
-            box-shadow: 0 0 30px var(--ball), inset 0 0 10px white;
-            top: 50%; left: 21%; transform: translate(-50%, -50%);
-            z-index: 10; cursor: pointer;
+        /* La Única Viga Central */
+        #central-rail {
+            position: absolute; height: 10px; background: var(--primary);
+            box-shadow: 0 0 20px var(--primary); border-radius: 5px;
+            width: 50%; /* La viga ocupa el 50% central (del 25% al 75%) */
+            left: 25%;
         }
 
-        #msg { margin-top: 50px; color: #666; text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
-        #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 100; }
-        .btn { padding: 20px 40px; background: var(--line); border: none; font-weight: bold; border-radius: 5px; cursor: pointer; }
+        /* La Esfera de Energía */
+        #ball {
+            position: absolute; width: 45px; height: 45px;
+            background: var(--accent); border-radius: 50%;
+            box-shadow: 0 0 30px var(--accent), inset 0 0 10px white;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 10; cursor: pointer;
+            will-change: left, background, box-shadow;
+        }
+
+        /* Superposición de Inicio/Fin */
+        #overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; text-align: center; padding: 20px;
+        }
+        .btn-start {
+            padding: 20px 50px; background: transparent; color: var(--primary);
+            border: 3px solid var(--primary); font-weight: 900; font-size: 18px;
+            border-radius: 10px; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(50, 255, 126, 0.3);
+        }
+        .btn-start:active { background: var(--primary); color: black; }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <button class="btn" id="startBtn">INICIAR RESISTENCIA</button>
+        <h1 style="color:var(--primary); font-size: 30px; letter-spacing: 3px;">TOCH: CORE HOLD</h1>
+        <p style="color:#888; margin-bottom: 40px; font-size: 14px; max-width: 300px;">
+            MANTÉN EL DEDO SOBRE LA ESFERA.<br><br>
+            A MEDIDA QUE PASA EL TIEMPO, SE VUELVE MÁS FUERTE.<br><br>
+            NO DEJES QUE CAIGA AL VACÍO (DERECHA O IZQUIERDA).
+        </p>
+        <button class="btn-start" id="startBtn">INICIAR CONTENCIÓN</button>
     </div>
 
-    <div id="ui">
+    <div id="hud">
+        <div style="font-size: 10px; letter-spacing: 3px;">INTENSIDAD DEL NÚCLEO</div>
+        <div id="intensity-bar"><div id="intensity-fill"></div></div>
         <div id="timer">60.00</div>
-        <div style="font-size: 10px; color: var(--line);">MANTÉN EL CONTACTO</div>
     </div>
 
-    <div id="track">
-        <div class="rail" id="r-left"></div>
-        <div class="rail" id="r-right"></div>
+    <div id="stage">
+        <div id="central-rail"></div>
         <div id="ball"></div>
     </div>
-
-    <div id="msg">ARRASTRA PARA EQUILIBRAR<br>CUIDADO CON EL CENTRO</div>
 
     <script>
         const ball = document.getElementById('ball');
         const timerTxt = document.getElementById('timer');
+        const intensityFill = document.getElementById('intensity-fill');
         const startBtn = document.getElementById('startBtn');
         const overlay = document.getElementById('overlay');
 
-        let posX = 21; // Porcentaje
+        let posX = 50; // Posición en porcentaje (50% es el centro exacto)
         let isDragging = false;
-        let time = 60;
         let active = false;
-        let drift = 0.15; // La fuerza que empuja la bola al vacío automáticamente
+        let timeRemaining = 60;
+        let lastTimestamp = 0;
 
-        // Iniciar el juego
+        // --- CONFIGURACIÓN DE DIFICULTAD PROGRESIVA ---
+        const initialDriftPower = 0.15; // Fuerza de escape inicial
+        const maxDriftPower = 1.80;    // Fuerza de escape máxima (al final)
+        const userControlFactor = 0.90; // Qué tanto obedece al dedo (menor = más pesado)
+
+        let currentDriftPower = initialDriftPower;
+        let targetX = 50; // Donde el usuario quiere que esté la bola
+
+        // Iniciar el ciclo del juego
         startBtn.onclick = () => {
             overlay.style.display = "none";
+            posX = 50;
+            timeRemaining = 60;
+            currentDriftPower = initialDriftPower;
             active = true;
-            time = 60;
-            posX = 21;
-            drift = 0.15;
-            loop();
+            isDragging = false;
+            lastTimestamp = performance.now();
+            requestAnimationFrame(gameLoop);
         };
 
-        // Eventos de Toque / Mouse
-        function onStart(e) { if(active) isDragging = true; }
-        function onEnd() { isDragging = false; }
-        function onMove(e) {
-            if (!isDragging || !active) return;
+        // --- LÓGICA DE INTERACCIÓN TÁCTIL ---
+        function onTouchStart(e) { if(active) isDragging = true; updateTargetX(e); }
+        function onTouchEnd() { isDragging = false; }
+        function onTouchMove(e) { if (!active || !isDragging) return; updateTargetX(e); }
+
+        function updateTargetX(e) {
             let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            // Convertir posición de pantalla a porcentaje del track
-            let rect = document.getElementById('track').getBoundingClientRect();
-            posX = ((clientX - rect.left) / rect.width) * 100;
+            let rect = document.getElementById('stage').getBoundingClientRect();
+            // Convertir píxeles a porcentaje del escenario
+            targetX = ((clientX - rect.left) / rect.width) * 100;
         }
 
-        ball.addEventListener('mousedown', onStart);
-        ball.addEventListener('touchstart', onStart);
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('touchmove', onMove);
-        window.addEventListener('mouseup', onEnd);
-        window.addEventListener('touchend', onEnd);
+        // Eventos para Móvil y PC
+        ball.addEventListener('touchstart', onTouchStart, {passive: false});
+        ball.addEventListener('touchmove', onTouchMove, {passive: false});
+        window.addEventListener('touchend', onTouchEnd);
 
-        function loop() {
+        ball.addEventListener('mousedown', onTouchStart);
+        window.addEventListener('mousemove', onTouchMove);
+        window.addEventListener('mouseup', onTouchEnd);
+
+        // --- CICLO PRINCIPAL DEL JUEGO (GAME LOOP) ---
+        function gameLoop(timestamp) {
             if (!active) return;
+            let dt = (timestamp - lastTimestamp) / 1000; // Delta time en segundos
+            lastTimestamp = timestamp;
 
-            // Lógica de "Voluntad Propia": la bola siempre intenta escapar
-            // Si no la mueves, ella se desliza sola hacia el borde más cercano
-            if (!isDragging) {
-                if (posX < 50) posX -= drift;
-                else posX += drift;
+            // 1. DIFICULTAD PROGRESIVA: Aumentar la fuerza de la bola según el tiempo
+            // Calculamos un porcentaje de progreso (0 al principio, 1 al final)
+            let progress = 1 - (timeRemaining / 60);
+            currentDriftPower = initialDriftPower + (progress * (maxDriftPower - initialDriftPower));
+
+            // Actualizar barra de intensidad visual
+            intensityFill.style.width = (progress * 100) + "%";
+
+            // 2. FÍSICA DE "CONTENCIÓN": Batalla entre el dedo y la bola
+            if (isDragging) {
+                // El usuario intenta mover la bola hacia targetX
+                let userForce = (targetX - posX) * userControlFactor;
+                posX += userForce;
             }
 
-            // Dificultad progresiva: cada segundo la bola "pesa" más (escapa más rápido)
-            drift += 0.0001;
+            // La bola SIEMPRE intenta escapar hacia el borde más cercano (Voluntad Propia)
+            // Si está a la izquierda del centro (50), escapa a la izquierda. Si no, a la derecha.
+            let driftDirection = (posX < 50) ? -1 : 1;
+            posX += driftDirection * currentDriftPower;
 
-            // Renderizado
+            // 3. RENDERIZADO VISUAL
             ball.style.left = posX + "%";
 
-            // Verificar si el dedo soltó la bola o si cayó al vacío
-            let inViga1 = (posX >= 0 && posX <= 42);
-            let inViga2 = (posX >= 58 && posX <= 100);
+            // Cambio de color según la intensidad
+            if (progress > 0.7) {
+                ball.style.background = "var(--danger)";
+                ball.style.boxShadow = "0 0 40px var(--danger), inset 0 0 15px white";
+            } else if (progress > 0.4) {
+                ball.style.background = "#fff"; // Fase de sobrecarga
+            } else {
+                ball.style.background = "var(--accent)";
+            }
 
-            if (!inViga1 && !inViga2) {
-                gameOver("CAÍSTE AL VACÍO");
+            // 4. CONDICIÓN DE DERROTA (Caída al Vacío)
+            // La viga central ocupa del 25% al 75%
+            if (posX < 25 || posX > 75) {
+                gameOver("NÚCLEO COLAPSADO. LA ENERGÍA ESCAPÓ.");
                 return;
             }
 
-            // El castigo por no tocarla
-            if (!isDragging && active) {
-                // Si pasan más de 0.5 segundos sin tocarla, podrías perder (opcional)
-                // Por ahora, solo dejamos que el "drift" haga su trabajo
+            // 5. ACTUALIZAR CRONÓMETRO
+            timeRemaining -= dt;
+            timerTxt.innerText = Math.max(0, timeRemaining).toFixed(2);
+
+            if (timeRemaining <= 0) {
+                gameOver("¡CONTENCIÓN EXITOSA! MAESTRO DEL NÚCLEO.", true);
+            } else {
+                requestAnimationFrame(gameLoop);
             }
-
-            time -= 0.016;
-            timerTxt.innerText = Math.max(0, time).toFixed(2);
-
-            if (time <= 0) gameOver("¡MAESTRO DE LA RESISTENCIA!", true);
-            else requestAnimationFrame(loop);
         }
 
-        function gameOver(m, win = false) {
+        function gameOver(msg, win = false) {
             active = false;
-            alert(m);
-            overlay.style.display = "flex";
-            startBtn.innerText = "REINTENTAR";
+            ball.style.top = "1000px"; // Efecto de caída visual
+            
+            setTimeout(() => {
+                alert(msg);
+                overlay.style.display = "flex";
+                startBtn.innerText = "REINTENTAR CONTENCIÓN";
+                ball.style.top = "50%"; // Reset posición
+                posX = 50;
+            }, 500);
         }
     </script>
 </body>
