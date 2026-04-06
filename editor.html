@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PROVEED Admin — Editor Visual</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  :root{ --verde:#A8E63D; --naranja:#FF8C00; --negro:#0A0A0A; --rojo:#FF4D4D; --azul:#007AFF; }
+  body{ background:var(--negro); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .sidebar{ position:fixed; left:0; top:0; bottom:0; width:220px; background:#111; border-right:1px solid #1e1e1e; padding:28px 16px; z-index:200; display:none; flex-direction:column; gap:4px; }
+  @media(min-width:768px){ .sidebar{ display:flex; } }
+  .sidebar-logo{ display:flex; align-items:center; gap:8px; margin-bottom:28px; padding:0 8px; }
+  .sidebar-logo svg{ width:28px; height:28px; }
+  .sidebar-logo-text{ font-size:1rem; font-weight:800; color:white; }
+  .sidebar-logo-text span{ color:var(--verde); }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; cursor:pointer; text-decoration:none; color:#555; font-size:0.82rem; font-weight:600; transition:0.2s; }
+  .nav-item:hover{ background:#1a1a1a; color:#aaa; }
+  .nav-item.active{ background:#1e1e1e; color:white; }
+  .nav-item svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; flex-shrink:0; }
+  .nav-section{ font-size:0.6rem; font-weight:700; color:#333; text-transform:uppercase; letter-spacing:1px; padding:12px 12px 4px; }
+  .sidebar-bottom{ margin-top:auto; }
+  .btn-logout{ display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; cursor:pointer; color:#555; font-size:0.82rem; font-weight:600; border:none; background:transparent; width:100%; }
+  .btn-logout svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; }
+
+  /* EDITOR LAYOUT */
+  .editor-layout{ display:flex; height:100vh; }
+  @media(min-width:768px){ .editor-layout{ margin-left:220px; } }
+
+  /* PANEL IZQUIERDO */
+  .editor-panel{ width:300px; background:#111; border-right:1px solid #1e1e1e; display:flex; flex-direction:column; overflow:hidden; flex-shrink:0; }
+  @media(max-width:767px){ .editor-panel{ width:100%; position:fixed; bottom:0; left:0; right:0; height:55vh; border-right:none; border-top:1px solid #1e1e1e; z-index:100; } }
+  .panel-header{ padding:16px; border-bottom:1px solid #1e1e1e; flex-shrink:0; }
+  .panel-title{ font-size:0.9rem; font-weight:700; color:white; }
+  .panel-sub{ font-size:0.72rem; color:#555; margin-top:2px; }
+  .panel-body{ flex:1; overflow-y:auto; padding:16px; }
+
+  /* SELECTOR DE ARCHIVO */
+  .archivo-select{ width:100%; padding:10px 12px; background:#1a1a1a; border:1px solid #222; border-radius:11px; color:white; font-family:'Inter',sans-serif; font-size:0.85rem; outline:none; margin-bottom:16px; -webkit-appearance:none; cursor:pointer; }
+  .archivo-select option{ background:#1a1a1a; }
+
+  /* SECCIONES */
+  .seccion-group{ margin-bottom:20px; }
+  .seccion-label{ font-size:0.62rem; font-weight:700; color:#444; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .color-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; background:#1a1a1a; border-radius:11px; margin-bottom:6px; border:1px solid #222; cursor:pointer; transition:0.2s; }
+  .color-item:hover{ border-color:#333; }
+  .color-item.selected{ border-color:var(--verde); }
+  .color-preview{ width:28px; height:28px; border-radius:8px; flex-shrink:0; border:1px solid rgba(255,255,255,0.1); }
+  .color-info{ flex:1; }
+  .color-name{ font-size:0.8rem; font-weight:600; color:white; }
+  .color-val{ font-size:0.68rem; color:#555; margin-top:1px; }
+  .color-picker-input{ width:28px; height:28px; border:none; border-radius:8px; cursor:pointer; padding:0; background:none; -webkit-appearance:none; }
+
+  /* FUENTES */
+  .font-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; background:#1a1a1a; border-radius:11px; margin-bottom:6px; border:1px solid #222; cursor:pointer; transition:0.2s; }
+  .font-item.selected{ border-color:var(--verde); }
+  .font-preview{ font-size:1rem; font-weight:700; color:white; width:32px; text-align:center; }
+  .font-name{ flex:1; font-size:0.8rem; color:white; }
+  .font-radio{ width:16px; height:16px; border:2px solid #333; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .font-item.selected .font-radio{ border-color:var(--verde); background:var(--verde); }
+
+  /* TEXTOS */
+  .texto-item{ margin-bottom:10px; }
+  .texto-label{ font-size:0.7rem; color:#555; font-weight:600; margin-bottom:4px; }
+  .texto-input{ width:100%; padding:10px 12px; background:#1a1a1a; border:1px solid #222; border-radius:11px; color:white; font-family:'Inter',sans-serif; font-size:0.85rem; outline:none; }
+  .texto-input:focus{ border-color:var(--verde); }
+
+  /* SECCIONES DRAG */
+  .secciones-list{ display:flex; flex-direction:column; gap:6px; }
+  .seccion-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; background:#1a1a1a; border-radius:11px; border:1px solid #222; cursor:grab; transition:0.2s; }
+  .seccion-item:active{ cursor:grabbing; opacity:0.7; }
+  .drag-handle-icon{ display:flex; flex-direction:column; gap:3px; flex-shrink:0; }
+  .drag-handle-icon span{ width:14px; height:2px; background:#444; border-radius:2px; }
+  .seccion-item-name{ flex:1; font-size:0.82rem; color:#aaa; font-weight:600; }
+  .seccion-toggle{ width:32px; height:18px; background:#222; border-radius:9px; position:relative; cursor:pointer; transition:0.3s; border:none; }
+  .seccion-toggle.on{ background:var(--verde); }
+  .seccion-toggle::after{ content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:white; transition:0.3s; }
+  .seccion-toggle.on::after{ left:16px; }
+
+  /* PREVIEW */
+  .editor-preview{ flex:1; background:#0a0a0a; position:relative; overflow:hidden; display:none; }
+  @media(min-width:768px){ .editor-preview{ display:block; } }
+  .preview-header{ padding:14px 20px; background:#111; border-bottom:1px solid #1e1e1e; display:flex; align-items:center; justify-content:space-between; }
+  .preview-title{ font-size:0.82rem; font-weight:700; color:#555; }
+  .preview-device-btns{ display:flex; gap:6px; }
+  .dev-btn{ padding:5px 12px; border-radius:8px; border:1px solid #222; background:transparent; color:#555; font-size:0.72rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; transition:0.2s; }
+  .dev-btn.active{ background:#1e1e1e; color:white; border-color:#333; }
+  .preview-frame-wrap{ display:flex; align-items:center; justify-content:center; height:calc(100% - 52px); padding:24px; }
+  .preview-frame{ background:#f5f5f5; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.5); transition:0.3s; }
+  .preview-frame.mobile{ width:375px; height:667px; }
+  .preview-frame.tablet{ width:768px; height:500px; }
+  .preview-frame iframe{ width:100%; height:100%; border:none; }
+  .preview-placeholder{ width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:#333; }
+  .preview-placeholder svg{ width:48px; height:48px; stroke:#333; fill:none; stroke-width:1.2; }
+  .preview-placeholder p{ font-size:0.85rem; }
+
+  /* BOTONES ACCIÓN */
+  .panel-footer{ padding:16px; border-top:1px solid #1e1e1e; display:flex; gap:8px; flex-shrink:0; }
+  .btn-guardar{ flex:2; padding:12px; background:var(--verde); color:var(--negro); border:none; border-radius:12px; font-family:'Inter',sans-serif; font-size:0.88rem; font-weight:800; cursor:pointer; transition:0.2s; }
+  .btn-guardar:active{ transform:scale(0.98); }
+  .btn-reset{ flex:1; padding:12px; background:#1e1e1e; color:#aaa; border:none; border-radius:12px; font-family:'Inter',sans-serif; font-size:0.88rem; font-weight:600; cursor:pointer; }
+
+  /* TABS PANEL */
+  .panel-tabs{ display:flex; border-bottom:1px solid #1e1e1e; flex-shrink:0; }
+  .ptab{ flex:1; padding:12px; border:none; background:transparent; color:#555; font-size:0.76rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; border-bottom:2px solid transparent; transition:0.2s; }
+  .ptab.active{ color:white; border-bottom-color:var(--verde); }
+
+  .toast{ position:fixed; top:20px; right:20px; background:var(--verde); color:var(--negro); padding:12px 20px; border-radius:14px; font-size:0.85rem; font-weight:700; opacity:0; transition:0.3s; z-index:600; }
+  .toast.show{ opacity:1; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 100 100"><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#A8E63D"/><stop offset="100%" style="stop-color:#7BC820"/></linearGradient></defs><path d="M50 4 L93 28 V72 L50 96 L7 72 V28 Z" fill="url(#g1)"/><path d="M30 52 L44 66 L70 36" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <div class="sidebar-logo-text">PRO<span>VEED</span></div>
+  </div>
+  <div class="nav-section">Principal</div>
+  <a class="nav-item" href="dashboard.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+  <a class="nav-item" href="usuarios.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Usuarios</a>
+  <a class="nav-item" href="productos.html"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Productos</a>
+  <a class="nav-item" href="pedidos.html"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>Pedidos</a>
+  <a class="nav-item" href="mensajes.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes</a>
+  <div class="nav-section">Herramientas</div>
+  <a class="nav-item active" href="editor.html"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Editor Visual</a>
+  <a class="nav-item" href="paginas.html"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Páginas</a>
+  <a class="nav-item" href="biblioteca.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Biblioteca</a>
+  <div class="sidebar-bottom">
+    <button class="btn-logout" onclick="cerrarSesion()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Cerrar sesión</button>
+  </div>
+</nav>
+
+<div class="editor-layout">
+  <!-- PANEL CONTROL -->
+  <div class="editor-panel">
+    <div class="panel-header">
+      <div class="panel-title">Editor Visual</div>
+      <div class="panel-sub">Personaliza tu app en tiempo real</div>
+    </div>
+
+    <select class="archivo-select" id="archivo-select" onchange="cambiarArchivo(this.value)" style="margin:12px 16px 0;width:calc(100% - 32px);">
+      <option value="emprendedor">Portal Emprendedor</option>
+      <option value="proveedor">Portal Proveedor</option>
+    </select>
+
+    <div class="panel-tabs">
+      <button class="ptab active" onclick="switchTab('colores',this)">Colores</button>
+      <button class="ptab" onclick="switchTab('fuentes',this)">Fuentes</button>
+      <button class="ptab" onclick="switchTab('textos',this)">Textos</button>
+      <button class="ptab" onclick="switchTab('secciones',this)">Secciones</button>
+    </div>
+<div class="panel-body">
+      <!-- COLORES -->
+      <div id="tab-colores">
+        <div class="seccion-group">
+          <div class="seccion-label">Colores principales</div>
+          <div class="color-item">
+            <input type="color" class="color-picker-input" id="color-principal" value="#A8E63D" oninput="actualizarColor('principal',this.value)">
+            <div class="color-info"><div class="color-name">Color principal</div><div class="color-val" id="val-principal">#A8E63D</div></div>
+          </div>
+          <div class="color-item">
+            <input type="color" class="color-picker-input" id="color-secundario" value="#FF8C00" oninput="actualizarColor('secundario',this.value)">
+            <div class="color-info"><div class="color-name">Color secundario</div><div class="color-val" id="val-secundario">#FF8C00</div></div>
+          </div>
+          <div class="color-item">
+            <input type="color" class="color-picker-input" id="color-fondo" value="#F5F6F2" oninput="actualizarColor('fondo',this.value)">
+            <div class="color-info"><div class="color-name">Fondo</div><div class="color-val" id="val-fondo">#F5F6F2</div></div>
+          </div>
+          <div class="color-item">
+            <input type="color" class="color-picker-input" id="color-negro" value="#111111" oninput="actualizarColor('negro',this.value)">
+            <div class="color-info"><div class="color-name">Color oscuro</div><div class="color-val" id="val-negro">#111111</div></div>
+          </div>
+          <div class="color-item">
+            <input type="color" class="color-picker-input" id="color-error" value="#FF4D4D" oninput="actualizarColor('error',this.value)">
+            <div class="color-info"><div class="color-name">Color error</div><div class="color-val" id="val-error">#FF4D4D</div></div>
+          </div>
+        </div>
+        <div class="seccion-group">
+          <div class="seccion-label">Elementos específicos</div>
+          <div class="color-item">
+            <input type="color" class="color-picker-input" id="color-header" value="#111111" oninput="actualizarColor('header',this.value)">
+            <div class="color-info"><div class="color-name">Header / Barra superior</div><div class="color-val" id="val-header">#111111</div></div>
+          </div>
+          <div class="color-item">
+            <input type="color" class="color-picker-input" id="color-boton" value="#111111" oninput="actualizarColor('boton',this.value)">
+            <div class="color-info"><div class="color-name">Botones principales</div><div class="color-val" id="val-boton">#111111</div></div>
+          </div>
+          <div class="color-item">
+            <input type="color" class="color-picker-input" id="color-precio" value="#FF8C00" oninput="actualizarColor('precio',this.value)">
+            <div class="color-info"><div class="color-name">Color de precios</div><div class="color-val" id="val-precio">#FF8C00</div></div>
+          </div>
+          <div class="color-item">
+            <input type="color" class="color-picker-input" id="color-tabbar" value="#FFFFFF" oninput="actualizarColor('tabbar',this.value)">
+            <div class="color-info"><div class="color-name">Barra de navegación</div><div class="color-val" id="val-tabbar">#FFFFFF</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FUENTES -->
+      <div id="tab-fuentes" style="display:none;">
+        <div class="seccion-group">
+          <div class="seccion-label">Fuente principal</div>
+          <div class="font-item selected" onclick="selFuente('Inter',this)">
+            <div class="font-preview" style="font-family:'Inter'">Aa</div>
+            <div class="font-name">Inter — Moderna y legible</div>
+            <div class="font-radio"></div>
+          </div>
+          <div class="font-item" onclick="selFuente('Roboto',this)">
+            <div class="font-preview" style="font-family:'Roboto'">Aa</div>
+            <div class="font-name">Roboto — Limpia y neutral</div>
+            <div class="font-radio"></div>
+          </div>
+          <div class="font-item" onclick="selFuente('Poppins',this)">
+            <div class="font-preview" style="font-family:'Poppins'">Aa</div>
+            <div class="font-name">Poppins — Amigable y redonda</div>
+            <div class="font-radio"></div>
+          </div>
+          <div class="font-item" onclick="selFuente('Montserrat',this)">
+            <div class="font-preview" style="font-family:'Montserrat'">Aa</div>
+            <div class="font-name">Montserrat — Profesional</div>
+            <div class="font-radio"></div>
+          </div>
+          <div class="font-item" onclick="selFuente('Nunito',this)">
+            <div class="font-preview" style="font-family:'Nunito'">Aa</div>
+            <div class="font-name">Nunito — Suave y moderna</div>
+            <div class="font-radio"></div>
+          </div>
+        </div>
+        <div class="seccion-group">
+          <div class="seccion-label">Tamaño de texto base</div>
+          <div style="display:flex;align-items:center;gap:12px;background:#1a1a1a;border-radius:11px;padding:12px 14px;border:1px solid #222;">
+            <input type="range" id="font-size-range" min="14" max="20" value="16" oninput="actualizarFontSize(this.value)" style="flex:1;accent-color:var(--verde);">
+            <span id="font-size-val" style="font-size:0.82rem;color:white;font-weight:700;width:32px;">16px</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEXTOS -->
+      <div id="tab-textos" style="display:none;">
+        <div class="seccion-group">
+          <div class="seccion-label">Textos del emprendedor</div>
+          <div class="texto-item"><div class="texto-label">Tagline del banner</div><input class="texto-input" id="txt-tagline" value="Los mejores proveedores en un solo lugar" oninput="marcarCambio()"></div>
+          <div class="texto-item"><div class="texto-label">Subtítulo del banner</div><input class="texto-input" id="txt-subtitulo" value="Precios mayoristas reales, sin intermediarios" oninput="marcarCambio()"></div>
+          <div class="texto-item"><div class="texto-label">Texto del botón explorar</div><input class="texto-input" id="txt-btn-explorar" value="Explorar ahora →" oninput="marcarCambio()"></div>
+          <div class="texto-item"><div class="texto-label">Etiqueta del banner</div><input class="texto-input" id="txt-banner-tag" value="🔥 Mayorista Ecuador" oninput="marcarCambio()"></div>
+          <div class="texto-item"><div class="texto-label">Placeholder búsqueda</div><input class="texto-input" id="txt-search" value="Buscar productos, proveedores..." oninput="marcarCambio()"></div>
+        </div>
+        <div class="seccion-group">
+          <div class="seccion-label">Textos generales</div>
+          <div class="texto-item"><div class="texto-label">Nombre de la plataforma</div><input class="texto-input" id="txt-nombre" value="PROVEED" oninput="marcarCambio()"></div>
+          <div class="texto-item"><div class="texto-label">Slogan</div><input class="texto-input" id="txt-slogan" value="Mercado Mayorista Ecuador" oninput="marcarCambio()"></div>
+        </div>
+      </div>
+
+      <!-- SECCIONES -->
+      <div id="tab-secciones" style="display:none;">
+        <div class="seccion-group">
+          <div class="seccion-label">Orden y visibilidad — Dashboard</div>
+          <div class="secciones-list" id="secciones-list">
+            <div class="seccion-item" draggable="true" data-sec="banner">
+              <div class="drag-handle-icon"><span></span><span></span><span></span></div>
+              <div class="seccion-item-name">Banner principal</div>
+              <button class="seccion-toggle on" onclick="this.classList.toggle('on')"></button>
+            </div>
+            <div class="seccion-item" draggable="true" data-sec="categorias">
+              <div class="drag-handle-icon"><span></span><span></span><span></span></div>
+              <div class="seccion-item-name">Categorías</div>
+              <button class="seccion-toggle on" onclick="this.classList.toggle('on')"></button>
+            </div>
+            <div class="seccion-item" draggable="true" data-sec="tips">
+              <div class="drag-handle-icon"><span></span><span></span><span></span></div>
+              <div class="seccion-item-name">Tips de proveedores</div>
+              <button class="seccion-toggle on" onclick="this.classList.toggle('on')"></button>
+            </div>
+            <div class="seccion-item" draggable="true" data-sec="productos">
+              <div class="drag-handle-icon"><span></span><span></span><span></span></div>
+              <div class="seccion-item-name">Productos destacados</div>
+              <button class="seccion-toggle on" onclick="this.classList.toggle('on')"></button>
+            </div>
+          </div>
+        </div>
+        <div class="seccion-group">
+          <div class="seccion-label">Módulos del tab bar</div>
+          <div class="secciones-list">
+            <div class="seccion-item"><div class="drag-handle-icon"><span></span><span></span><span></span></div><div class="seccion-item-name">Inicio</div><button class="seccion-toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="seccion-item"><div class="drag-handle-icon"><span></span><span></span><span></span></div><div class="seccion-item-name">Explorar</div><button class="seccion-toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="seccion-item"><div class="drag-handle-icon"><span></span><span></span><span></span></div><div class="seccion-item-name">Tips</div><button class="seccion-toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="seccion-item"><div class="drag-handle-icon"><span></span><span></span><span></span></div><div class="seccion-item-name">Carrito</div><button class="seccion-toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="seccion-item"><div class="drag-handle-icon"><span></span><span></span><span></span></div><div class="seccion-item-name">Pedidos</div><button class="seccion-toggle on" onclick="this.classList.toggle('on')"></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-footer">
+      <button class="btn-reset" onclick="resetearCambios()">Resetear</button>
+      <button class="btn-guardar" onclick="guardarCambios()">💾 Guardar cambios</button>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="editor-preview">
+    <div class="preview-header">
+      <div class="preview-title">Vista previa en tiempo real</div>
+      <div class="preview-device-btns">
+        <button class="dev-btn active" onclick="setDevice('mobile',this)">📱 Móvil</button>
+        <button class="dev-btn" onclick="setDevice('tablet',this)">💻 Tablet</button>
+      </div>
+    </div>
+    <div class="preview-frame-wrap">
+      <div class="preview-frame mobile" id="preview-frame">
+        <div class="preview-placeholder">
+          <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          <p>Selecciona un archivo y haz cambios<br>para ver la vista previa aquí</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyAZQRlfdtJjmodrfmct5N3qrLO6hniO2o8",
+  authDomain:"proveed-8cb7c.firebaseapp.com",
+  projectId:"proveed-8cb7c",
+  storageBucket:"proveed-8cb7c.firebasestorage.app",
+  messagingSenderId:"235073250367",
+  appId:"1:235073250367:web:89ec59fea5f0b8a347448a"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+const ADMIN_EMAIL = 'proveed30@gmail.com';
+let archivoActual = 'emprendedor', haycambios = false;
+
+onAuthStateChanged(auth, async user => {
+  if (!user || user.email !== ADMIN_EMAIL) { window.location.href = 'index.html'; return; }
+  cargarConfig('emprendedor');
+});
+
+async function cargarConfig(portal) {
+  try {
+    const snap = await getDoc(doc(db, 'config_app', portal));
+    if (snap.exists()) {
+      const d = snap.data();
+      if (d.colores) {
+        Object.entries(d.colores).forEach(([k, v]) => {
+          const el = document.getElementById('color-' + k);
+          const valEl = document.getElementById('val-' + k);
+          if (el) { el.value = v; }
+          if (valEl) valEl.textContent = v;
+        });
+      }
+      if (d.textos) {
+        Object.entries(d.textos).forEach(([k, v]) => {
+          const el = document.getElementById('txt-' + k);
+          if (el) el.value = v;
+        });
+      }
+    }
+  } catch(e) { console.warn(e); }
+}
+
+window.cambiarArchivo = function(v) {
+  archivoActual = v;
+  cargarConfig(v);
+};
+
+window.switchTab = function(tab, el) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['colores','fuentes','textos','secciones'].forEach(t => {
+    const el2 = document.getElementById('tab-' + t);
+    if (el2) el2.style.display = t === tab ? 'block' : 'none';
+  });
+};
+
+window.actualizarColor = function(key, val) {
+  const valEl = document.getElementById('val-' + key);
+  if (valEl) valEl.textContent = val;
+  hayambios = true;
+};
+
+window.selFuente = function(fuente, el) {
+  document.querySelectorAll('.font-item').forEach(f => f.classList.remove('selected'));
+  el.classList.add('selected');
+  hayambios = true;
+};
+
+window.actualizarFontSize = function(v) {
+  document.getElementById('font-size-val').textContent = v + 'px';
+  hayambios = true;
+};
+
+window.marcarCambio = function() { hayambios = true; };
+
+window.setDevice = function(d, el) {
+  document.querySelectorAll('.dev-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const frame = document.getElementById('preview-frame');
+  frame.className = 'preview-frame ' + d;
+};
+
+window.guardarCambios = async function() {
+  const colores = {};
+  ['principal','secundario','fondo','negro','error','header','boton','precio','tabbar'].forEach(k => {
+    const el = document.getElementById('color-' + k);
+    if (el) colores[k] = el.value;
+  });
+  const textos = {};
+  ['tagline','subtitulo','btn-explorar','banner-tag','search','nombre','slogan'].forEach(k => {
+    const el = document.getElementById('txt-' + k);
+    if (el) textos[k] = el.value;
+  });
+  const fontActiva = document.querySelector('.font-item.selected');
+  const fuente = fontActiva ? fontActiva.querySelector('.font-name').textContent.split('—')[0].trim() : 'Inter';
+  const fontSize = document.getElementById('font-size-range').value;
+  try {
+    await setDoc(doc(db, 'config_app', archivoActual), { colores, textos, fuente, fontSize, actualizadoEn: new Date().toISOString() });
+    showToast('✓ Cambios guardados y aplicados');
+    hayambios = false;
+  } catch(e) { showToast('Error: ' + e.message); }
+};
+
+window.resetearCambios = async function() {
+  if (!confirm('¿Resetear todos los cambios a los valores originales?')) return;
+  await setDoc(doc(db, 'config_app', archivoActual), {
+    colores: { principal:'#A8E63D', secundario:'#FF8C00', fondo:'#F5F6F2', negro:'#111111', error:'#FF4D4D', header:'#111111', boton:'#111111', precio:'#FF8C00', tabbar:'#FFFFFF' },
+    textos: { tagline:'Los mejores proveedores en un solo lugar', subtitulo:'Precios mayoristas reales, sin intermediarios', 'btn-explorar':'Explorar ahora →', 'banner-tag':'🔥 Mayorista Ecuador', search:'Buscar productos, proveedores...', nombre:'PROVEED', slogan:'Mercado Mayorista Ecuador' },
+    fuente:'Inter', fontSize:'16'
+  });
+  cargarConfig(archivoActual);
+  showToast('↺ Configuración restablecida');
+};
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Drag & drop secciones
+const list = document.getElementById('secciones-list');
+if (list) {
+  let dragEl = null;
+  list.addEventListener('dragstart', e => { dragEl = e.target.closest('.seccion-item'); dragEl.style.opacity = '0.5'; });
+  list.addEventListener('dragend', e => { dragEl.style.opacity = '1'; dragEl = null; });
+  list.addEventListener('dragover', e => {
+    e.preventDefault();
+    const target = e.target.closest('.seccion-item');
+    if (target && target !== dragEl) {
+      const rect = target.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) list.insertBefore(dragEl, target);
+      else list.insertBefore(dragEl, target.nextSibling);
+    }
+  });
+}
+
+window.cerrarSesion = async function() { await signOut(auth); window.location.href = 'index.html'; };
+</script>
+</body>
+</html>
