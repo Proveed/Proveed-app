@@ -1,0 +1,145 @@
+<!-- PRODUCTOS.HTML -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PROVEED Admin — Productos</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{ --verde:#A8E63D; --naranja:#FF8C00; --negro:#0A0A0A; --rojo:#FF4D4D; --azul:#007AFF; }
+  body{ background:var(--negro); font-family:'Inter',sans-serif; padding-bottom:90px; -webkit-font-smoothing:antialiased; }
+  .sidebar{ position:fixed; left:0; top:0; bottom:0; width:220px; background:#111; border-right:1px solid #1e1e1e; padding:28px 16px; z-index:200; display:none; flex-direction:column; gap:4px; }
+  @media(min-width:768px){ .sidebar{ display:flex; } body{ padding-left:220px; padding-bottom:20px; } .tab-bar{ display:none; } }
+  .sidebar-logo{ display:flex; align-items:center; gap:8px; margin-bottom:28px; padding:0 8px; }
+  .sidebar-logo svg{ width:28px; height:28px; }
+  .sidebar-logo-text{ font-size:1rem; font-weight:800; color:white; }
+  .sidebar-logo-text span{ color:var(--verde); }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; cursor:pointer; text-decoration:none; color:#555; font-size:0.82rem; font-weight:600; transition:0.2s; }
+  .nav-item.active{ background:#1e1e1e; color:white; }
+  .nav-item svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; flex-shrink:0; }
+  .nav-section{ font-size:0.6rem; font-weight:700; color:#333; text-transform:uppercase; letter-spacing:1px; padding:12px 12px 4px; }
+  .sidebar-bottom{ margin-top:auto; }
+  .btn-logout{ display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; cursor:pointer; color:#555; font-size:0.82rem; font-weight:600; border:none; background:transparent; width:100%; }
+  .btn-logout svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; }
+  .page-header{ padding:48px 20px 16px; }
+  @media(min-width:768px){ .page-header{ padding:28px 28px 16px; } }
+  .page-title{ font-size:1.4rem; font-weight:800; color:white; }
+  .page-sub{ font-size:0.8rem; color:#555; margin-top:2px; }
+  .search-wrap{ margin:0 20px 16px; background:#111; border:1px solid #1e1e1e; border-radius:13px; padding:11px 14px; display:flex; align-items:center; gap:10px; }
+  @media(min-width:768px){ .search-wrap{ margin:0 28px 16px; } }
+  .search-wrap input{ flex:1; background:transparent; border:none; outline:none; color:white; font-family:'Inter',sans-serif; font-size:0.9rem; }
+  .search-wrap input::placeholder{ color:#444; }
+  .search-wrap svg{ width:16px; height:16px; stroke:#444; fill:none; stroke-width:2.5; flex-shrink:0; }
+  .tabs-row{ display:flex; gap:8px; padding:0 20px 16px; overflow-x:auto; scrollbar-width:none; }
+  @media(min-width:768px){ .tabs-row{ padding:0 28px 16px; } }
+  .vtab{ padding:8px 16px; border-radius:20px; border:1px solid #222; background:transparent; color:#555; font-size:0.78rem; font-weight:600; cursor:pointer; white-space:nowrap; font-family:'Inter',sans-serif; transition:0.2s; }
+  .vtab.active{ background:#1e1e1e; color:white; border-color:#333; }
+  .prods-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:0 20px; }
+  @media(min-width:768px){ .prods-grid{ grid-template-columns:repeat(3,1fr); padding:0 28px; } }
+  .prod-card{ background:#111; border:1px solid #1e1e1e; border-radius:16px; overflow:hidden; transition:0.2s; }
+  .prod-card:hover{ border-color:#333; }
+  .prod-img{ width:100%; height:140px; background:#1a1a1a; overflow:hidden; display:flex; align-items:center; justify-content:center; position:relative; }
+  .prod-img img{ width:100%; height:100%; object-fit:cover; }
+  .prod-img svg{ width:36px; height:36px; stroke:#333; fill:none; stroke-width:1.5; }
+  .prod-estado-badge{ position:absolute; top:8px; right:8px; font-size:0.6rem; font-weight:700; padding:3px 8px; border-radius:6px; }
+  .est-activo{ background:rgba(168,230,61,0.9); color:#000; }
+  .est-inactivo{ background:rgba(255,77,77,0.8); color:white; }
+  .prod-body{ padding:12px; }
+  .prod-nombre{ font-size:0.82rem; font-weight:600; color:white; margin-bottom:3px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .prod-prov{ font-size:0.68rem; color:#555; margin-bottom:6px; }
+  .prod-precio{ font-size:0.92rem; font-weight:700; color:var(--naranja); }
+  .prod-vistas{ font-size:0.65rem; color:#444; margin-top:2px; }
+  .prod-actions{ display:flex; gap:6px; margin-top:10px; }
+  .prod-btn{ flex:1; padding:8px; border-radius:9px; border:none; font-family:'Inter',sans-serif; font-size:0.72rem; font-weight:700; cursor:pointer; }
+  .btn-on{ background:rgba(168,230,61,0.1); color:#3a7a00; }
+  .btn-off{ background:rgba(255,77,77,0.1); color:var(--rojo); }
+  .empty{ text-align:center; padding:48px 20px; color:#444; font-size:0.85rem; grid-column:1/-1; }
+  .tab-bar{ position:fixed; bottom:0; width:100%; background:#111; display:flex; justify-content:space-around; align-items:center; padding:10px 0 22px; border-top:1px solid #1e1e1e; z-index:200; }
+  .tab{ display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; flex:1; color:#444; text-decoration:none; }
+  .tab.active{ color:var(--verde); }
+  .tab svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; }
+  .tab span{ font-size:0.52rem; font-weight:600; text-transform:uppercase; }
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo"><svg viewBox="0 0 100 100"><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#A8E63D"/><stop offset="100%" style="stop-color:#7BC820"/></linearGradient></defs><path d="M50 4 L93 28 V72 L50 96 L7 72 V28 Z" fill="url(#g1)"/><path d="M30 52 L44 66 L70 36" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><div class="sidebar-logo-text">PRO<span>VEED</span></div></div>
+  <div class="nav-section">Principal</div>
+  <a class="nav-item" href="dashboard.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+  <a class="nav-item" href="usuarios.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Usuarios</a>
+  <a class="nav-item active" href="productos.html"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Productos</a>
+  <a class="nav-item" href="pedidos.html"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>Pedidos</a>
+  <a class="nav-item" href="mensajes.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes</a>
+  <div class="nav-section">Herramientas</div>
+  <a class="nav-item" href="editor.html"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Editor Visual</a>
+  <a class="nav-item" href="paginas.html"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Páginas</a>
+  <a class="nav-item" href="biblioteca.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Biblioteca</a>
+  <div class="sidebar-bottom"><button class="btn-logout" onclick="cerrarSesion()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Cerrar sesión</button></div>
+</nav>
+<div class="page-header"><div class="page-title">Productos</div><div class="page-sub">Gestión de todos los productos de la plataforma</div></div>
+<div class="search-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="text" placeholder="Buscar producto o proveedor..." oninput="buscar(this.value)"></div>
+<div class="tabs-row">
+  <button class="vtab active" onclick="filtrar('todos',this)">Todos</button>
+  <button class="vtab" onclick="filtrar('activos',this)">Activos</button>
+  <button class="vtab" onclick="filtrar('inactivos',this)">Inactivos</button>
+  <button class="vtab" onclick="filtrar('video',this)">Con video</button>
+</div>
+<div class="prods-grid" id="prods-grid"><div class="empty">Cargando productos...</div></div>
+<nav class="tab-bar">
+  <a class="tab" href="dashboard.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Inicio</span></a>
+  <a class="tab" href="usuarios.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Usuarios</span></a>
+  <a class="tab active" href="productos.html"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg><span>Productos</span></a>
+  <a class="tab" href="mensajes.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Mensajes</span></a>
+  <a class="tab" href="editor.html"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Editor</span></a>
+</nav>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+const app = initializeApp({ apiKey:"AIzaSyAZQRlfdtJjmodrfmct5N3qrLO6hniO2o8", authDomain:"proveed-8cb7c.firebaseapp.com", projectId:"proveed-8cb7c", storageBucket:"proveed-8cb7c.firebasestorage.app", messagingSenderId:"235073250367", appId:"1:235073250367:web:89ec59fea5f0b8a347448a" });
+const auth = getAuth(app); const db = getFirestore(app);
+const ADMIN_EMAIL = 'proveed30@gmail.com';
+let todosProductos = [], filtroActual = 'todos', busquedaActual = '';
+onAuthStateChanged(auth, user => { if (!user || user.email !== ADMIN_EMAIL) { window.location.href = 'index.html'; return; } cargarProductos(); });
+async function cargarProductos() {
+  const snap = await getDocs(collection(db, 'productos'));
+  todosProductos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  todosProductos.sort((a, b) => (b.vistas || 0) - (a.vistas || 0));
+  renderProductos();
+}
+function renderProductos() {
+  let lista = [...todosProductos];
+  if (filtroActual === 'activos') lista = lista.filter(p => p.activo);
+  if (filtroActual === 'inactivos') lista = lista.filter(p => !p.activo);
+  if (filtroActual === 'video') lista = lista.filter(p => p.videoURL);
+  if (busquedaActual) lista = lista.filter(p => (p.nombre || '').toLowerCase().includes(busquedaActual) || (p.nombreProveedor || '').toLowerCase().includes(busquedaActual));
+  const grid = document.getElementById('prods-grid');
+  if (!lista.length) { grid.innerHTML = '<div class="empty">Sin productos</div>'; return; }
+  grid.innerHTML = '';
+  lista.forEach(p => {
+    const div = document.createElement('div'); div.className = 'prod-card';
+    const img = p.imagenes?.[0] || p.imagen || '';
+    const activo = p.activo !== false;
+    div.innerHTML = `
+      <div class="prod-img">${img ? `<img src="${img}" alt="" loading="lazy">` : `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`}<div class="prod-estado-badge ${activo ? 'est-activo' : 'est-inactivo'}">${activo ? 'Activo' : 'Inactivo'}</div></div>
+      <div class="prod-body">
+        <div class="prod-nombre">${p.nombre || 'Producto'}</div>
+        <div class="prod-prov">${p.nombreProveedor || 'Proveedor'}</div>
+        <div class="prod-precio">$${Number(p.precio || 0).toFixed(2)}</div>
+        <div class="prod-vistas">👁 ${p.vistas || 0} vistas · Mín: ${p.minimo || 1}</div>
+        <div class="prod-actions">
+          <button class="prod-btn ${activo ? 'btn-off' : 'btn-on'}" onclick="toggleProd('${p.id}',${activo})">${activo ? 'Pausar' : 'Activar'}</button>
+        </div>
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+window.filtrar = function(f, el) { filtroActual = f; document.querySelectorAll('.vtab').forEach(t => t.classList.remove('active')); el.classList.add('active'); renderProductos(); };
+window.buscar = function(v) { busquedaActual = v.toLowerCase(); renderProductos(); };
+window.toggleProd = async function(id, activo) { await updateDoc(doc(db, 'productos', id), { activo: !activo }); cargarProductos(); };
+window.cerrarSesion = async function() { await signOut(auth); window.location.href = 'index.html'; };
+</script>
+</body>
+</html>
