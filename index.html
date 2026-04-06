@@ -1,264 +1,102 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EQUILIBRIUM V3</title>
-    <style>
-        :root { --p: #32ff7e; --d: #ff3e3e; --b: #000; --blue: #1e90ff; --green: #2ecc71; }
-        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { margin: 0; background: var(--b); color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
-        
-        /* Contenedores Principales de Vista (Se alternan físicamente) */
-        .viewport { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; z-index: 10; background: var(--b); }
-        .hud-area { width: 100%; height: 100px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; position: relative; z-index: 200; pointer-events: none; }
-
-        /* Estilo Menú Inicio (Botón de primer toque) */
-        #viewport-menu { justify-content: center; background: radial-gradient(circle, #0a0a25 0%, #000 100%); }
-        h1 { font-size: 3rem; letter-spacing: 10px; color: var(--p); text-shadow: 0 0 20px var(--p); margin: 0; }
-        
-        /* Estilo MAPA ESTELAR (Arreglado para scroll) */
-        #viewport-map { background: radial-gradient(circle, #000 0%, #000 100%); padding-top: 40px; }
-        .grid-holder { width: 100%; max-width: 400px; height: calc(100vh - 120px); overflow-y: scroll; -webkit-overflow-scrolling: touch; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; width: 100%; padding-bottom: 80px; }
-        .node { width: 70px; height: 70px; background: #080808; border: 2px solid #222; border-radius: 15px; display: flex; 
-                align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; cursor: pointer; color: #444; }
-        .node.open { border-color: var(--p); color: var(--p); box-shadow: 0 0 15px rgba(50,255,126,0.3); }
-        
-        /* HUD Juego */
-        .level-text { font-size: 14px; font-weight: 900; color: var(--p); letter-spacing: 2px; }
-        .percentage-text { font-size: 18px; font-weight: 900; font-family: monospace; }
-        .bar-bg { width: 80%; height: 8px; background: #111; border-radius: 4px; overflow: hidden; pointer-events: auto; cursor: pointer; }
-        .bar-fill { width: 0%; height: 100%; background: var(--p); box-shadow: 0 0 15px var(--p); transition: width 0.1s; }
-
-        /* Elementos de Juego */
-        #viewport-game { background: url('https://i.imgur.com/2c7Y9Fh.jpg') center/cover; }
-        #world { width: 100%; height: 100%; position: relative; overflow: hidden; }
-        #player { position: absolute; width: 65px; height: 65px; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 50; }
-        .meteor { position: absolute; width: 40px; height: 40px; z-index: 40; filter: drop-shadow(0 0 10px var(--d)); }
-
-        .btn { padding: 16px 45px; background: var(--p); color: black; border: none; border-radius: 50px; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 20px var(--p); pointer-events: auto; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PROVEED Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{ --verde:#A8E63D; --naranja:#FF8C00; --negro:#0A0A0A; --rojo:#FF4D4D; }
+  html,body{ height:100%; font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  body{ background:var(--negro); display:flex; align-items:center; justify-content:center; padding:24px; }
+  body::before{ content:''; position:fixed; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(168,230,61,0.08) 0%, transparent 60%); pointer-events:none; }
+  .card{ width:100%; max-width:400px; background:#111; border-radius:24px; padding:36px 28px; border:1px solid #1e1e1e; }
+  .logo-wrap{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .logo-hex{ width:36px; height:36px; }
+  .logo-text{ font-size:1.2rem; font-weight:800; color:white; }
+  .logo-text span{ color:var(--verde); }
+  .admin-badge{ display:inline-block; background:rgba(168,230,61,0.12); color:var(--verde); font-size:0.68rem; font-weight:700; padding:3px 10px; border-radius:20px; margin-bottom:28px; border:1px solid rgba(168,230,61,0.2); }
+  .card-title{ font-size:1.4rem; font-weight:800; color:white; margin-bottom:6px; }
+  .card-sub{ font-size:0.85rem; color:#555; margin-bottom:28px; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:0.7rem; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+  .field input{ width:100%; padding:13px 15px; background:#1a1a1a; border:1.5px solid #222; border-radius:13px; outline:none; font-family:'Inter',sans-serif; font-size:0.95rem; color:white; transition:border-color 0.2s; }
+  .field input:focus{ border-color:var(--verde); }
+  .field input::placeholder{ color:#444; }
+  .btn-login{ width:100%; padding:15px; background:var(--verde); color:var(--negro); border:none; border-radius:14px; font-family:'Inter',sans-serif; font-size:0.95rem; font-weight:800; cursor:pointer; margin-top:8px; transition:0.2s; }
+  .btn-login:active{ transform:scale(0.98); }
+  .btn-login:disabled{ opacity:0.5; cursor:not-allowed; }
+  .error-msg{ display:none; background:rgba(255,77,77,0.1); border:1px solid rgba(255,77,77,0.3); border-radius:12px; padding:11px 14px; font-size:0.82rem; color:var(--rojo); margin-bottom:16px; }
+  .error-msg.show{ display:block; }
+  .security-note{ display:flex; align-items:center; gap:8px; margin-top:20px; font-size:0.72rem; color:#444; }
+  .security-note svg{ width:14px; height:14px; stroke:#555; fill:none; stroke-width:2; flex-shrink:0; }
+</style>
 </head>
 <body>
+<div class="card">
+  <div class="logo-wrap">
+    <svg class="logo-hex" viewBox="0 0 100 100">
+      <defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#A8E63D"/><stop offset="100%" style="stop-color:#7BC820"/></linearGradient></defs>
+      <path d="M50 4 L93 28 V72 L50 96 L7 72 V28 Z" fill="url(#g1)"/>
+      <path d="M30 52 L44 66 L70 36" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    <div class="logo-text">PRO<span>VEED</span></div>
+  </div>
+  <div class="admin-badge">⚡ Super Admin</div>
+  <div class="card-title">Panel de Control</div>
+  <div class="card-sub">Acceso restringido solo al administrador</div>
+  <div class="error-msg" id="error-msg">Acceso denegado. Solo el administrador puede entrar.</div>
+  <div class="field">
+    <label>Correo electrónico</label>
+    <input type="email" id="email" placeholder="proveed30@gmail.com">
+  </div>
+  <div class="field">
+    <label>Contraseña</label>
+    <input type="password" id="password" placeholder="••••••••">
+  </div>
+  <button class="btn-login" id="btn-login" onclick="doLogin()">ENTRAR AL PANEL →</button>
+  <div class="security-note">
+    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Acceso encriptado y protegido
+  </div>
+</div>
 
-    <script>
-        // Variables Globales de Estado
-        let gameState = {
-            unlocked: 1,
-            activeLevel: 1,
-            isPlaying: false,
-            isPhysicsActive: false,
-            py: 0,
-            pvy: 0,
-            progress: 0,
-            meteors: [],
-            animReq: null
-        };
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-        // --- SISTEMA DE NAVEGACIÓN DE VISTAS ---
-        function changeView(viewType) {
-            // Eliminar vistas antiguas para limpiar DOM y eventos
-            const viewports = document.querySelectorAll('.viewport');
-            viewports.forEach(v => v.remove());
+const app = initializeApp({
+  apiKey:"AIzaSyAZQRlfdtJjmodrfmct5N3qrLO6hniO2o8",
+  authDomain:"proveed-8cb7c.firebaseapp.com",
+  projectId:"proveed-8cb7c",
+  storageBucket:"proveed-8cb7c.firebasestorage.app",
+  messagingSenderId:"235073250367",
+  appId:"1:235073250367:web:89ec59fea5f0b8a347448a"
+});
+const auth = getAuth(app);
+const ADMIN_EMAIL = 'proveed30@gmail.com';
 
-            if (viewType === 'MENU') renderMenu();
-            if (viewType === 'MAP') renderMap();
-            if (viewType === 'GAME') renderGame();
-        }
+window.doLogin = async function() {
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('password').value;
+  const btn = document.getElementById('btn-login');
+  const err = document.getElementById('error-msg');
+  err.classList.remove('show');
+  if (!email || !pass) { err.textContent = 'Completa todos los campos.'; err.classList.add('show'); return; }
+  if (email !== ADMIN_EMAIL) { err.textContent = 'Acceso denegado. Solo el administrador puede entrar.'; err.classList.add('show'); return; }
+  btn.disabled = true; btn.textContent = 'Verificando...';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+    window.location.href = 'dashboard.html';
+  } catch(e) {
+    err.textContent = 'Contraseña incorrecta.';
+    err.classList.add('show');
+    btn.disabled = false; btn.textContent = 'ENTRAR AL PANEL →';
+  }
+};
 
-        function renderMenu() {
-            const viewport = document.createElement('div');
-            viewport.id = 'viewport-menu';
-            viewport.className = 'viewport';
-            viewport.innerHTML = `
-                <h1>EQUILIBRIUM</h1>
-                <p style="letter-spacing: 5px; opacity: 0.5;">COSMIC STRATEGY</p>
-                <button class="btn" onclick="changeView('MAP')">ENTRAR AL SISTEMA</button>
-            `;
-            document.body.appendChild(viewport);
-        }
-
-        function renderMap() {
-            const viewport = document.createElement('div');
-            viewport.id = 'viewport-map';
-            viewport.className = 'viewport';
-            
-            let nodes = '';
-            for(let i=1; i<=120; i++) {
-                const isOpen = i <= gameState.unlocked;
-                nodes += `<div class="node ${isOpen ? 'open' : 'locked'}" onclick="${isOpen ? `launchLevel(${i})` : ''}">${i}</div>`;
-            }
-
-            viewport.innerHTML = `
-                <h2 style="color: var(--p); margin-bottom: 20px;">SISTEMA ESTELAR</h2>
-                <div class="grid-holder">
-                    <div class="grid">${nodes}</div>
-                </div>
-                <button class="btn" style="background:#333; color:white; box-shadow:none; position:fixed; bottom:20px; z-index: 50;" onclick="location.reload()">VOLVER</button>
-            `;
-            document.body.appendChild(viewport);
-        }
-
-        function launchLevel(n) {
-            gameState.activeLevel = n;
-            changeView('GAME');
-        }
-
-        // --- SISTEMA DE JUEGO ---
-        function renderGame() {
-            gameState.isPlaying = true;
-            gameState.isPhysicsActive = false;
-            gameState.progress = 0;
-            gameState.pvy = 0;
-            gameState.py = window.innerHeight / 2; // Centro exacto
-            gameState.meteors = [];
-
-            const viewport = document.createElement('div');
-            viewport.id = 'viewport-game';
-            viewport.className = 'viewport';
-            
-            viewport.innerHTML = `
-                <div class="hud-area">
-                    <div style="display:flex; justify-content:space-between; width:90%;">
-                        <span class="level-text">SOLAR:${gameState.activeLevel}</span>
-                        <span class="percentage-text" id="game-perc">0%</span>
-                    </div>
-                    <div class="bar-bg" onclick="die('EQUILIBRIO PERDIDO: REINICIO DE NÚCLEO')">
-                        <div class="bar-fill" id="game-fill"></div>
-                    </div>
-                </div>
-                <div id="world">
-                    <div id="player">
-                        <svg viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="48" fill="var(--blue)" stroke="white" stroke-width="1"/>
-                            <path d="M20,40 Q35,25 55,30 Q70,15 85,35 L90,55 Q70,75 50,65 Q30,80 20,60 Z" fill="var(--green)"/>
-                            <path d="M40,75 Q55,95 30,95 Q15,85 30,70 Z" fill="var(--green)"/>
-                        </svg>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(viewport);
-            
-            // Añadir eventos táctiles específicamente al Escenario
-            const world = document.getElementById('world');
-            world.addEventListener('touchstart', handleInput, {passive: false});
-            world.addEventListener('mousedown', handleInput);
-            
-            updatePlayerPos();
-        }
-
-        function updatePlayerPos() {
-            const player = document.getElementById('player');
-            if(player) player.style.top = gameState.py + 'px';
-        }
-
-        function handleInput(e) {
-            if(!gameState.isPlaying) return;
-            if(e.cancelable) e.preventDefault();
-
-            if(!gameState.isPhysicsActive) {
-                gameState.isPhysicsActive = true;
-                gameState.animReq = requestAnimationFrame(gameLoop);
-            }
-
-            // Impulso hacia arriba (Y disminuye)
-            const force = 16 + (gameState.activeLevel * 0.1);
-            gameState.pvy -= force;
-
-            // Destrucción de meteoritos por toque directo
-            const touchX = e.touches ? e.touches[0].clientX : e.clientX;
-            const touchY = e.touches ? e.touches[0].clientY : e.clientY;
-            
-            gameState.meteors.forEach((m, i) => {
-                const r = m.el.getBoundingClientRect();
-                // Calcular distancia del toque al centro del meteoro
-                const d = Math.sqrt(Math.pow(touchX - (r.left + 20), 2) + Math.pow(touchY - (r.top + 20), 2));
-                if(d < 110) { // Radio de destrucción amplio para móvil
-                    m.el.remove();
-                    gameState.meteors.splice(i, 1);
-                    gameState.pvy += 1.5; // Ligereza al destruir
-                }
-            });
-        }
-
-        function gameLoop() {
-            if(!gameState.isPhysicsActive) return;
-
-            // Gravedad y Fricción
-            const gravity = 0.45 + (gameState.activeLevel * 0.05);
-            const goalDist = 400 + (gameState.activeLevel * 180);
-
-            gameState.pvy += gravity; // Y aumenta (baja)
-            gameState.pvy *= 0.98;
-            gameState.py += gameState.pvy;
-            
-            updatePlayerPos();
-
-            // Progreso
-            gameState.progress++;
-            const perc = Math.min((gameState.progress / goalDist) * 100, 100);
-            const fill = document.getElementById('game-fill');
-            const percText = document.getElementById('game-perc');
-            if(fill) fill.style.width = perc + '%';
-            if(percText) percText.innerText = Math.floor(perc) + '%';
-
-            if(perc >= 100) return win();
-
-            // Meteoros
-            const meteorRate = 0.02 + (gameState.activeLevel * 0.005);
-            if(Math.random() < meteorRate) spawnMeteor();
-            
-            gameState.meteors.forEach((m, i) => {
-                m.y += 4 + (gameState.activeLevel * 0.2);
-                m.el.style.top = m.y + 'px';
-                
-                if(m.y > window.innerHeight) { m.el.remove(); gameState.meteors.splice(i, 1); continue; }
-                
-                const pr = document.getElementById('player').getBoundingClientRect();
-                const mr = m.el.getBoundingClientRect();
-                // Distancia entre centros (Tierra r=35, Meteoro r=20)
-                const d = Math.sqrt(Math.pow((pr.left+32)-(mr.left+20),2) + Math.pow((pr.top+32)-(mr.top+20),2));
-                if(d < 45) return die("COLISIÓN: ÓRBITA COMPROMETIDA");
-            });
-
-            // Límites pantalla (Y disminuye arriba, aumenta abajo)
-            if(gameState.py < 40 || gameState.py > window.innerHeight - 40) {
-                return die("FUERA DE ÓRBITA: GRAVEDAD CRÍTICA");
-            }
-
-            gameState.animReq = requestAnimationFrame(gameLoop);
-        }
-
-        function spawnMeteor() {
-            const el = document.createElement('div');
-            el.className = 'meteor';
-            el.innerHTML = `<svg viewBox="0 0 100 100"><path d="M50 10 L85 30 L95 70 L50 90 L10 70 L20 30 Z" fill="#444" stroke="#ff3e3e" stroke-width="5"/></svg>`;
-            // Spawn horizontal aleatorio (pero dentro de pantalla)
-            el.style.left = Math.random() * (window.innerWidth - 60) + 'px';
-            el.style.top = '-50px';
-            document.getElementById('world').appendChild(el);
-            gameState.meteors.push({ el, y: -50 });
-        }
-
-        function win() {
-            gameState.isPhysicsActive = false;
-            cancelAnimationFrame(gameState.animReq);
-            if(gameState.activeLevel === gameState.unlocked) gameState.unlocked++;
-            alert("NIVEL " + gameState.activeLevel + " COMPLETO. ÓRBITA SINCRONIZADA.");
-            changeView('MAP');
-        }
-
-        function die(msg) {
-            gameState.isPhysicsActive = false;
-            cancelAnimationFrame(gameState.animReq);
-            alert(msg);
-            renderGame(); // Reinicia el mismo nivel
-        }
-
-        // --- ARRANQUE ---
-        renderMenu();
-
-    </script>
+document.addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); });
+</script>
 </body>
 </html>
